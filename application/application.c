@@ -38,7 +38,7 @@ int main( void )
  
   for(;;)
   { 
-    //can_protocol_period(); 
+    can_protocol_period(); 
     //protocol_period();
     UltraSonicStartTick();
     UltraSonicDataTick();

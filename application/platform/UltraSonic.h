@@ -52,7 +52,7 @@
 #define T_1_HIGH_MIN
 
 
-#define NO_OBJ_DETECTED     0
+#define NO_OBJ_DETECTED     0x00000000
 
 typedef enum
 {

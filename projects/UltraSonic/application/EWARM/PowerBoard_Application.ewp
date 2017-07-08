@@ -3867,6 +3867,9 @@
         <name>$PROJ_DIR$\..\..\..\..\application\platform\can_protocol.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\..\application\platform\fifo.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\protocol.h</name>
       </file>
       <file>
