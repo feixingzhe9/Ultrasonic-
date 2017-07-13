@@ -1111,7 +1111,7 @@ void UltraSonicSetThreshold(ultra_sonic_threshold_t * threshold)
 
 
 
-uint32_t UltraSonicGetMeasureData(void)
+uint16_t UltraSonicGetMeasureData(void)
 {
     if((ultra_sonic_data->data_ready_flag == DATA_NEW_COMING) || (ultra_sonic_data->data_ready_flag == DATA_READY))
     {

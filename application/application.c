@@ -13,8 +13,6 @@
 #define Application_REVISION "v0.1"
 void SysLed(void);
 void UltraSonicStartTick(void);
-//extern ultra_sonic_ee_data_ut * ultra_sonic_ee_data;
-//extern ultra_sonic_threshold_t * ultra_sonic_threshold;
 
 int main( void )
 {
@@ -26,20 +24,17 @@ int main( void )
 
   bsp_Init();
   Platform_Init();
-  Protocol_Init();
   MicoCanInitialize( MICO_CAN1 );
   
   delay_ms(10);
   UltraSonicInit();
   delay_ms(10);
   
-  //can test init//
   CanLongBufInit();
  
   for(;;)
   { 
     can_protocol_period(); 
-    //protocol_period();
     UltraSonicStartTick();
     UltraSonicDataTick();
     SysLed();

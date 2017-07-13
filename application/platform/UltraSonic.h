@@ -81,7 +81,7 @@ typedef struct
     uint32_t send_time;
     uint32_t rcv_time;
     interval_time_t interval_time;
-    uint32_t compute_ditance[INTERVAL_TIME_MAX];   
+    uint16_t compute_ditance[INTERVAL_TIME_MAX];   
     uint8_t data_ready_flag;
 #define DATA_NEW_COMING     0x01
 #define DATA_READY          0x02
@@ -251,7 +251,7 @@ extern uint32_t UltraSonicFrqCalibration(void);
 extern void UltraSonicSetFrqToDest(void);
 extern void UltraSonicSetThreshold(ultra_sonic_threshold_t * threshold);
 extern void UltraSonicDataTick(void);
-extern uint32_t UltraSonicGetMeasureData(void);
+extern uint16_t UltraSonicGetMeasureData(void);
 
 extern ultra_sonic_data_t *ultra_sonic_data;
 extern ultra_sonic_status_t * ultra_sonic_status;

@@ -457,7 +457,7 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
     id->CanID_Struct.res = 0;
     //id->CanID_Struct.FUNC_ID = 
     
-     uint32_t tmp;
+     uint16_t tmp;
     switch(id->CanID_Struct.FUNC_ID)
     {
         case CAN_FUN_ID_RESET:
@@ -492,6 +492,7 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
                    
                     tmp =  UltraSonicGetMeasureData();
                     memcpy(&data_out[0], (uint8_t *)&tmp,sizeof(tmp));
+                    return sizeof(tmp);
                     break;
                 default :
                     break;
