@@ -14,15 +14,13 @@
 
 
 #define DESTID          0x02
-#define CAN_SUB_PB_ID   0x51
+//#define CAN_SUB_PB_ID   0x51
 #define SRCID           0x06
 
-
+#define ULTRASONIC_SRC_ID_BASE          0x60
 
 #define CAN_CMD_READ_VERSION            0x01
-#define CAN_CMD_LEDS_CONTROL            0x20
-#define CAN_CMD_S_SYS_V_BAT             0x21
-#define CAN_CMD_
+
 
 
 #define SOURCE_ID_PREPARE_UPDATE        0x10
@@ -130,7 +128,7 @@ void CM_CAN_Tx( mico_can_t can_type, CAN_ID_UNION id, uint8_t* pdata, uint16_t l
 void UploadAdcData(void);
 
 void can_protocol_period( void );
-
+extern void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len);
 void CanLongBufInit(void);
 
 /*******************  Bit definition for ExtId bytes  ********************/

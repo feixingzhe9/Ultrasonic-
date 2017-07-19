@@ -14,15 +14,19 @@
 #include "platform_logging.h"
 
 #include "can_protocol.h"
+#include "fifo.h"
 
 typedef unsigned int    u32;
 
 #define CAN_FILTER_ID       (0x60)
-#define CAN_FILTER_MASK     ((0x0f<<13)<<3)
-extern uint8_t GetCanMacId(void);
+#define CAN_FILTER_MASK     (0xff<<13)
+extern uint8_t GetCanSrcId(void);
+uint32_t ultrasonic_src_id;
 OSStatus platform_can_init( const platform_can_driver_t* can )
 {
-    uint32_t can_mac_id = GetCanMacId();
+
+    //uint32_t can_mac_id = CAN_SUB_PB_ID;
+    ultrasonic_src_id = GetCanSrcId();
     OSStatus    err = kNoErr;
     CAN_FilterConfTypeDef     CAN_FilterInitStructure;
     
@@ -75,8 +79,8 @@ OSStatus platform_can_init( const platform_can_driver_t* can )
     require_action_quiet( HAL_CAN_Init( can->handle ) == HAL_OK, exit, err = kGeneralErr );
     
 
-    CAN_FilterInitStructure.FilterIdHigh        = ((can_mac_id<<3)<<13)>>16;//can_mac_id>>16;//((can_mac_id<<3)<<13)>>16;
-    CAN_FilterInitStructure.FilterIdLow         = ((can_mac_id<<3)<<13) & 0xffff| CAN_ID_EXT ;//can_mac_id & 0xffff;//((can_mac_id<<3)<<13) & 0xffff;
+    CAN_FilterInitStructure.FilterIdHigh        = ((ultrasonic_src_id<<3)<<13)>>16;//can_mac_id>>16;//((can_mac_id<<3)<<13)>>16;
+    CAN_FilterInitStructure.FilterIdLow         = ((ultrasonic_src_id<<3)<<13) & 0xffff| CAN_ID_EXT ;//can_mac_id & 0xffff;//((can_mac_id<<3)<<13) & 0xffff;
     CAN_FilterInitStructure.FilterMaskIdHigh    = (CAN_FILTER_MASK<<3)>>16;
     CAN_FilterInitStructure.FilterMaskIdLow     = (CAN_FILTER_MASK<<3) & 0xffff | CAN_ID_EXT | CAN_RTR_REMOTE;
 
@@ -89,6 +93,30 @@ OSStatus platform_can_init( const platform_can_driver_t* can )
     CAN_FilterInitStructure.BankNumber          = 0;
     require_action_quiet( HAL_CAN_ConfigFilter( can->handle, &CAN_FilterInitStructure ) == HAL_OK,\
       exit, err = kGeneralErr );
+  
+    
+    
+/////////////////**************************///////////////////////////////   
+#if 0
+#define CAN_ID_TEST         0x00005678
+    CAN_FilterInitStructure.FilterIdHigh        = (CAN_ID_TEST<<3) >> 16;
+    CAN_FilterInitStructure.FilterIdLow         = (CAN_ID_TEST<<3) & 0xffff;
+    //CAN_FilterInitStructure.FilterMaskIdHigh    = CAN_FILTER_MASK>>16;
+    //CAN_FilterInitStructure.FilterMaskIdLow     = CAN_FILTER_MASK & 0xffff;
+
+
+    CAN_FilterInitStructure.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+    CAN_FilterInitStructure.FilterNumber        = 2;
+    CAN_FilterInitStructure.FilterMode          = CAN_FILTERMODE_IDLIST;
+    CAN_FilterInitStructure.FilterScale         = CAN_FILTERSCALE_32BIT;
+    CAN_FilterInitStructure.FilterActivation    = ENABLE;
+    CAN_FilterInitStructure.BankNumber          = 2;
+    require_action_quiet( HAL_CAN_ConfigFilter( can->handle, &CAN_FilterInitStructure ) == HAL_OK,\
+      exit, err = kGeneralErr );
+#endif
+////////////////////*************************//////////////////////////////////////////////////////
+
+
     
     __HAL_CAN_ENABLE_IT( can->handle, CAN_IT_FMP0 );
     
@@ -162,6 +190,7 @@ OSStatus platform_can_send_message( const platform_can_driver_t* can, const CanT
   //memcpy(can->handle->pTxMsg->Data, msg->Data, msg->DLC);
   memcpy(can->handle->pTxMsg, msg, sizeof(CanTxMsgTypeDef));
   
+  //require_action_quiet( HAL_CAN_Transmit( can->handle, 0x10 ) == HAL_OK, exit, err = kGeneralErr );
   require_action_quiet( HAL_CAN_Transmit( can->handle, 0x10 ) == HAL_OK, exit, err = kGeneralErr );
   
 exit:
@@ -190,34 +219,42 @@ void platform_can_rx_irq( platform_can_driver_t* can_driver )
   {
     HAL_CAN_IRQHandler( can_driver->handle );
   }
-  can_driver->rx_complete = 1;
+  //can_driver->rx_complete = 1;
 }
 
 //CanRxMsgTypeDef RxMessage;
+
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 {
-  
-  
-  HAL_CAN_Receive_IT( hcan, CAN_FIFO0);
-//  memcpy( &RxMessage, hcan->pRxMsg, sizeof(CanRxMsgTypeDef) );
-  
+    can_pkg_t can_pkg_tmp;
+    HAL_CAN_Receive_IT( hcan, CAN_FIFO0);
+    
+#if 1
+    ///////// put CAN package into fifo
+        can_pkg_tmp.id.CANx_ID = hcan->pRxMsg->ExtId;
+        can_pkg_tmp.len = hcan->pRxMsg->DLC;
+        memcpy(can_pkg_tmp.data.CanData, hcan->pRxMsg->Data, hcan->pRxMsg->DLC);
+        FifoPutCanPkg(can_fifo, can_pkg_tmp);    
+#endif
+    
 #if 0
-  CanTxMsgTypeDef  *can_tx_msg;
-  CanRxMsgTypeDef  *can_rx_msg;
-  can_tx_msg = hcan->pTxMsg;
-  can_rx_msg = hcan->pRxMsg;
-  
-  can_tx_msg->ExtId     = can_rx_msg->ExtId;
-  can_tx_msg->IDE       = can_rx_msg->IDE;
-  can_tx_msg->RTR       = CAN_RTR_DATA;
-  can_tx_msg->DLC       = can_rx_msg->DLC;
-  
-  for( uint8_t i = 0; i < can_rx_msg->DLC; i++ )
-  {
-    can_tx_msg->Data[i] = can_rx_msg->Data[i];
-  }
-  
-  HAL_CAN_Transmit_IT( hcan );
+    memcpy( &RxMessage, hcan->pRxMsg, sizeof(CanRxMsgTypeDef) );
+    CanTxMsgTypeDef  *can_tx_msg;
+    CanRxMsgTypeDef  *can_rx_msg;
+    can_tx_msg = hcan->pTxMsg;
+    can_rx_msg = hcan->pRxMsg;
+
+    can_tx_msg->ExtId     = can_rx_msg->ExtId;
+    can_tx_msg->IDE       = can_rx_msg->IDE;
+    can_tx_msg->RTR       = CAN_RTR_DATA;
+    can_tx_msg->DLC       = can_rx_msg->DLC;
+
+    for( uint8_t i = 0; i < can_rx_msg->DLC; i++ )
+    {
+        can_tx_msg->Data[i] = can_rx_msg->Data[i];
+    }
+
+    HAL_CAN_Transmit_IT( hcan );
 #endif
 }
 

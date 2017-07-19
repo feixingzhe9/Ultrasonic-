@@ -309,6 +309,40 @@ void UltraSonicStart(void)
     ultra_sonic_data->send_time = GetTimerCount();
 }
 
+#include "can_protocol.h"
+extern uint32_t ultrasonic_src_id;
+void CompleteAndUploadData(void)
+{
+    uint8_t i = 0;
+    
+    if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
+    {
+        //for(i = 0; i < ultra_sonic_data->interval_time.cnt; i++)
+        {
+            ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
+#if 0
+            UltraSonicLog("%d - distance : %d cm\r\n",i + 1,ultra_sonic_data->compute_ditance[i]);
+#else
+            CanTX( MICO_CAN1, 0x12345678, (uint8_t *)&ultra_sonic_data->compute_ditance[i], sizeof(ultra_sonic_data->compute_ditance[i]) ); 
+#endif
+        }
+    }
+    else
+    {
+#if 0
+           UltraSonicLog("NO_OBJ_DETECTED");
+#else
+           uint16_t tmp = NO_OBJ_DETECTED;
+           CAN_ID_UNION id;
+           id.CanID_Struct.SourceID = 0x80;
+           id.CanID_Struct.DestMACID = 0;
+           id.CanID_Struct.SrcMACID = ultrasonic_src_id;
+           id.CanID_Struct.ACK = 1;
+           id.CanID_Struct.res = 0;
+           CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
+#endif
+    }
+}
 
 #define ULTRASONIC_MEASURE_TIME         13/SYSTICK_PERIOD //unit: ms
 #define ULTRASONIC_DATA_EXIST_TIME      500/SYSTICK_PERIOD//unit: ms
@@ -327,6 +361,7 @@ void UltraSonicDataTick(void)
         }
         if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_TIME)
         {
+            CompleteAndUploadData();
             ultra_sonic_data->start_flag = 0;
             ultra_sonic_data->end_flag = 1;
             flag_1 = 0;
@@ -930,7 +965,7 @@ void ShowTestLog(void)
         //for(i = 0; i < ultra_sonic_data->interval_time.cnt; i++)
         {
             ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
-#if 0
+#if 1
             UltraSonicLog("%d - distance : %d cm\r\n",i + 1,ultra_sonic_data->compute_ditance[i]);
 #else
             CanTX( MICO_CAN1, 0x12345678, (uint8_t *)&ultra_sonic_data->compute_ditance[i], sizeof(ultra_sonic_data->compute_ditance[i]) );
