@@ -149,6 +149,8 @@ typedef enum
   
     MICO_GPIO_ID1,
     MICO_GPIO_ID2,
+    
+    MICO_GPIO_EMG_STOP,
   
 #endif
     MICO_GPIO_MAX, /* Denotes the total number of GPIO port aliases. Not a valid GPIO alias */

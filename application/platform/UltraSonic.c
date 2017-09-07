@@ -1,4 +1,5 @@
-
+/////////////Ultrasonic Double//////////
+////////////////////////////////////////
 #include "platform.h"
 #include "stm32f1xx.h"
 #include "UltraSonic.h"
@@ -40,6 +41,8 @@ ultra_sonic_time_t *ultra_sonic_time = &ultra_sonic_time_ram;
 ultra_sonic_ee_data_ut ultra_sonic_ee_data_ram;
 ultra_sonic_ee_data_ut * ultra_sonic_ee_data = &ultra_sonic_ee_data_ram;
 
+uint8_t measure_repeat_filter = 0;
+uint8_t random_time[5] = {25,40,55,70,85};
 #if 1
 ultra_sonic_threshold_t ultra_sonic_threshold_ram = 
 {
@@ -123,7 +126,7 @@ uint32_t t_cal;
     
 void UltraSonicTimeInit(void)
 {
-    estimate_frq = F_DRV;
+    estimate_frq = F_DRV + SEARCH_FRQ_COMPENSATION;
     
     t_snd = T_SND;
     t_rec = T_REC;
@@ -176,7 +179,7 @@ void UltraSonicInit(void)
     ultra_sonic_ee_data->ee_data.drv_cur = 0x08;
     
     
-    
+     
     
     UltraSonicTimeInit();
     
@@ -300,6 +303,7 @@ void UltraSonicStart(void)
    
     DISABLE_INTERRUPTS();
     ultra_sonic_data->interval_time.cnt = 0;
+    memset(ultra_sonic_data->compute_ditance, 0, INTERVAL_TIME_MAX);
     ultra_sonic_data->end_flag = 0;
     ultra_sonic_data->start_flag = 1;
     ENABLE_INTERRUPTS();
@@ -311,40 +315,69 @@ void UltraSonicStart(void)
 
 #include "can_protocol.h"
 extern uint32_t ultrasonic_src_id;
+static uint16_t last_distance = NO_OBJ_DETECTED;
+
 void CompleteAndUploadData(void)
 {
     uint8_t i = 0;
-    
+    CAN_ID_UNION id;
+    id.CanID_Struct.SourceID = 0x80;
+    id.CanID_Struct.DestMACID = 0x12;//test;
+    id.CanID_Struct.SrcMACID = ultrasonic_src_id;
+    id.CanID_Struct.ACK = 1;
+    id.CanID_Struct.res = 0;
     if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
     {
+        do
+        {
+            ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
+        
+        }while((i < ultra_sonic_data->interval_time.cnt) && (ultra_sonic_data->compute_ditance[i++] <= MEASURE_BLIND_DISTANCE));
+        
+        if(i > 0)i--;
+
         //for(i = 0; i < ultra_sonic_data->interval_time.cnt; i++)
         {
             ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
-#if 0
-            UltraSonicLog("%d - distance : %d cm\r\n",i + 1,ultra_sonic_data->compute_ditance[i]);
-#else
-            CanTX( MICO_CAN1, 0x12345678, (uint8_t *)&ultra_sonic_data->compute_ditance[i], sizeof(ultra_sonic_data->compute_ditance[i]) ); 
-#endif
+            
+            if((ultra_sonic_data->compute_ditance[i] <= DANGER_DISTANCE) && (++measure_repeat_filter < DANGER_DISTANCE_FILTER_CNT))
+            {
+                delay_ms(20 + GetTimerCount() % 30);//random time - 30ms ~ 79ms
+                UltraSonicStart();  
+            }
+            else               
+            {
+                measure_repeat_filter = 0;   
+                if(ultra_sonic_data->compute_ditance[i] <= MEASURE_BLIND_DISTANCE)
+                {
+                    uint16_t tmp = last_distance;           
+                    CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
+                    printf("%d\n",tmp);
+                }
+                else
+                {
+                    CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&ultra_sonic_data->compute_ditance[i], sizeof(ultra_sonic_data->compute_ditance[i]) ); 
+                    printf("%d\n",ultra_sonic_data->compute_ditance[i]);
+                    last_distance = ultra_sonic_data->compute_ditance[i];
+                    if(last_distance <= MEASURE_BLIND_DISTANCE)
+                    {
+                        printf("WTF ! \r\n");
+                    }
+                }
+                
+            }                
         }
     }
     else
     {
-#if 0
-           UltraSonicLog("NO_OBJ_DETECTED");
-#else
-           uint16_t tmp = NO_OBJ_DETECTED;
-           CAN_ID_UNION id;
-           id.CanID_Struct.SourceID = 0x80;
-           id.CanID_Struct.DestMACID = 0;
-           id.CanID_Struct.SrcMACID = ultrasonic_src_id;
-           id.CanID_Struct.ACK = 1;
-           id.CanID_Struct.res = 0;
-           CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
-#endif
+        measure_repeat_filter = 0;
+        uint16_t tmp = NO_OBJ_DETECTED;
+        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
+        printf("%d\n",tmp);
     }
 }
 
-#define ULTRASONIC_MEASURE_TIME         13/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_MEASURE_TIME         9/SYSTICK_PERIOD //unit: ms
 #define ULTRASONIC_DATA_EXIST_TIME      500/SYSTICK_PERIOD//unit: ms
 void UltraSonicDataTick(void)
 {
@@ -361,10 +394,11 @@ void UltraSonicDataTick(void)
         }
         if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_TIME)
         {
-            CompleteAndUploadData();
+           
             ultra_sonic_data->start_flag = 0;
             ultra_sonic_data->end_flag = 1;
-            flag_1 = 0;
+            flag_1 = 0; 
+            CompleteAndUploadData();
         }   
     }
  
@@ -1066,7 +1100,7 @@ void UltraSonicSetFrqToDest(void)
     delay_ms(50);
     if(ee_data_change_flag == 1)
     {
-        UltraSonicPrgramEE();
+        //UltraSonicPrgramEE();
     }  
     delay_ms(10);
 }
@@ -1081,33 +1115,81 @@ uint8_t UltraSonicEvenParityCompute(uint32_t data, uint8_t len)
     return tmp;
 }
 
-void UltraSonicWriteThresholdData(ultra_sonic_threshold_t * threshold)
+
+
+uint32_t UltraSonicWriteThresholdData(ultra_sonic_threshold_t * threshold)
 { 
+    uint32_t status = ULTRASONIC_READ_ERR;
+    uint32_t frq_tmp = estimate_frq;
+    uint32_t frq_search_near = 0;
+    uint8_t cnt = 0;
     UltraSonicLog("write threshold data...\r\n");
-    Ultra_IO_Output();
-	UltraIoOutputLow();
-    delay_us(t_cmd);
-	UltraIoOutputHigh();
-    delay_us(t_d);
-	UltraWriteBit(0);
-	UltraWriteBit(0);
-	UltraWriteBit(0);
-	UltraWriteBit(1);
-	//Ultra_IO_Input();
-    
-    for(uint8_t i = 1; i < THRES_NUM; i++)
+    if(status == ULTRASONIC_READ_ERR)
     {
-        UltraSonicWrteData(threshold->threshold[i], 5);
+        Ultra_IO_Output();
+        UltraIoOutputLow();
+        delay_us(t_cmd);
+        UltraIoOutputHigh();
+        delay_us(t_d);
+        UltraWriteBit(0);
+        UltraWriteBit(0);
+        UltraWriteBit(0);
+        UltraWriteBit(1);
+        //Ultra_IO_Input();
+        
+        for(uint8_t i = 1; i < THRES_NUM; i++)
+        {
+            UltraSonicWrteData(threshold->threshold[i], 5);
+        }
+        UltraSonicWrteData(threshold->tres_scale, 2);
+        UltraSonicWrteData(threshold->thres_ini, 1);
+        UltraSonicWrteData(threshold->thres_len, 1);
+        UltraSonicWrteData(threshold->parity_0, 1);
+        UltraSonicWrteData(threshold->parity_1, 1);
+        UltraSonicWrteData(threshold->parity_2, 1);
+        UltraSonicWrteData(threshold->parity_3, 1);
+        UltraSonicWrteData(threshold->parity_4, 1);   
+        
+        delay_ms(1);
+        status = UltraSonicReadStatusStart();
+        frq_search_near = frq_tmp + SEARCH_FRQ_COMPENSATION;
+        cnt = 0;
+        while( (status == ULTRASONIC_READ_ERR) && (cnt <= SEARCH_FRQ_COMPENSATION * 2 / ULTRA_SEARCH_FRQ_STEP_SIZE) )
+        {
+            cnt++;
+            status = 0;
+          
+            if(frq_search_near > MIN_FRQ)
+            {
+                frq_search_near -= ULTRA_SEARCH_FRQ_STEP_SIZE;
+            }
+            else
+            {
+                frq_search_near = MAX_FRQ;
+            }
+            
+            UltraSonicTimeChange(frq_search_near);
+            
+            //Ultra_IO_Output();///////
+            //UltraIoOutputHigh();//////
+            delay_ms(1);////////////
+            status = UltraSonicReadStatusStart();
+        }
+        if(cnt <= SEARCH_FRQ_COMPENSATION * 2 / ULTRA_SEARCH_FRQ_STEP_SIZE)
+        {
+            return status;
+        }
     }
-    UltraSonicWrteData(threshold->tres_scale, 2);
-    UltraSonicWrteData(threshold->thres_ini, 1);
-    UltraSonicWrteData(threshold->thres_len, 1);
-    UltraSonicWrteData(threshold->parity_0, 1);
-    UltraSonicWrteData(threshold->parity_1, 1);
-    UltraSonicWrteData(threshold->parity_2, 1);
-    UltraSonicWrteData(threshold->parity_3, 1);
-    UltraSonicWrteData(threshold->parity_4, 1);   
+    else
+    {
+        return status;
+    }
+    return ULTRASONIC_READ_ERR;
+    
 }
+
+uint32_t test_status;
+uint32_t test_cnt = 0;
 void UltraSonicSetThreshold(ultra_sonic_threshold_t * threshold)
 {
     uint32_t parity_0_data = (threshold->threshold[12]&0x03) | (threshold->threshold[13]<<2) | (threshold->threshold[14]<<7) | \
@@ -1121,6 +1203,7 @@ void UltraSonicSetThreshold(ultra_sonic_threshold_t * threshold)
     uint32_t parity_4_data = (threshold->threshold[1]) | (threshold->threshold[2]<<5);
     uint32_t status = 0;
     uint8_t cnt = 0;
+    uint32_t frq_tmp = estimate_frq;
     
     threshold->parity_0 = UltraSonicEvenParityCompute(parity_0_data, 16);
     threshold->parity_1 = UltraSonicEvenParityCompute(parity_1_data, 16);
@@ -1128,20 +1211,35 @@ void UltraSonicSetThreshold(ultra_sonic_threshold_t * threshold)
     threshold->parity_3 = UltraSonicEvenParityCompute(parity_3_data, 16);
     threshold->parity_4 = UltraSonicEvenParityCompute(parity_4_data, 10);
     
-    do
-    {  
-        UltraSonicWriteThresholdData(threshold);
-        delay_ms(20);
-        status = UltraSonicReadStatus();
-        delay_ms(20);
+    status = UltraSonicWriteThresholdData(threshold);
+    while( ((status & 0x02) == 0) || (status == ULTRASONIC_READ_ERR))  
+    //while(((status & 0x80) == 0) || (status == ULTRASONIC_READ_ERR))
+    {   
+        //delay_ms(10);
+        //status = UltraSonicReadStatus();
+        //delay_ms(10);
         cnt++;
         if(cnt >= 250)
         {
             UltraSonicLog("FATAL: CAN NOT WRITE THRESHOLD VALUE ! ! ! ! ! \r\nSYSTEM WILL RESET!\r\n");
             platform_mcu_reset();
         }
+
+        
+        if(frq_tmp > MIN_FRQ)
+        {
+            frq_tmp -= ULTRA_SEARCH_FRQ_STEP_SIZE;
+        }
+        else
+        {
+            frq_tmp = MAX_FRQ;
+        }
+        delay_ms(1);
+        UltraSonicTimeChange(frq_tmp);
+        status = UltraSonicWriteThresholdData(threshold);
     }
-    while((status & 0x02) == 0);   
+    
+    test_status = status;
 }
 
 

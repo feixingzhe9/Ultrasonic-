@@ -29,7 +29,7 @@
 
 
 
-#define CAN_FIFO_SIZE                   50
+#define CAN_FIFO_SIZE                   500
 
 
 

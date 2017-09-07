@@ -623,7 +623,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>Ultrasonic.hex</state>
+          <state>Ultrasonic-Single.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>

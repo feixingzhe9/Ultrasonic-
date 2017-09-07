@@ -81,12 +81,12 @@ const platform_gpio_t platform_gpio_pins[] =
     [MICO_GPIO_ULTRA_DATA]        = { GPIOB,  13 },
     [MICO_GPIO_24_V_EN]           = { GPIOA,  0 },
     [MICO_GPIO_SYS_LED]           = { GPIOB,  3 },
-    [MICO_GPIO_KEY_S0]            = { GPIOA,  1 },
-    [MICO_GPIO_KEY_S1]            = { GPIOA,  2 },
-    [MICO_GPIO_KEY_S2]            = { GPIOA,  3 },
-    [MICO_GPIO_KEY_S3]            = { GPIOA,  4 },
-    [MICO_GPIO_KEY_S4]            = { GPIOA,  5 },
-    [MICO_GPIO_KEY_S5]            = { GPIOA,  6 },
+    [MICO_GPIO_KEY_S0]            = { GPIOA,  2 },
+    [MICO_GPIO_KEY_S1]            = { GPIOA,  3 },
+    [MICO_GPIO_KEY_S2]            = { GPIOA,  4 },
+    [MICO_GPIO_KEY_S3]            = { GPIOA,  5 },
+    [MICO_GPIO_KEY_S4]            = { GPIOA,  6 },
+    [MICO_GPIO_KEY_S5]            = { GPIOA,  7 },
 
     [MICO_GPIO_UART3_TX]          = { GPIOB, 10 },
     [MICO_GPIO_UART3_RX]          = { GPIOB, 11 },
@@ -114,6 +114,8 @@ const platform_gpio_t platform_gpio_pins[] =
 
     [MICO_GPIO_UART1_TX]          = { GPIOA,  9 },
     [MICO_GPIO_UART1_RX]          = { GPIOA, 10 },
+    
+    [MICO_GPIO_EMG_STOP]          = { GPIOA, 8  },
 };
 
 /*

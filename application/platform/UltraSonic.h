@@ -40,6 +40,9 @@
 #define ULTRA_FRQ_STEP_SIZE         300
 #define ULTRA_SEARCH_FRQ_STEP_SIZE  500 
 
+#define SEARCH_FRQ_COMPENSATION     1000
+
+#define MEASURE_BLIND_DISTANCE      22
 
 #define T_0_LOW_MAX         t_0_low*1.3 
 #define T_0_LOW_MIN         t_0_low*0.7
@@ -52,8 +55,9 @@
 #define T_1_HIGH_MIN
 
 
-#define NO_OBJ_DETECTED     0x00000000
-
+#define NO_OBJ_DETECTED                 0x00000000
+#define DANGER_DISTANCE                 50
+#define DANGER_DISTANCE_FILTER_CNT      2
 typedef enum
 {
     US_CMD_SEND_REQUEST,
