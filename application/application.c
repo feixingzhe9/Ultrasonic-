@@ -25,7 +25,7 @@ int main( void )
   bsp_Init();
   Platform_Init();
   MicoCanInitialize( MICO_CAN1 );
-  
+   
   delay_ms(10);
   UltraSonicInit();
   delay_ms(10);
@@ -35,13 +35,13 @@ int main( void )
   for(;;)
   { 
     can_protocol_period(); 
-    UltraSonicStartTick();
+    //UltraSonicStartTick();
     UltraSonicDataTick();
     SysLed();
   }
 }
 
-#define ULTRASONIC_SEND_TIME   200/SYSTICK_PERIOD
+#define ULTRASONIC_SEND_TIME   1000/SYSTICK_PERIOD
 void UltraSonicStartTick(void) 
 {
     static uint32_t start_time_1 = 0;
@@ -70,18 +70,17 @@ uint32_t sys_led_start_time = 0;
 void SysLed(void)
 { 
     static uint32_t cnt = 0;
-    
+
+#if 1    
     platform_pin_config_t pin_config;
     pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
     pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;// GPIO_MODE_AF_PP;// 
     pin_config.gpio_pull = GPIO_PULLUP;
-
-    
     
     //  Initialise system led
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
     
-    
+#endif   
     if(os_get_time() - sys_led_start_time >= TEST_PERID)
     {
         cnt++;

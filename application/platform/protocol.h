@@ -26,8 +26,8 @@
 #define READ_FW_VERSION_COMMAND         0x00
 #define READ_PROTOCOL_VERSION           0x01
 
-#define HW_VERSION                      "10"
-#define SW_VERSION                      "C001M07B103"
+#define HW_VERSION                      "Noah_US_V0.1"
+#define SW_VERSION                      "NoahC001M05A001"
 #define PROTOCOL_VERSION                "20170505R0101"
 
 typedef struct _serial_frame_t {

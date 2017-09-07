@@ -207,7 +207,7 @@ OSStatus platform_gpio_irq_enable( const platform_gpio_t* gpio, platform_gpio_ir
     }
   }
   gpio_init_structure.Speed = GPIO_SPEED_MEDIUM;
-  gpio_init_structure.Pull  = GPIO_PULLDOWN;
+  gpio_init_structure.Pull  = GPIO_PULLUP;//GPIO_PULLDOWN;
   
   HAL_GPIO_Init( gpio->port, &gpio_init_structure );
   

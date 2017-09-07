@@ -1,4 +1,4 @@
-
+//////////////////--- Ultrasonic Double ---//////////////////
 #include "platform.h"
 #include "stm32f1xx.h"
 #include "UltraSonic.h"
@@ -40,24 +40,26 @@ ultra_sonic_time_t *ultra_sonic_time = &ultra_sonic_time_ram;
 ultra_sonic_ee_data_ut ultra_sonic_ee_data_ram;
 ultra_sonic_ee_data_ut * ultra_sonic_ee_data = &ultra_sonic_ee_data_ram;
 
+uint8_t measure_repeat_filter = 0;
+uint8_t random_time[5] = {25,40,55,70,85};
 #if 1
 ultra_sonic_threshold_t ultra_sonic_threshold_ram = 
 {
     //.threshold[0] = 31,
     .threshold[1]   = 31,
-    .threshold[2]   = 28,
-    .threshold[3]   = 25,
-    .threshold[4]   = 23,
-    .threshold[5]   = 22,
-    .threshold[6]   = 15,
-    .threshold[7]   = 8,
-    .threshold[8]   = 6,
-    .threshold[9]   = 5,
-    .threshold[10]  = 4,
-    .threshold[11]  = 4,
-    .threshold[12]  = 4,
-    .threshold[13]  = 4,
-    .threshold[14]  = 4,
+    .threshold[2]   = 25,//18,//
+    .threshold[3]   = 22,//15,//
+    .threshold[4]   = 20,//13,//
+    .threshold[5]   = 18,//11,//
+    .threshold[6]   = 15,//10,//
+    .threshold[7]   = 13,//10,//
+    .threshold[8]   = 13,//6,
+    .threshold[9]   = 13,//5,
+    .threshold[10]  = 13,//4,
+    .threshold[11]  = 13,//4,
+    .threshold[12]  = 15,//4,
+    .threshold[13]  = 15,//4,
+    .threshold[14]  = 15,//4,
     .tres_scale     = 2,
     .thres_ini      = 0,
     .thres_len      = 0,
@@ -69,6 +71,7 @@ ultra_sonic_threshold_t ultra_sonic_threshold_ram =
     .parity_3       = 0,
     .parity_4       = 0,
 };
+
 #else
 ultra_sonic_threshold_t ultra_sonic_threshold_ram = 
 {
@@ -103,27 +106,27 @@ ultra_sonic_threshold_t * ultra_sonic_threshold = &ultra_sonic_threshold_ram;
 
 volatile uint32_t estimate_frq = F_DRV;
 
-uint32_t f_drv;
-uint32_t t_deb;
-uint32_t t_snd;
-uint32_t t_rec;
-uint32_t t_cmd;
-uint32_t t_cmd_prog;
-uint32_t t_d;
-uint32_t t_vprog;
-uint32_t t_prog;
-uint32_t t_0_low;
-uint32_t t_0_high;
-uint32_t t_1_low;
-uint32_t t_1_high;
-uint32_t t_bit;
-uint32_t t_bit0;
-uint32_t t_bit1;
-uint32_t t_cal;
+volatile uint32_t f_drv;
+volatile uint32_t t_deb;
+volatile uint32_t t_snd;
+volatile uint32_t t_rec;
+volatile uint32_t t_cmd;
+volatile uint32_t t_cmd_prog;
+volatile uint32_t t_d;
+volatile uint32_t t_vprog;
+volatile uint32_t t_prog;
+volatile uint32_t t_0_low;
+volatile uint32_t t_0_high;
+volatile uint32_t t_1_low;
+volatile uint32_t t_1_high;
+volatile uint32_t t_bit;
+volatile uint32_t t_bit0;
+volatile uint32_t t_bit1;
+volatile uint32_t t_cal;
     
 void UltraSonicTimeInit(void)
 {
-    estimate_frq = F_DRV;
+    estimate_frq = F_DRV + SEARCH_FRQ_COMPENSATION;
     
     t_snd = T_SND;
     t_rec = T_REC;
@@ -159,12 +162,14 @@ void UltraSonicTimeChange(uint32_t frq)
     t_bit1 = T_BIT1*F_DRV/frq;
     t_cal = T_CAL*F_DRV/frq;
 }
+
+uint32_t test_test_status = 0;
 void UltraSonicInit(void)
 {
     TimerInit();
     StartTimer();
     V24OutputHigh();//
-    
+     
     memset(ultra_sonic_data, 0, sizeof(ultra_sonic_data_t));
     ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
     
@@ -173,7 +178,7 @@ void UltraSonicInit(void)
     
     memset(ultra_sonic_ee_data, 0, sizeof(ultra_sonic_ee_data_ut));
     ultra_sonic_ee_data->ee_data.amp_gain = 0x08;
-    ultra_sonic_ee_data->ee_data.drv_cur = 0x08;
+    //ultra_sonic_ee_data->ee_data.drv_cur = 0x08;
     
     
     
@@ -181,9 +186,15 @@ void UltraSonicInit(void)
     UltraSonicTimeInit();
     
     //UltraSonicSetFrqToDest();
-    delay_ms(20);
+    delay_ms(2);
     
+    
+    
+    
+    // in normal mode, must set the ultrasonic threshold ! ! !
     UltraSonicSetThreshold(ultra_sonic_threshold);
+    
+    //test_test_status = UltraSonicReadStatus();
     delay_ms(10);
      
 #if 0
@@ -291,60 +302,115 @@ void UltraSonicSendCMD(ultra_sonic_cmd_t cmd)
 
 void UltraSonicStart(void)
 {
+#if 1
     Ultra_IO_Output();
+    //delay_us(100);
 	UltraIoOutputLow();
 	delay_us(t_snd);
 	UltraIoOutputHigh();
+#else
     
-    delay_us(150);  
+    Ultra_IO_Output();
+	UltraIoOutputLow();
+	delay_us(t_cmd);
+	UltraIoOutputHigh();
+	delay_us(t_d);
+    
+	UltraWriteBit(1);//"1101":send 12 pulses
+	UltraWriteBit(1);
+	UltraWriteBit(0);
+	UltraWriteBit(1);
+#endif
+    
+    delay_us(280);  
    
     DISABLE_INTERRUPTS();
     ultra_sonic_data->interval_time.cnt = 0;
+    memset(ultra_sonic_data->compute_ditance, 0, INTERVAL_TIME_MAX);
     ultra_sonic_data->end_flag = 0;
-    ultra_sonic_data->start_flag = 1;
+    ultra_sonic_data->start_flag = 1;   
     ENABLE_INTERRUPTS();
-    
     Ultra_IO_InputIT();
     
     ultra_sonic_data->send_time = GetTimerCount();
+    
 }
 
+
+//extern void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len);
 #include "can_protocol.h"
 extern uint32_t ultrasonic_src_id;
+static uint16_t last_distance = NO_OBJ_DETECTED;
+
 void CompleteAndUploadData(void)
 {
     uint8_t i = 0;
-    
+    CAN_ID_UNION id;
+    id.CanID_Struct.SourceID = 0x80;
+    id.CanID_Struct.DestMACID = 0x12;//test;
+    id.CanID_Struct.SrcMACID = ultrasonic_src_id;
+    id.CanID_Struct.ACK = 1;
+    id.CanID_Struct.res = 0;
     if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
     {
+        do
+        {
+            ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
+        
+        }while((i < ultra_sonic_data->interval_time.cnt) && (ultra_sonic_data->compute_ditance[i++] <= MEASURE_BLIND_DISTANCE));
+        
+        if(i > 0)i--;
+
         //for(i = 0; i < ultra_sonic_data->interval_time.cnt; i++)
         {
             ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
-#if 0
-            UltraSonicLog("%d - distance : %d cm\r\n",i + 1,ultra_sonic_data->compute_ditance[i]);
-#else
-            CanTX( MICO_CAN1, 0x12345678, (uint8_t *)&ultra_sonic_data->compute_ditance[i], sizeof(ultra_sonic_data->compute_ditance[i]) ); 
-#endif
+            
+            if((ultra_sonic_data->compute_ditance[i] <= DANGER_DISTANCE) && (++measure_repeat_filter < DANGER_DISTANCE_FILTER_CNT))
+            {
+                delay_ms(20 + GetTimerCount() % 30);//random time - 30ms ~ 79ms
+                UltraSonicStart();           
+            }
+            else               
+            {
+                measure_repeat_filter = 0;   
+                if(ultra_sonic_data->compute_ditance[i] <= MEASURE_BLIND_DISTANCE)
+                {
+                    uint16_t tmp = last_distance;           
+                    CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
+                    if(tmp <= MEASURE_BLIND_DISTANCE)
+                    {
+                        printf("WTF ! \r\n");
+                    }
+                    //printf("distance : %d\r\n",tmp);
+                    printf("%d\n",tmp);
+                }
+                else
+                {
+                    CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&ultra_sonic_data->compute_ditance[i], sizeof(ultra_sonic_data->compute_ditance[i]) ); 
+                    //printf("distance : %d\r\n",ultra_sonic_data->compute_ditance[i]);
+                    printf("%d\n",ultra_sonic_data->compute_ditance[i]);
+                    last_distance = ultra_sonic_data->compute_ditance[i];
+                    if(last_distance <= MEASURE_BLIND_DISTANCE)
+                    {
+                        printf("WTF ! \r\n");
+                    }
+                }
+                
+            }                
         }
+        
     }
     else
     {
-#if 0
-           UltraSonicLog("NO_OBJ_DETECTED");
-#else
-           uint16_t tmp = NO_OBJ_DETECTED;
-           CAN_ID_UNION id;
-           id.CanID_Struct.SourceID = 0x80;
-           id.CanID_Struct.DestMACID = 0;
-           id.CanID_Struct.SrcMACID = ultrasonic_src_id;
-           id.CanID_Struct.ACK = 1;
-           id.CanID_Struct.res = 0;
-           CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
-#endif
+        measure_repeat_filter = 0;
+        uint16_t tmp = NO_OBJ_DETECTED;
+        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
+        //printf("distance : %d\r\n",tmp);
+        printf("%d\n",tmp);
     }
 }
 
-#define ULTRASONIC_MEASURE_TIME         13/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_MEASURE_TIME         9/SYSTICK_PERIOD //unit: ms
 #define ULTRASONIC_DATA_EXIST_TIME      500/SYSTICK_PERIOD//unit: ms
 void UltraSonicDataTick(void)
 {
@@ -361,10 +427,12 @@ void UltraSonicDataTick(void)
         }
         if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_TIME)
         {
-            CompleteAndUploadData();
+           
             ultra_sonic_data->start_flag = 0;
             ultra_sonic_data->end_flag = 1;
-            flag_1 = 0;
+            flag_1 = 0; 
+            CompleteAndUploadData();
+            
         }   
     }
  
@@ -466,7 +534,7 @@ uint32_t UltraSonicReadEEStart(ultra_sonic_ee_data_ut * data)
 	UltraWriteBit(0);
 	Ultra_IO_Input();
 #if 1
-    readvalue = UltraSonicReadData(20);
+    readvalue = UltraSonicReadData(32);
     data->value = readvalue;
 #else  
     data->ee_data.spare_bit = UltraSonicReadData(1);
@@ -603,7 +671,7 @@ uint32_t UltraSonicReadStatusStart(void)
     
     ultra_sonic_data->send_time = GetTimerCount();
     
-    readvalue = UltraSonicReadData(2);
+    readvalue = UltraSonicReadData(9);
     printf("status is %x\r\n", readvalue);
     return readvalue;
 }
@@ -641,7 +709,7 @@ uint32_t UltraSonicReadStatus(void)
         //Ultra_IO_Output();///////
         //UltraIoOutputHigh();//////
         
-        delay_ms(15);////////////
+        delay_ms(10);////////////
         status = UltraSonicReadStatusStart();
     }
     return status;
@@ -650,167 +718,76 @@ uint32_t UltraSonicReadStatus(void)
 
 
 #define CALIBRATION_FILTER_NUM              7
-#define CALIBRATION_OVER_TIME               500
+#define CALIBRATION_OVER_TIME               100000
 #define ULTRASONIC_FRQ_CALIBRATION_ERR      0 
 uint32_t UltraReadCalibrationData(void)
 {
     uint32_t cnt = 0;
-    uint32_t i;
     uint32_t tmp;
     
     uint32_t start_time = 0;
+    uint32_t start_time_2 = 0;
     uint32_t end_time = 0;
+    uint32_t end_time_2 = 0;
     uint32_t frq;
 #if 1
-    uint32_t sum = 0;
-    for(i = 0; i < CALIBRATION_FILTER_NUM; i++)
+
+      
+    while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 0) && (cnt < 500))
     {
-      //measure low level time
-        while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 0) && (cnt < CALIBRATION_OVER_TIME))
-        {
-            cnt++;
-        }       
-        start_time = GetTimerCount();
-        if(cnt >= CALIBRATION_OVER_TIME)
-        {
-            return ULTRASONIC_FRQ_CALIBRATION_ERR;
-        }
-        cnt = 0;
-        while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 1) && (cnt < CALIBRATION_OVER_TIME))
-        {
-            cnt++;
-        }  
-
-        end_time = GetTimerCount();
-        if(cnt >= CALIBRATION_OVER_TIME)
-        {
-            return ULTRASONIC_FRQ_CALIBRATION_ERR;
-        }
-        cnt = 0;
-          if(end_time > start_time)
-          {
-                tmp = end_time - start_time;
-          }
-          else
-          {
-                tmp = USER_TIM_MAX_CNT - (start_time - end_time);
-          }
-          sum += tmp;         
-          //measure high level time
-        while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 1) && (cnt < CALIBRATION_OVER_TIME))
-        {
-            cnt++;
-        }       
-        start_time = GetTimerCount();
-        if(cnt >= CALIBRATION_OVER_TIME)
-        {
-            return ULTRASONIC_FRQ_CALIBRATION_ERR;
-        }
-        cnt = 0;
-        while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 0) && (cnt < CALIBRATION_OVER_TIME))
-        {
-            cnt++;
-        }   
-        end_time = GetTimerCount();
-        if(cnt >= CALIBRATION_OVER_TIME)
-        {
-            return ULTRASONIC_FRQ_CALIBRATION_ERR;
-        }
-        cnt = 0;
-        if(end_time > start_time)
-        {
-            tmp = end_time - start_time;
-        }
-        else
-        {
-            tmp = USER_TIM_MAX_CNT - (start_time - end_time);
-        }
-        sum += tmp;
-    }
-    tmp = sum/(CALIBRATION_FILTER_NUM*2);
-    
-    
-    ////////////////////////////////////////////////
-    tmp += 2;////////////////////???????????????????????
-    /////////////////////////////////////////////////
-    
-    
-    frq = 1000000 * 12 /tmp;
-#else
-    for(i = 0; i < CALIBRATION_FILTER_NUM; i++)
+        cnt++;
+    }       
+    start_time = GetTimerCount();
+    if(cnt >= 500)
     {
-      //measure low level time
-        while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 0) && (cnt < CALIBRATION_OVER_TIME))
-        {
-            cnt++;
-        }
-        if(i == 0)
-        {
-            start_time = GetTimerCount();
-        }
-
-        if(cnt >= CALIBRATION_OVER_TIME)
-        {
-            return ULTRASONIC_FRQ_CALIBRATION_ERR;
-        }
-        cnt = 0;
-        while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 1) && (cnt < CALIBRATION_OVER_TIME))
-        {
-            cnt++;
-        }  
-
-        //end_time = GetTimerCount();
-        if(cnt >= CALIBRATION_OVER_TIME)
-        {
-            return ULTRASONIC_FRQ_CALIBRATION_ERR;
-        }
-        cnt = 0;
-          
-          //measure high level time
-        while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 1) && (cnt < CALIBRATION_OVER_TIME))
-        {
-            cnt++;
-        }       
-        //start_time = GetTimerCount();
-        if(cnt >= CALIBRATION_OVER_TIME)
-        {
-            return ULTRASONIC_FRQ_CALIBRATION_ERR;
-        }
-        cnt = 0;
-        while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 0) && (cnt < CALIBRATION_OVER_TIME))
-        {
-            cnt++;
-        }  
-        
-        if(cnt >= CALIBRATION_OVER_TIME)
-        {
-            return ULTRASONIC_FRQ_CALIBRATION_ERR;
-        }
-        if(i == CALIBRATION_FILTER_NUM - 1)
-        {
-            end_time = GetTimerCount(); 
-            cnt = 0;
-            if(end_time > start_time)
-            {
-                tmp = end_time - start_time;
-            }
-            else
-            {
-                tmp = USER_TIM_MAX_CNT - (start_time - end_time);
-            }
-        }
-        
+        return ULTRASONIC_FRQ_CALIBRATION_ERR;
     }
-    //tmp = tmp/(CALIBRATION_FILTER_NUM*2);
+    cnt = 0;
+    while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 1) && (cnt < 500))
+    {
+        cnt++;
+    }
+    start_time_2 = GetTimerCount();
+    if(cnt >= 500)
+    {
+        return ULTRASONIC_FRQ_CALIBRATION_ERR;
+    }
     
+    while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) != 0) && (cnt < CALIBRATION_OVER_TIME))
+    {
+        cnt++;
+    }       
+    end_time = GetTimerCount();
+    end_time_2 = GetTimerCount();
     
-    ////////////////////////////////////////////////
-    //tmp += 2;////////////////////???????????????????????
-    /////////////////////////////////////////////////
+    if(end_time_2 > start_time_2)
+    {
+        tmp = end_time_2 - start_time_2;
+    }
+    else
+    {
+        tmp = USER_TIM_MAX_CNT - (start_time_2 - end_time_2);
+    }
+    if((tmp < 3000) || (tmp > 8000))
+    {
+        return ULTRASONIC_FRQ_CALIBRATION_ERR;
+    }
+    if(cnt >= CALIBRATION_OVER_TIME)
+    {
+        return ULTRASONIC_FRQ_CALIBRATION_ERR;
+    }
+
+    if(end_time > start_time)
+    {
+        tmp = end_time - start_time;
+    }
+    else
+    {
+        tmp = USER_TIM_MAX_CNT - (start_time - end_time);
+    }  
     
-    
-    frq = 1000000 * 12 * (CALIBRATION_FILTER_NUM*2) /tmp;
-    tmp = tmp/(CALIBRATION_FILTER_NUM*2);
+    frq = 1000000 * 288 /tmp;
+
 #endif
     UltraSonicLog("average time :%d , frq : %d\r\n",tmp,frq);
     return frq;
@@ -870,6 +847,8 @@ uint32_t UltraSonicFrqCalibration(void)
         
         delay_ms(5);////////////
         frq = UltraSonicFrqCalibrationStart();
+        delay_ms(10);////////////
+        //delay_ms(10);////////////
     }
  
     estimate_frq = frq;///////////////////////////
@@ -922,15 +901,15 @@ void UltraSonicWriteEE(ultra_sonic_ee_data_ut* data)
 	UltraWriteBit(0);
 	UltraWriteBit(1);
  
-#if 0
-    UltraSonicWrteData(data->value, 20);
+#if 1
+    UltraSonicWrteData(data->value, 32);
 #else
-    UltraSonicWrteData(data->ee_data.spare_bit, 1);
-    UltraSonicWrteData(data->ee_data.io_mask, 1);
+    //UltraSonicWrteData(data->ee_data.spare_bit, 1);
+    //UltraSonicWrteData(data->ee_data.io_mask, 1);
     UltraSonicWrteData(data->ee_data.noise_cfg, 2);
-    UltraSonicWrteData(data->ee_data.filt_adjust, 1);
+    //UltraSonicWrteData(data->ee_data.filt_adjust, 1);
     UltraSonicWrteData(data->ee_data.f_drv_adj, 7);
-    UltraSonicWrteData(data->ee_data.drv_cur, 4);
+    //UltraSonicWrteData(data->ee_data.drv_cur, 4);
     UltraSonicWrteData(data->ee_data.amp_gain, 4);
 #endif
 
@@ -955,7 +934,7 @@ void UltraSonicPrgramEE(void)
     UltraSonicLog("Ultrasonic Program EEPROM ! \r\n");
 }
 
-extern void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len);
+
 void ShowTestLog(void)
 {
     uint8_t i = 0;
@@ -968,73 +947,26 @@ void ShowTestLog(void)
 #if 1
             UltraSonicLog("%d - distance : %d cm\r\n",i + 1,ultra_sonic_data->compute_ditance[i]);
 #else
-            CanTX( MICO_CAN1, 0x12345678, (uint8_t *)&ultra_sonic_data->compute_ditance[i], sizeof(ultra_sonic_data->compute_ditance[i]) );
+           CanTX( MICO_CAN1, 0x12345678, (uint8_t *)&ultra_sonic_data->compute_ditance[i], sizeof(ultra_sonic_data->compute_ditance[i]) ); 
 #endif
         }
+        ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
     }
-    
-
-#if 0   
-    if(ultrasonic_frq_calibration->start_flag == 1)
-    {
-        tmp = 1000000/ultrasonic_frq_calibration->interval_time;
-        UltraSonicLog("frq : %d\r\n", tmp*2*12);
-    }
-#endif    
+      
 }
+
 
 void UltraSonicSetFrqToDest(void)
 {
     uint32_t frq_tmp;
-    //uint32_t ee_data_value = UltraSonicReadEE();
-    //uint32_t ee_test;
     uint8_t cnt = 0;
     uint8_t ee_data_change_flag = 0;
     
     frq_tmp = UltraSonicFrqCalibration();
-    delay_ms(20);
+    delay_ms(10);
     UltraSonicReadEE(ultra_sonic_ee_data);
-    delay_ms(20);
-    //ee_test = UltraSonicReadEETest();
-    //delay_ms(20);
-#if 0
-    if(frq_tmp > DEST_FRQ)
-    {
-        if(ultra_sonic_ee_data->ee_data.f_drv_adj != 0)
-        {
-            if(ultra_sonic_ee_data->ee_data.f_drv_adj >= (frq_tmp - DEST_FRQ)/ULTRA_FRQ_STEP_SIZE)
-            {
-                ultra_sonic_ee_data->ee_data.f_drv_adj -= (frq_tmp - DEST_FRQ)/ULTRA_FRQ_STEP_SIZE;//
-            }
-            else
-            {
-                ultra_sonic_ee_data->ee_data.f_drv_adj = 0;
-            }
-        }        
-    }
-    else
-    {
-        if(ultra_sonic_ee_data->ee_data.f_drv_adj + (DEST_FRQ - frq_tmp)/ULTRA_FRQ_STEP_SIZE < 1<<7)
-        {
-            ultra_sonic_ee_data->ee_data.f_drv_adj += (DEST_FRQ - frq_tmp)/ULTRA_FRQ_STEP_SIZE;//
-        }
-        else
-        {
-            ultra_sonic_ee_data->ee_data.f_drv_adj = (1<<7) -1;
-        }       
-    }
-    
-    //ultra_sonic_ee_data->ee_data.amp_gain = 0x08;//////////////////?????????????
-    //ultra_sonic_ee_data->ee_data.drv_cur = 0x08;//////////////////?????????????
-    
-    UltraSonicWriteEE(ultra_sonic_ee_data);
-    delay_ms(100);
-    frq_tmp = UltraSonicFrqCalibration();
-    delay_ms(100);
-#endif  
-    
-    //ultra_sonic_ee_data->ee_data.amp_gain = 0x08;//////////////////?????????????
-    //ultra_sonic_ee_data->ee_data.drv_cur = 0x08;//////////////////?????????????
+    delay_ms(10);
+
     while(abs(frq_tmp - DEST_FRQ) > DEST_FRQ_ERROR)
     {
         if(cnt < 250)
@@ -1066,7 +998,7 @@ void UltraSonicSetFrqToDest(void)
     delay_ms(50);
     if(ee_data_change_flag == 1)
     {
-        UltraSonicPrgramEE();
+        //UltraSonicPrgramEE();
     }  
     delay_ms(10);
 }
@@ -1081,33 +1013,81 @@ uint8_t UltraSonicEvenParityCompute(uint32_t data, uint8_t len)
     return tmp;
 }
 
-void UltraSonicWriteThresholdData(ultra_sonic_threshold_t * threshold)
+
+
+uint32_t UltraSonicWriteThresholdData(ultra_sonic_threshold_t * threshold)
 { 
+    uint32_t status = ULTRASONIC_READ_ERR;
+    uint32_t frq_tmp = estimate_frq;
+    uint32_t frq_search_near = 0;
+    uint8_t cnt = 0;
     UltraSonicLog("write threshold data...\r\n");
-    Ultra_IO_Output();
-	UltraIoOutputLow();
-    delay_us(t_cmd);
-	UltraIoOutputHigh();
-    delay_us(t_d);
-	UltraWriteBit(0);
-	UltraWriteBit(0);
-	UltraWriteBit(0);
-	UltraWriteBit(1);
-	//Ultra_IO_Input();
-    
-    for(uint8_t i = 1; i < THRES_NUM; i++)
+    if(status == ULTRASONIC_READ_ERR)
     {
-        UltraSonicWrteData(threshold->threshold[i], 5);
+        Ultra_IO_Output();
+        UltraIoOutputLow();
+        delay_us(t_cmd);
+        UltraIoOutputHigh();
+        delay_us(t_d);
+        UltraWriteBit(0);
+        UltraWriteBit(0);
+        UltraWriteBit(0);
+        UltraWriteBit(1);
+        //Ultra_IO_Input();
+        
+        for(uint8_t i = 1; i < THRES_NUM; i++)
+        {
+            UltraSonicWrteData(threshold->threshold[i], 5);
+        }
+        UltraSonicWrteData(threshold->tres_scale, 2);
+        UltraSonicWrteData(threshold->thres_ini, 1);
+        UltraSonicWrteData(threshold->thres_len, 1);
+        UltraSonicWrteData(threshold->parity_0, 1);
+        UltraSonicWrteData(threshold->parity_1, 1);
+        UltraSonicWrteData(threshold->parity_2, 1);
+        UltraSonicWrteData(threshold->parity_3, 1);
+        UltraSonicWrteData(threshold->parity_4, 1);   
+        
+        delay_ms(1);
+        status = UltraSonicReadStatusStart();
+        frq_search_near = frq_tmp + SEARCH_FRQ_COMPENSATION;
+        cnt = 0;
+        while( (status == ULTRASONIC_READ_ERR) && (cnt <= SEARCH_FRQ_COMPENSATION * 2 / ULTRA_SEARCH_FRQ_STEP_SIZE) )
+        {
+            cnt++;
+            status = 0;
+          
+            if(frq_search_near > MIN_FRQ)
+            {
+                frq_search_near -= ULTRA_SEARCH_FRQ_STEP_SIZE;
+            }
+            else
+            {
+                frq_search_near = MAX_FRQ;
+            }
+            
+            UltraSonicTimeChange(frq_search_near);
+            
+            //Ultra_IO_Output();///////
+            //UltraIoOutputHigh();//////
+            delay_ms(1);////////////
+            status = UltraSonicReadStatusStart();
+        }
+        if(cnt <= SEARCH_FRQ_COMPENSATION * 2 / ULTRA_SEARCH_FRQ_STEP_SIZE)
+        {
+            return status;
+        }
     }
-    UltraSonicWrteData(threshold->tres_scale, 2);
-    UltraSonicWrteData(threshold->thres_ini, 1);
-    UltraSonicWrteData(threshold->thres_len, 1);
-    UltraSonicWrteData(threshold->parity_0, 1);
-    UltraSonicWrteData(threshold->parity_1, 1);
-    UltraSonicWrteData(threshold->parity_2, 1);
-    UltraSonicWrteData(threshold->parity_3, 1);
-    UltraSonicWrteData(threshold->parity_4, 1);   
+    else
+    {
+        return status;
+    }
+    return ULTRASONIC_READ_ERR;
+    
 }
+
+uint32_t test_status;
+uint32_t test_cnt = 0;
 void UltraSonicSetThreshold(ultra_sonic_threshold_t * threshold)
 {
     uint32_t parity_0_data = (threshold->threshold[12]&0x03) | (threshold->threshold[13]<<2) | (threshold->threshold[14]<<7) | \
@@ -1121,6 +1101,7 @@ void UltraSonicSetThreshold(ultra_sonic_threshold_t * threshold)
     uint32_t parity_4_data = (threshold->threshold[1]) | (threshold->threshold[2]<<5);
     uint32_t status = 0;
     uint8_t cnt = 0;
+    uint32_t frq_tmp = estimate_frq;
     
     threshold->parity_0 = UltraSonicEvenParityCompute(parity_0_data, 16);
     threshold->parity_1 = UltraSonicEvenParityCompute(parity_1_data, 16);
@@ -1128,20 +1109,35 @@ void UltraSonicSetThreshold(ultra_sonic_threshold_t * threshold)
     threshold->parity_3 = UltraSonicEvenParityCompute(parity_3_data, 16);
     threshold->parity_4 = UltraSonicEvenParityCompute(parity_4_data, 10);
     
-    do
-    {  
-        UltraSonicWriteThresholdData(threshold);
-        delay_ms(20);
-        status = UltraSonicReadStatus();
-        delay_ms(20);
+    status = UltraSonicWriteThresholdData(threshold);
+    //while((status & 0x02) == 0);   
+    while(((status & 0x80) == 0) || (status == ULTRASONIC_READ_ERR))
+    {   
+        //delay_ms(10);
+        //status = UltraSonicReadStatus();
+        //delay_ms(10);
         cnt++;
         if(cnt >= 250)
         {
             UltraSonicLog("FATAL: CAN NOT WRITE THRESHOLD VALUE ! ! ! ! ! \r\nSYSTEM WILL RESET!\r\n");
             platform_mcu_reset();
         }
+
+        
+        if(frq_tmp > MIN_FRQ)
+        {
+            frq_tmp -= ULTRA_SEARCH_FRQ_STEP_SIZE;
+        }
+        else
+        {
+            frq_tmp = MAX_FRQ;
+        }
+        delay_ms(1);
+        UltraSonicTimeChange(frq_tmp);
+        status = UltraSonicWriteThresholdData(threshold);
     }
-    while((status & 0x02) == 0);   
+    
+    test_status = status;
 }
 
 

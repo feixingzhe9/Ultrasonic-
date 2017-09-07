@@ -42,6 +42,7 @@
  *               Variables Definitions
  ******************************************************/
 #ifndef MICO_DISABLE_WATCHDOG
+//#if 1
 //static __IO uint32_t LsiFreq = 0;
 #define LsiFreq         40000 // LSI RC frequcey = 40 kHz
 //static __IO uint32_t CaptureNumber = 0, PeriodValue = 0;
@@ -56,6 +57,7 @@ OSStatus platform_watchdog_init( uint32_t timeout_ms )
 {
 // PLATFORM_TO_DO
 #ifndef MICO_DISABLE_WATCHDOG
+//#if 1
   OSStatus err = kNoErr;
   uint16_t reloadTick;
   /* Get the LSI frequency:  TIM5 is used to measure the LSI frequency */
@@ -105,6 +107,7 @@ OSStatus MicoWdgFinalize( void )
 OSStatus platform_watchdog_kick( void )
 {
 #ifndef MICO_DISABLE_WATCHDOG
+//#if 1
   OSStatus err = kNoErr;
   require_action( HAL_IWDG_Refresh( &iwdg_handle ) == HAL_OK, exit, err = kGeneralErr );
   

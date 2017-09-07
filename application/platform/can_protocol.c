@@ -84,8 +84,8 @@ uint8_t GetCanSrcId(void)
         tmp_2 = GetKeyValue(MICO_GPIO_KEY_S1);
         tmp_3 = GetKeyValue(MICO_GPIO_KEY_S2); 
         tmp_4 = GetKeyValue(MICO_GPIO_KEY_S3);
-        tmp_5 = GetKeyValue(MICO_GPIO_KEY_S4);
-        tmp_6 = GetKeyValue(MICO_GPIO_KEY_S5);
+        //tmp_5 = GetKeyValue(MICO_GPIO_KEY_S4);
+        //tmp_6 = GetKeyValue(MICO_GPIO_KEY_S5);
         new_key_value = tmp_1 | (tmp_2 << 1) | (tmp_3 << 2) | (tmp_4 << 3) | (tmp_5 << 4) | (tmp_6 << 5);        
 #else
         new_key_value |=  GetKeyValue(MICO_GPIO_KEY_S0);
@@ -466,11 +466,14 @@ CAN_TXDATA_STRUCT FirmwareUpgrade(uint32_t ID,uint8_t* pdata,uint32_t len)
 
 #define CAN_SOURCE_ID_READ_MEASURE_DATA     0x80
 
+#define CAN_SOURCE_ID_CAN_TEST              0x03
+
 
 
 
 #define CMD_NOT_FOUND   0
 extern uint32_t ultrasonic_src_id;
+static uint32_t can_test_cnt = 0;
 uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t data_in_len, uint8_t *data_out)
 {
     //uint8_t data_out_len;
@@ -524,6 +527,10 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
                     return 0;
 #endif                   
                     break;
+                case CAN_SOURCE_ID_CAN_TEST:
+                    can_test_cnt++;
+                    memcpy(&data_out[0], (uint8_t *)&can_test_cnt, sizeof(can_test_cnt));
+                    return sizeof(can_test_cnt);
                 default :
                     break;
             }
@@ -608,18 +615,19 @@ void can_protocol_period( void )
         if(seg_polo == ONLYONCE)
         {
             //if( (id.CanID_Struct.SourceID < SOURCE_ID_PREPARE_UPDATE) && (id.CanID_Struct.SourceID > SOURCE_ID_CHECK_TRANSMIT) )
+            if(id.CanID_Struct.DestMACID = ultrasonic_src_id)
             {
-                    //process the data here//
-                    tx_len = CmdProcessing(&id, rx_buf.CanData_Struct.Data, rx_data_len - 1, CanTxdataBuff );
-                    //process the data here//
-                    
-                    if(tx_len > 0)
-                    {
-                        CanTX( MICO_CAN1, id.CANx_ID, CanTxdataBuff, tx_len );
-                    }                   
-                    //CanTX( MICO_CAN1, id.CANx_ID, test_data, sizeof(test_data) );
-                    //CanTX( MICO_CAN1, id.CANx_ID, rx_buf.CanData, rx_data_len );
+                tx_len = CmdProcessing(&id, rx_buf.CanData_Struct.Data, rx_data_len - 1, CanTxdataBuff );
+                //process the data here//
+                
+                if(tx_len > 0)
+                {
+                    CanTX( MICO_CAN1, id.CANx_ID, CanTxdataBuff, tx_len );
+                }        
             }
+            
+            //CanTX( MICO_CAN1, id.CANx_ID, test_data, sizeof(test_data) );
+            //CanTX( MICO_CAN1, id.CANx_ID, rx_buf.CanData, rx_data_len );
         }
         else //long frame
         {

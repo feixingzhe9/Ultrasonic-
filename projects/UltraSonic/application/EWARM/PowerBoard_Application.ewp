@@ -623,7 +623,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>Ultrasonic.hex</state>
+          <state>Ultrasonic_Seperation.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -3871,6 +3871,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\protocol.h</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\serial_uart.c</name>

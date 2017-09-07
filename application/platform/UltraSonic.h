@@ -8,7 +8,7 @@
 
 //////////define the time init value//////////
 ///   uint:  us  ////
-#define F_DRV			    58000
+#define F_DRV			    52000
 #if 1
 #define T_DEB               0
 #define T_SND 				(uint32_t)(6*1000*1000/F_DRV)  //  
@@ -31,14 +31,20 @@
 
 
 //////////define the destination frequency and allowed errors
-#define DEST_FRQ                    58000
+#define DEST_FRQ                    52000
 #define DEST_FRQ_ERROR              250
 
 #define MIN_FRQ                     30000
 #define MAX_FRQ                     70000
 
 #define ULTRA_FRQ_STEP_SIZE         300
-#define ULTRA_SEARCH_FRQ_STEP_SIZE  500 
+#define ULTRA_SEARCH_FRQ_STEP_SIZE  300 
+
+
+#define SEARCH_FRQ_COMPENSATION     1000
+
+
+#define MEASURE_BLIND_DISTANCE      12
 
 
 #define T_0_LOW_MAX         t_0_low*1.3 
@@ -52,8 +58,9 @@
 #define T_1_HIGH_MIN
 
 
-#define NO_OBJ_DETECTED     0x00000000
-
+#define NO_OBJ_DETECTED                 0x00000000
+#define DANGER_DISTANCE                 50
+#define DANGER_DISTANCE_FILTER_CNT      2
 typedef enum
 {
     US_CMD_SEND_REQUEST,
@@ -133,39 +140,29 @@ typedef struct
 
 typedef struct
 {
-
 #if 0
-    volatile uint32_t spare_bit;
-    volatile uint32_t io_mask;
-    volatile uint32_t noise_cfg;
-    volatile uint32_t filt_adjust;
-    volatile uint32_t f_drv_adj;
-    volatile uint32_t drv_cur;
-    volatile uint32_t amp_gain; 
-    volatile uint32_t nothing;
-#else  
-    #if 1  
-        //volatile uint32_t nothing     :12;
-        volatile uint32_t amp_gain    :4;   
-        volatile uint32_t drv_cur     :4;
-        volatile uint32_t f_drv_adj   :7;
-        volatile uint32_t filt_adjust :1;
-        volatile uint32_t noise_cfg   :2;
-        volatile uint32_t io_mask     :1;
-        volatile uint32_t spare_bit   :1;
-             
-    #else   
-        //volatile uint32_t nothing     :12;
-        volatile uint32_t spare_bit   :1;
-        volatile uint32_t io_mask     :1;
-        volatile uint32_t noise_cfg   :2;
-        volatile uint32_t filt_adjust :1;
-        volatile uint32_t f_drv_adj   :7;
-        volatile uint32_t drv_cur     :4;
-        volatile uint32_t amp_gain    :4; 
-        
-    #endif
+    //volatile uint32_t nothing     :12;
+    volatile uint32_t amp_gain    :4;   
+    volatile uint32_t drv_cur     :4;
+    volatile uint32_t f_drv_adj   :7;
+    volatile uint32_t filt_adjust :1;
+    volatile uint32_t noise_cfg   :2;
+    volatile uint32_t io_mask     :1;
+    volatile uint32_t spare_bit   :1;
 #endif
+#if 1
+    volatile uint32_t amp_gain          :5;   
+    volatile uint32_t vdrv_cfg          :4;
+    volatile uint32_t f_drv_adj         :8;
+    volatile uint32_t n_pulse           :1;
+    volatile uint32_t el_damp           :4;
+    volatile uint32_t rd_cfg            :1;
+    volatile uint32_t comp_mask         :1;
+    volatile uint32_t atg_cfg           :1;
+    volatile uint32_t noise_cfg         :2;
+    volatile uint32_t customer_bits     :5;
+#endif
+            
 }ultra_sonic_ee_data_t;
 
 typedef union

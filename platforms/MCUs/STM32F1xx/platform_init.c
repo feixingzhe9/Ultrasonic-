@@ -312,18 +312,8 @@ uint32_t mico_get_time_no_os(void)
 #ifndef BOOTLOADER
 //#include "serial_leds.h"
 #endif
-extern void SysLedTrigger(void);
 void sysTickHandler(void)
-{
-/*
-    static uint16_t cnt = 0;
-    //cnt++;
-    if(cnt++ >= 500)
-    {
-        SysLedTrigger();
-        cnt = 1;
-    }
-*/     
+{    
     HAL_IncTick();
     no_os_tick ++;
     
