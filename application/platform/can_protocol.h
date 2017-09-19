@@ -22,15 +22,25 @@
 #define CAN_CMD_READ_VERSION            0x01
 
 
-
 #define SOURCE_ID_PREPARE_UPDATE        0x10
 #define SOURCE_ID_TRANSMIT_UPDATE       0x11
 #define SOURCE_ID_CHECK_TRANSMIT        0x12
 
-
-
 #define CAN_FIFO_SIZE                   500
 
+//////  function id define  //////
+#define CAN_FUN_ID_RESET        0x06
+#define CAN_FUN_ID_WRITE        0x01
+#define CAN_FUN_ID_READ         0x02
+#define CAN_FUN_ID_TRIGGER      0x03
+
+
+//////  source id define  //////
+#define CAN_SOURCE_ID_READ_VERSION      0x01    
+
+#define CAN_SOURCE_ID_READ_MEASURE_DATA     0x80
+
+#define CAN_SOURCE_ID_CAN_TEST              0x03
 
 
 typedef union

@@ -51,7 +51,7 @@ ultra_sonic_threshold_t ultra_sonic_threshold_ram =
     .threshold[2]   = 28,
     .threshold[3]   = 25,
     .threshold[4]   = 23,
-    .threshold[5]   = 22,
+    .threshold[5]   = 18,
     .threshold[6]   = 15,
     .threshold[7]   = 8,
     .threshold[8]   = 6,
@@ -322,9 +322,10 @@ void CompleteAndUploadData(void)
     uint8_t i = 0;
     CAN_ID_UNION id;
     id.CanID_Struct.SourceID = 0x80;
-    id.CanID_Struct.DestMACID = 0x12;//test;
+    id.CanID_Struct.DestMACID = 0x60;//test;
     id.CanID_Struct.SrcMACID = ultrasonic_src_id;
     id.CanID_Struct.ACK = 1;
+    id.CanID_Struct.FUNC_ID = CAN_FUN_ID_READ;
     id.CanID_Struct.res = 0;
     if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
     {
@@ -377,7 +378,7 @@ void CompleteAndUploadData(void)
     }
 }
 
-#define ULTRASONIC_MEASURE_TIME         9/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_MEASURE_TIME         10/SYSTICK_PERIOD //unit: ms
 #define ULTRASONIC_DATA_EXIST_TIME      500/SYSTICK_PERIOD//unit: ms
 void UltraSonicDataTick(void)
 {
