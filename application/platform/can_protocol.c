@@ -454,19 +454,7 @@ CAN_TXDATA_STRUCT FirmwareUpgrade(uint32_t ID,uint8_t* pdata,uint32_t len)
 /*******************************ID HANDLE END*************************************************/
 
 
-//////  function id define  //////
-#define CAN_FUN_ID_RESET        0x06
-#define CAN_FUN_ID_WRITE        0x01
-#define CAN_FUN_ID_READ         0x02
-#define CAN_FUN_ID_TRIGGER      0x03
 
-
-//////  source id define  //////
-#define CAN_SOURCE_ID_READ_VERSION      0x01    
-
-#define CAN_SOURCE_ID_READ_MEASURE_DATA     0x80
-
-#define CAN_SOURCE_ID_CAN_TEST              0x03
 
 
 
