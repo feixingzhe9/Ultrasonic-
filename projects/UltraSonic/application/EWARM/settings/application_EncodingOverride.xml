@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<userOverrides>
+  <override>
+    <path>E:\c\Ultrasonic-\signle\application\platform\can_protocol.c</path>
+    <encoding>System</encoding>
+  </override>
+</userOverrides>
+
+
