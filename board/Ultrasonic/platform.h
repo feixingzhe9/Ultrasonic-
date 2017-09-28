@@ -105,6 +105,7 @@ typedef enum
 #if 1
     
     MICO_GPIO_ULTRA_DATA,
+    
     MICO_GPIO_24_V_EN,
     MICO_GPIO_SYS_LED,
     

@@ -32,7 +32,7 @@ int main( void )
   MicoCanInitialize( MICO_CAN1 );
   
   delay_ms(10);
-  UltraSonicInit();
+  //UltraSonicInit();
   delay_ms(10);
   
   CanLongBufInit();
@@ -40,7 +40,7 @@ int main( void )
   for(;;)
   { 
     can_protocol_period(); 
-    //UltraSonicStartTick();
+
     UltraSonicDataTick();
     SysLed();
 #ifdef HOMWEE_TEST 

@@ -26,7 +26,7 @@
 #define SOURCE_ID_TRANSMIT_UPDATE       0x11
 #define SOURCE_ID_CHECK_TRANSMIT        0x12
 
-#define CAN_FIFO_SIZE                   500
+#define CAN_FIFO_SIZE                   2
 
 //////  function id define  //////
 #define CAN_FUN_ID_RESET        0x06

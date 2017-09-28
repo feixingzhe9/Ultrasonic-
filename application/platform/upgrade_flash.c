@@ -78,7 +78,7 @@ OSStatus upgradeWriteFlashData( uint32_t* Data, uint32_t DataLength )
   ENABLE_INTERRUPTS();
   require_noerr_action( err, exit, upgrade_log("write error") ); 
 //  flash_addr += DataLength;
-  upgrade_log( "have write data @%08x %d bytes", \
+  //upgrade_log( "have write data @%08x %d bytes", \
     ota_partition_info->partition_start_addr + ota_write_data_offset - DataLength, DataLength );
   
 exit:
@@ -124,8 +124,6 @@ OSStatus upgradeCheckFlash( void )
     bootTable.type = 'A';
     bootTable.upgrade_type = 'U';
     MICOUpdateConfiguration( &bootTable );
-    flashTable.isNeedAutoBoot = 'Y';
-    MICOBootConfiguration( &flashTable );
   }
 exit:  
   return err;

@@ -24,6 +24,8 @@ typedef struct  _boot_table_t {
 
 typedef struct {
   uint8_t       isNeedAutoBoot; 
+  uint8_t       isComfirmedSoc;
+  uint32_t      last_soc_mws;
 } save_flash_data_t;
 extern save_flash_data_t        flashTable;
 

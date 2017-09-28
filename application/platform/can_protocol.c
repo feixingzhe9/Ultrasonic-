@@ -14,13 +14,15 @@
 
 #include "fifo.h"
 
+#include "upgrade_flash.h"
+
 
 
 #define CanProtocolLog(format, ...)  custom_log("can protocol", format, ##__VA_ARGS__)
 
 __IO uint32_t flag = 0xff;
 
-CanRxMsgTypeDef RxMessage;
+//CanRxMsgTypeDef RxMessage;
 CanTxMsgTypeDef TxMessage;
 
 extern platform_can_driver_t  platform_can_drivers[];
@@ -40,23 +42,8 @@ can_fifo_t *can_fifo = &can_fifo_ram;
 can_pkg_t can_pkg[CAN_FIFO_SIZE] = {0};
 
  
-typedef void (*CallBackFunc)(void);
 
-typedef struct 
-{
-	uint32_t val;
-	CallBackFunc callback;	
-}CALLBACK_T;
 
-const CALLBACK_T ID_table[]=
-{
-	{0,NULL},
-	{1,NULL},
-};
-
-CALLBACK_T FuncId_table[] = {
-	{0x00,NULL},
-};
 
 #if 1
 extern uint8_t GetKeyValue(mico_gpio_t gpio);
@@ -111,25 +98,7 @@ uint8_t GetCanSrcId(void)
         
 }
 #endif
-/**
-  * @brief  rx msg handle
-  * @param   
-  * @retval 
-	* @RevisionHistory
-  */
-CALLBACK_T* FuncIdHandle(uint32_t funcid)
-{
-    int i;
-    int func_num = sizeof(FuncId_table)/sizeof(FuncId_table[0]);
-    for(i = 0;i <func_num;i++)
-    {
-      if(FuncId_table[i].val == funcid)
-      {
-        return (&FuncId_table[i]);
-      }
-    }
-    return NULL;
-}
+
 
 #define ONLYONCE       0x00
 #define BEGIAN         0x01
@@ -231,249 +200,12 @@ void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len)
         
 	}
 }
-#if 0
-CAN_TXDATA_STRUCT FirmwareUpgrade(uint32_t ID,uint8_t* pdata,uint32_t len)
-{
-	uint8_t PageNum=0;
-	int DataNum=0; 
-	uint8_t DeltAdd=0;
-	uint8_t MD5Check[16]={0};
-	int DataSize=0;
-	FLASH_Status FlashEraseState; 
-	FLASH_Status FlashWriteState; 
-	CAN_TXDATA_STRUCT CanData;
-	uint8_t EraseState=0;
-	uint8_t WriteState=0;
-	uint8_t rx_id;
-	uint8_t rx_data[16];
-	uint8_t tx_data[32];
-	uint8_t rx_len,tx_len;
-	uint8_t *ptx_data;
-	int i;
-	
-	Md5Context MD5Ctx;
-	MD5_HASH md5_ret;
-	
-	rx_id = ID;
-	rx_len = 0 ;
-	memcpy(rx_data,pdata,rx_len);
-	//Éý¼¶×¼±¸
-	switch(rx_id)
-	{
-		case 0x00:
-				EraseState=0;
-				DataNum=0;
-				memcpy(MD5Check,&rx_data,16);
-				DataSize = (rx_data[3]<<24)+(rx_data[2]<<16)+(rx_data[1]<<8)+rx_data[0];
-				//³¬¹ý´óÐ¡
-				if(DataSize>128*1024)
-				{
-					EraseState |= 0x01;
-				}
-				else
-				{
-					EraseState &= 0x0E;
-					FLASH_Unlock();
-					RCC_HSICmd(ENABLE);																									
-					FLASH_SetLatency(FLASH_Latency_2);
-					FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR);
-
-					for(PageNum=0;PageNum<0x40;PageNum++)
-					{
-						IWDG_ReloadCounter();
-						
-						FlashEraseState=FLASH_ErasePage(UPDATEADDRESS+PageNum*0x800);
-						if(FlashEraseState!=4)
-						{
-							EraseState =0x02;
-							break;
-						}
-						else
-						{
-							EraseState &=0x0D;
-						}
-					}				
-					RCC_HSICmd(DISABLE);	
-				}
-				tx_data[0] = ID;
-				tx_data[1] = EraseState;	
-				CanData.len = 2;
-				ptx_data = tx_data;
-
-				break;
-	
-		//Éý¼¶Êý¾Ý°ü
-		case 0x01:
-				WriteState=0;
-				DeltAdd = 8;	//TBD
-				IWDG_ReloadCounter();															
-			//½«µ±Ç°½ÓÊÕµÄÊý¾ÝÓëÉÏ´ÎµÄÊý¾Ý½øÐÐ±È½Ï
-				if(memcmp(rx_data,RxMessage.Data,8))
-				{									
-					//°ë×ÖÐ´Èë
-					for(i=0;i<DeltAdd;i+=2)
-					{
-						unsigned short tempData;														
-						RCC_HSICmd(ENABLE);
-						tempData = (rx_data[i]<<8)+rx_data[i+1];
-						FlashWriteState=FLASH_ProgramHalfWord(UPDATEADDRESS+DataNum*2,tempData);																											
-						if(FlashWriteState!= 4)
-						{
-							DataNum-=i/2;
-							WriteState = 0x01;
-							break;
-						}
-						else
-						{
-							DataNum ++;
-							WriteState &= 0x0E;
-						}
-					}
-					
-					if(DeltAdd%2)
-					{
-						unsigned short tempData;
-						tempData = (0xFF00)+rx_data[i*2+4];
-						FlashWriteState=FLASH_ProgramHalfWord(UPDATEADDRESS+DataNum*2,tempData);	
-						if(FlashWriteState!= 4)
-						{
-							DataNum-=i/2;
-							WriteState |= 0x02;
-							break;
-						}
-						else
-						{
-							DataNum ++;
-							WriteState &= 0x0D;
-						}
-						RCC_HSICmd(DISABLE);
-					}
-				//½«Êý¾Ý±£´æÖÁ±äÁ¿ÓÃÓÚÓëÏÂ´Î½ÓÊÕµÄÊý¾Ý½øÐÐ±È½Ï
-					if(WriteState==0)
-					{
-						memcpy(rx_data,RxMessage.Data,8);		
-					}															
-				}
-				else
-				{
-					//×Ö·û´®ÖØ¸´
-					 WriteState = 0x00;
-				}
-				tx_data[0] = ID;
-				tx_data[1] = WriteState;
-				CanData.len = 2;	
-				ptx_data = tx_data;				
-			break;
-		//Éý¼¶Íê³É
-		case 0x02:
-				UpdateFlag=0;
-				DataNum=0;
-				WriteState=0;
-				Md5Initialise(&MD5Ctx);
-				Md5Update( &MD5Ctx, (uint8_t *)UPDATEADDRESS, DataSize);
-				Md5Finalise( &MD5Ctx, &md5_ret );
-				if(memcmp(md5_ret.bytes, MD5Check, 16)!=0)
-				{
-						WriteState |= 0x01;																											
-				}							
-				else
-				{
-					WriteState &=0x0E;
-					bootTable.boot_table_t.length = DataSize;
-					bootTable.boot_table_t.start_address = UPDATEADDRESS;
-					bootTable.boot_table_t.type = 'A';
-					bootTable.boot_table_t.upgrade_type = 'U';
-					RCC_HSICmd(ENABLE);
-					//²Á³ý²ÎÊýÒ³
-					for(PageNum=0;PageNum<0x02;PageNum++)
-					{
-						IWDG_ReloadCounter();
-						FlashWriteState=FLASH_ErasePage(PARAMSADDRESS+PageNum*0x800);
-						if(FlashWriteState!= 4)
-						{
-							DataNum-=i/2;
-							WriteState |= 0x02;
-							break;
-						}
-						else
-						{
-							WriteState &= 0x0D;
-						}
-					}
-					
-					if(WriteState==0x00)
-					{
-						//Ð´²ÎÊýÇø
-						for(i=0;i<16;i+=4)
-						{
-							unsigned int paraData;
-							paraData = (bootTable.data[i+3]<<24)+(bootTable.data[i+2]<<16)+(bootTable.data[i+1]<<8)+bootTable.data[i];
-							FlashWriteState=FLASH_ProgramWord(PARAMSADDRESS+DataNum*4,paraData);
-							if(FlashWriteState!= 4)
-							{
-								DataNum-=i/2;
-								WriteState |= 0x04;
-								break;
-							}
-							else
-							{
-								DataNum ++;
-								WriteState &= 0x0B;
-							}
-						}
-						
-						for(i=16;i<24;i+=4)
-						{
-							unsigned int paraData;
-							paraData = (bootTable.data[i+3]<<24)+(bootTable.data[i+2]<<16)+(bootTable.data[i+1]<<8)+bootTable.data[i];
-							FlashWriteState=FLASH_ProgramWord(PARAMSADDRESS+DataNum*4,paraData);
-							if(FlashWriteState!= 4)
-							{
-								DataNum-=i/2;
-								WriteState |= 0x08;
-								break;
-							}
-							else
-							{
-								DataNum ++;
-								WriteState &= 0x07;
-							}
-						}																
-					}	
-					RCC_HSICmd(DISABLE);																					
-				}	
-				
-				tx_data[1] = WriteState;	
-				tx_data[0] = 0x02;												
-				FLASH_Lock();
-				DataNum = 0;													
-				CanData.len = 2;
-				ptx_data = tx_data;
-			break;
-				
-		default :
-			  rx_id = 0xFF;
-			  tx_len   = 0x06;
-			  ptx_data = tx_data;
-			break;
-	}
-	CanData.len = tx_len;
-	CanData.FuncID = rx_id;
-	CanData.pdata = ptx_data;
-	return CanData;
-}
-#endif
-/*******************************ID HANDLE END*************************************************/
-
-
-
-
-
 
 
 #define CMD_NOT_FOUND   0
 extern uint32_t ultrasonic_src_id;
 static uint32_t can_test_cnt = 0;
+
 uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t data_in_len, uint8_t *data_out)
 {
     //uint8_t data_out_len;
@@ -586,18 +318,138 @@ void CanLongBufInit(void)
     FifoInit(can_fifo, can_pkg, CAN_FIFO_SIZE);
 }
 
+
+
+
+
+void canAckBack(uint32_t CANx_ID, const uint8_t * const pdata, uint16_t len)
+{
+  uint16_t t_len;
+  CanTxMsgTypeDef TxMessage;
+  CAN_ID_UNION id;
+  uint8_t src_mac_id_temp;
+  CAN_DATA_UNION TxMsg;
+  
+  id.CANx_ID = CANx_ID;
+  id.CanID_Struct.ACK = 1;
+  src_mac_id_temp = id.CanID_Struct.DestMACID;
+  id.CanID_Struct.DestMACID = id.CanID_Struct.SrcMACID;
+  id.CanID_Struct.SrcMACID = src_mac_id_temp;
+  
+  TxMessage.ExtId = id.CANx_ID;
+  TxMessage.IDE   = CAN_ID_EXT;					 //��չģʽ
+  TxMessage.RTR   = CAN_RTR_DATA;				 //���͵�������
+  
+  t_len = len;
+  if( t_len <=7 )
+  {
+      TxMsg.CanData_Struct.SegPolo = ONLYONCE;
+      TxMsg.CanData_Struct.SegNum = 0;
+      memcpy( TxMsg.CanData_Struct.Data, (const void *)pdata, t_len );
+      memcpy( TxMessage.Data, TxMsg.CanData, t_len + 1 );
+      
+      TxMessage.DLC = t_len + 1;
+      if( (CAN_USED->TSR & 0x1C000000) )
+      {
+          MicoCanMessageSend(MICO_CAN1, &TxMessage );//
+      }
+  }
+}
+static OSStatus upgradePrepareProcess(CAN_ID_UNION id, uint8_t *md5, uint8_t *firmware_Size )
+{
+  OSStatus err = kNoErr;
+  uint32_t firmwareSize;
+  mico_logic_partition_t *ota_partition_info;
+  uint8_t ack;
+  
+  ota_partition_info = MicoFlashGetInfo( MICO_PARTITION_OTA_TEMP );
+  require_action( ota_partition_info->partition_owner != MICO_FLASH_NONE, exit, err = kUnsupportedErr );
+
+  firmwareSize = ReadBig32(firmware_Size);
+  if( firmwareSize > ota_partition_info->partition_length )
+  {
+    ack = 0x01;
+    canAckBack(id.CANx_ID, &ack, 1);
+    CanProtocolLog( "not enough storage" );
+    goto exit;
+  }
+  CanProtocolLog( "firmwareSize is:%d", firmwareSize );
+  if( !upgradePrepareFlash( md5, firmwareSize ) )
+  {
+    ack = 0x00;
+    canAckBack(id.CANx_ID, &ack, 1);
+    CanProtocolLog( "mcu prepare ok" );
+  }
+  else
+  {
+    ack = 0x02;
+    canAckBack(id.CANx_ID, &ack, 1);
+    CanProtocolLog( "mcu retry later" );
+  }
+
+exit:
+  return err;  
+}
+
+static OSStatus upgradeFirmwareRecevingProcess( CAN_ID_UNION *id,  uint8_t *rx_data, uint8_t dataLen)
+{
+  OSStatus err = kNoErr;
+  uint32_t packageDataLength = dataLen;
+  uint8_t ack;
+  if( !upgradeWriteFlashData( (uint32_t *)(rx_data + 2), packageDataLength - 2 ) )
+  {
+    ack = 0x00;
+    canAckBack(id->CANx_ID, rx_data, 2);
+  }
+  else
+  {
+    ack = 0x01;
+    canAckBack(id->CANx_ID, &ack, 1);
+    CanProtocolLog( "mcu write data failed" );
+    goto exit;
+  }
+exit:
+  return err;
+}
+
+static OSStatus upgradeFinishCheckProcess( CAN_ID_UNION *id )
+{
+  OSStatus err = kNoErr;
+  uint8_t ack;
+  
+  if( !upgradeCheckFlash() )
+  {
+    ack = 0x00;
+    canAckBack(id->CANx_ID, &ack, 1);
+    CanProtocolLog("MD5 success,sent right ack");
+  }
+  else
+  {
+    ack = 0x01;
+    canAckBack(id->CANx_ID, &ack, 1);
+    CanProtocolLog("MD5 err,sent err ack");
+  }
+
+  return err;
+}
+
+
+
+
+
+
+
 #define CAN_LONG_FRAME_TIME_OUT     5000/SYSTICK_PERIOD
 
 #define CAN_COMM_TIME_OUT           5000
 uint32_t can_comm_start_time;
 void can_protocol_period( void )
 {
-    if(IsFifoEmpty(can_fifo) == FALSE)
+    while(IsFifoEmpty(can_fifo) == FALSE)
     {  
         CAN_ID_UNION id;
         can_pkg_t can_pkg_tmp;
         uint16_t tx_len;
-        //uint8_t test_data[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
         CAN_DATA_UNION rx_buf;
         uint8_t buf_index;
         uint8_t seg_polo;
@@ -612,6 +464,51 @@ void can_protocol_period( void )
         seg_num = can_pkg_tmp.data.CanData_Struct.SegNum;
         rx_data_len = can_pkg_tmp.len;
         
+        
+        
+        
+    
+        if( id.CanID_Struct.SourceID == 0x10 )//update_prepare
+        {
+            static uint8_t md5[16];
+            static uint8_t firmwareSize[4];
+
+            //memcpy( &rx_buf, RxMessage.Data, RxMessage.DLC );
+            if( rx_buf.CanData_Struct.SegPolo == BEGIAN )
+            {
+                memcpy(&md5[0], rx_buf.CanData_Struct.Data, 7 );
+            }
+            if( rx_buf.CanData_Struct.SegPolo == TRANSING )
+            {
+                memcpy(&md5[7], rx_buf.CanData_Struct.Data, 7 );
+            }
+            if( rx_buf.CanData_Struct.SegPolo == END )
+            {
+                memcpy(&md5[14], &rx_buf.CanData_Struct.Data[0], 2 );
+                memcpy(&firmwareSize[0], &rx_buf.CanData_Struct.Data[2], 4 );
+                upgradePrepareProcess(id, md5, firmwareSize);
+            }
+            //goto exit;
+            continue;
+        }
+        if( id.CanID_Struct.SourceID == 0x11 )//update_receicing
+        {
+            upgradeFirmwareRecevingProcess(&id, rx_buf.CanData, rx_data_len);
+            //goto exit;
+            continue;
+        }
+        if( id.CanID_Struct.SourceID == 0x12 )//update_finish_check
+        {
+            upgradeFinishCheckProcess(&id);
+            //goto exit;
+            continue;
+        }
+
+    
+    
+    
+    
+  
         if(seg_polo == ONLYONCE)
         {
             //if( (id.CanID_Struct.SourceID < SOURCE_ID_PREPARE_UPDATE) && (id.CanID_Struct.SourceID > SOURCE_ID_CHECK_TRANSMIT) )
@@ -625,9 +522,6 @@ void can_protocol_period( void )
                     CanTX( MICO_CAN1, id.CANx_ID, CanTxdataBuff, tx_len );
                 }        
             }
-            
-            //CanTX( MICO_CAN1, id.CANx_ID, test_data, sizeof(test_data) );
-            //CanTX( MICO_CAN1, id.CANx_ID, rx_buf.CanData, rx_data_len );
         }
         else //long frame
         {
@@ -696,35 +590,7 @@ void can_protocol_period( void )
                 }       
             }
         }
-        
-        
-#if 0
-        else if( CanData.FrameType == 1 )
-        {
-            if( CanData.CanID_U.SegmentNum <= 10 )//update prepare
-            {
-                if( CanData.CanID_U.ID != 0 )//muti data process
-                {
-                    CANUpDataLen = CanData.CanID_U.SegmentNum*8;
-                    memcpy( &CanUpdataBuff[CanData.CanID_U.SegmentNum*8], RxMessage.Data, RxMessage.DLC );
-                }
-                else
-                {
-                    CANUpDataLen = CanData.CanID_U.SegmentNum*8 + RxMessage.DLC;
-                    memcpy( &CanUpdataBuff[CanData.CanID_U.SegmentNum*8], RxMessage.Data, RxMessage.DLC );				
-                    //update cmd process
-                    TxCanData = FirmwareUpgrade( CanData.CanID_U.ID, CanUpdataBuff, CANUpDataLen );
-                    CM_CAN_Tx( MICO_CAN1, CanData, TxCanData.pdata, TxCanData.len );
-                    CANUpDataLen = 0;
-                }
-            }
-            else//update data package
-            {
-                TxCanData = FirmwareUpgrade( CanData.CanID_U.ID, CanUpdataBuff, CANUpDataLen );
-                CM_CAN_Tx( MICO_CAN1, CanData, TxCanData.pdata, TxCanData.len );
-            }
-        }
-#endif
+
     }
    
     

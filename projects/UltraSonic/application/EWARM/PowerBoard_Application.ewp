@@ -99,7 +99,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>STM32F103x8	ST STM32F103x8</state>
+          <state>STM32F103xB	ST STM32F103xB</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -615,7 +615,7 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
@@ -623,7 +623,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>Ultrasonic-Single.hex</state>
+          <state>Ultrasonic-Single.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -3905,6 +3905,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\Getline.c</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\menu.c</name>

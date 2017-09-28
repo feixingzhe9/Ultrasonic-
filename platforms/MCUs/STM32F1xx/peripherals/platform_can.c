@@ -23,12 +23,12 @@ typedef unsigned int    u32;
 #define CAN_FILTER_ID       (0x60)
 #define CAN_FILTER_MASK     (0xff<<13)
 extern uint8_t GetCanSrcId(void);
-uint32_t ultrasonic_src_id;
+uint32_t ultrasonic_src_id = 60;
 OSStatus platform_can_init( const platform_can_driver_t* can )
 {
 
     //uint32_t can_mac_id = CAN_SUB_PB_ID;
-    ultrasonic_src_id = GetCanSrcId();
+    //ultrasonic_src_id = GetCanSrcId();
     OSStatus    err = kNoErr;
     CAN_FilterConfTypeDef     CAN_FilterInitStructure;
     
@@ -80,12 +80,12 @@ OSStatus platform_can_init( const platform_can_driver_t* can )
     can->handle->Init.TXFP              = DISABLE;
     require_action_quiet( HAL_CAN_Init( can->handle ) == HAL_OK, exit, err = kGeneralErr );
     
-
+#if 0
     CAN_FilterInitStructure.FilterIdHigh        = ((ultrasonic_src_id<<3)<<13)>>16;//can_mac_id>>16;//((can_mac_id<<3)<<13)>>16;
     CAN_FilterInitStructure.FilterIdLow         = ((ultrasonic_src_id<<3)<<13) & 0xffff| CAN_ID_EXT ;//can_mac_id & 0xffff;//((can_mac_id<<3)<<13) & 0xffff;
     CAN_FilterInitStructure.FilterMaskIdHigh    = (CAN_FILTER_MASK<<3)>>16;
     CAN_FilterInitStructure.FilterMaskIdLow     = (CAN_FILTER_MASK<<3) & 0xffff | CAN_ID_EXT | CAN_RTR_REMOTE;
-
+#endif
 
     CAN_FilterInitStructure.FilterFIFOAssignment = CAN_FILTER_FIFO0;
     CAN_FilterInitStructure.FilterNumber        = 0;

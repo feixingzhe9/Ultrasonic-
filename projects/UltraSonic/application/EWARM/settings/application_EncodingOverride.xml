@@ -5,6 +5,10 @@
     <path>E:\c\Ultrasonic-\signle\application\platform\can_protocol.c</path>
     <encoding>System</encoding>
   </override>
+  <override>
+    <path>F:\mg\Ultrasonic-\application\platform\can_protocol.c</path>
+    <encoding>System</encoding>
+  </override>
 </userOverrides>
 
 
