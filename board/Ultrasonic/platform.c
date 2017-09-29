@@ -81,7 +81,7 @@ const platform_gpio_t platform_gpio_pins[] =
     [MICO_GPIO_ULTRA_DATA]        = { GPIOB,  13 },
     
     [MICO_GPIO_24_V_EN]           = { GPIOA,  0 },
-    [MICO_GPIO_SYS_LED]           = { GPIOC,  11 },//{ GPIOB,  3 },
+    [MICO_GPIO_SYS_LED]           = { GPIOC,  9 },//{ GPIOC,  11 },//{ GPIOB,  3 },
     [MICO_GPIO_KEY_S0]            = { GPIOA,  2 },
     [MICO_GPIO_KEY_S1]            = { GPIOA,  3 },
     [MICO_GPIO_KEY_S2]            = { GPIOA,  4 },

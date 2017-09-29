@@ -422,6 +422,7 @@ static OSStatus upgradeFinishCheckProcess( CAN_ID_UNION *id )
     ack = 0x00;
     canAckBack(id->CANx_ID, &ack, 1);
     CanProtocolLog("MD5 success,sent right ack");
+    platform_mcu_reset();
   }
   else
   {

@@ -12,6 +12,12 @@
 #define os_PowerBoard_log(format, ...)  custom_log("Ultrasonic", format, ##__VA_ARGS__)
 #define Application_REVISION "v0.1"
 
+
+const  char menu[] =
+"\r\n"
+"Application for %s,\r\nSOFTWARE_VERSION: %s,\r\nHARDWARE_REVISION: %s\r\n";
+
+
 //#define HOMWEE_TEST 
 
 void SysLed(void);
@@ -26,7 +32,7 @@ int main( void )
   init_platform();
 
   os_PowerBoard_log( "System clock = %d Hz",HAL_RCC_GetHCLKFreq() );
-
+  printf ( menu, MODEL, SW_VERSION, HARDWARE_REVISION );
   bsp_Init();
   Platform_Init();
   MicoCanInitialize( MICO_CAN1 );

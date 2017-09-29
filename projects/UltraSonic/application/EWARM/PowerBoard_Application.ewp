@@ -3905,9 +3905,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\Getline.c</name>
-      <excluded>
-        <configuration>Debug</configuration>
-      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\menu.c</name>
@@ -3920,9 +3917,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\ymodem.c</name>
-      <excluded>
-        <configuration>Debug</configuration>
-      </excluded>
     </file>
   </group>
   <group>

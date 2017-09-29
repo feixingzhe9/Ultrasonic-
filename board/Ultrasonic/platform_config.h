@@ -10,7 +10,7 @@
 
 #define HARDWARE_REVISION   "US_sensor_V1.0"
 #define DEFAULT_NAME        "ULTRASONIC"
-#define MODEL               "ULTRASONIC"
+#define MODEL               "ULTRASONIC_SINGLE"
 
 /* MICO RTOS tick rate in Hz */
 #define NBOS_DEFAULT_TICK_RATE_HZ                   (1000) 
