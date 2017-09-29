@@ -87,10 +87,12 @@ OSStatus platform_adc_init( const platform_adc_t* adc, uint32_t sample_cycle )
     {
       __HAL_RCC_ADC2_CLK_ENABLE();
     }
+#if !defined (STM32F103xB)
     else if( adc->port == ADC3 )
     {
       __HAL_RCC_ADC3_CLK_ENABLE();
     }
+#endif
     /* Configure ADCx clock prescaler */
     /* Caution: On STM32F1, ADC clock frequency max is 14MHz (refer to device   */
     /*          datasheet).                                                     */
@@ -174,10 +176,12 @@ OSStatus platform_adc_stream_init_early( const platform_adc_t* adc, uint32_t cha
     {
       __HAL_RCC_ADC2_CLK_ENABLE();
     }
+#if !defined (STM32F103xB)
     else if( adc->port == ADC3 )
     {
       __HAL_RCC_ADC3_CLK_ENABLE();
     }
+#endif
     /* Configure ADCx clock prescaler */
     /* Caution: On STM32F1, ADC clock frequency max is 14MHz (refer to device   */
     /*          datasheet).                                                     */
@@ -217,7 +221,7 @@ OSStatus platform_add_to_adc_stream( const platform_adc_t* adc, uint32_t sample_
     platform_pin_config_t pin_config;
 //    pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
     pin_config.gpio_mode = GPIO_MODE_ANALOG;
-    pin_config.gpio_pull = GPIO_NOPULL;
+    pin_config.gpio_pull = GPIO_PULLDOWN;
     platform_gpio_init( adc->pin, &pin_config );
     
     /* Find the closest supported sampling time by the MCU */
@@ -253,6 +257,7 @@ OSStatus platform_adc_stream_init_late( const platform_adc_t* adc, void* buffer,
       __HAL_RCC_DMA1_CLK_ENABLE();
       pDmaHandle->Instance = DMA1_Channel1;
     }
+#if !defined (STM32F103xB)
     else if( adc->port == ADC3 )
     {
       static DMA_HandleTypeDef  DmaHandle2;
@@ -260,6 +265,7 @@ OSStatus platform_adc_stream_init_late( const platform_adc_t* adc, void* buffer,
        __HAL_RCC_DMA2_CLK_ENABLE();
       pDmaHandle->Instance = DMA2_Channel5;
     }
+#endif
     else
     {
       return kParamErr;

@@ -21,7 +21,7 @@ OSStatus MicoCanInitialize( mico_can_t can );
 
 OSStatus MicoCanMessageSend( mico_can_t can, const CanTxMsgTypeDef *msg);
 
-OSStatus MicoCanMessageRead( mico_can_t can, const void *msg );
+OSStatus MicoCanMessageRead( mico_can_t can, const CanRxMsgTypeDef *msg );
 
 #endif
 

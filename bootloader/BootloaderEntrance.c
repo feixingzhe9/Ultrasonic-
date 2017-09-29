@@ -42,39 +42,6 @@
 extern void Main_Menu(void);
 extern OSStatus update(void);
 
-#ifdef SIZE_OPTIMIZE
-char menu[] =
-"\r\n"
-"PowerBoard bootloader for %s, %s, HARDWARE_REVISION: %s\r\n"
-"0:BOOTUPDATE,"
-"1:FWUPDATE,"
-"2:DRIVERUPDAT,"
-"3:PARAUPDATE,"
-"4:FLASHUPDATE,"
-"5:MEMORYMAP,"
-"6:BOOT,"
-"7:REBOOT";
-#else
-char menu[] =
-"\r\n"
-"PowerBoard bootloader for %s, %s, HARDWARE_REVISION: %s\r\n"
-"+ command -------------------------+ function ------------+\r\n"
-"| 0:BOOTUPDATE    <-r>             | Update bootloader    |\r\n"
-"| 1:FWUPDATE      <-r>             | Update application   |\r\n"
-"| 2:PARUPDATE     <-id n><-r><-e>  | Update MICO partition|\r\n"
-"| 3:FLASHUPDATE   <-dev device>    |                      |\r\n"
-"|  <-e><-r><-start addr><-end addr>| Update flash content |\r\n"
-"| 4:MEMORYMAP                      | List flash memory map|\r\n"
-"| 5:BOOT                           | Excute application   |\r\n"
-"| 6:REBOOT                         | Reboot               |\r\n"
-"+----------------------------------+----------------------+\r\n"
-"|    (C) COPYRIGHT 2016 MUYE Corporation  By Driver Group |\r\n"
-" Notes:\r\n"
-" -e Erase only  -r Read from flash -dev flash device number\r\n"
-"  -start flash start address -end flash start address\r\n"
-" Example: Input \"4 -dev 0 -start 0x400 -end 0x800\": Update \r\n"
-"          flash device 0 from 0x400 to 0x800\r\n";
-#endif
 
 #ifdef MICO_ENABLE_STDIO_TO_BOOT
 extern int stdio_break_in(void);
@@ -106,7 +73,7 @@ void bootloader_start_app( uint32_t app_addr )
 
 int main(void)
 {
-  init_clocks();
+  //init_clocks();
 
   init_memory();
   init_architecture();
@@ -129,8 +96,7 @@ int main(void)
 #ifdef MICO_ENABLE_STDIO_TO_BOOT
 BOOT:
 #endif
-  
-  printf ( menu, MODEL, Bootloader_REVISION, HARDWARE_REVISION );
+
 
   while(1){    
 #if 0
@@ -139,7 +105,7 @@ BOOT:
     MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_SYS_LED );
     HAL_Delay(1);
 #endif
-    Main_Menu ();
+    //Main_Menu ();
   }
 }
 

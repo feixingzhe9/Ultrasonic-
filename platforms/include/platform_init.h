@@ -40,7 +40,7 @@ int main( void );
 //extern void SysTick_Handler(void);
 extern void platform_init_system_clocks( void );
 extern void init_clocks( void );
-
+extern INLINE void user_period_tick( void );
 /**
  * Initialise memory subsystem
  * This function initialises memory subsystem such as external RAM

@@ -52,11 +52,15 @@
 static DMA_HandleTypeDef *hdma_tx[3] = NULL;
 static DMA_HandleTypeDef *hdma_rx[3] = NULL;
 /* UART interrupt vectors */
-static const IRQn_Type uart_irq_vectors[NUMBER_OF_UART_PORTS] =
+static const IRQn_Type uart_irq_vectors[] =
 {
     [0] = USART1_IRQn,
     [1] = USART2_IRQn,
     [2] = USART3_IRQn,
+#if defined(STM32F103xE)
+    [3] = UART4_IRQn,
+    [4] = UART5_IRQn,
+#endif
 };
 /******************************************************
 *               Function Definitions
@@ -98,7 +102,7 @@ OSStatus platform_uart_init( platform_uart_driver_t* driver, const platform_uart
 
   /* Configure TX and RX pin_mapping */
   platform_gpio_set_alternate_function( peripheral->pin_tx->port, peripheral->pin_tx->pin_number, GPIO_PULLUP, NULL );
-  //platform_gpio_set_alternate_function( peripheral->pin_rx->port, peripheral->pin_rx->pin_number, GPIO_PULLUP, NULL );
+
   platform_pin_config_t pin_config;
   pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
   pin_config.gpio_mode = GPIO_MODE_INPUT;
@@ -122,12 +126,23 @@ OSStatus platform_uart_init( platform_uart_driver_t* driver, const platform_uart
     __HAL_RCC_USART1_CLK_ENABLE();
     break;
   case 1:
-    __HAL_AFIO_REMAP_USART2_ENABLE();//comment to not remap
+    if( peripheral->pin_tx->port != GPIOA )
+    {
+      __HAL_AFIO_REMAP_USART2_ENABLE();//comment to not remap
+    }
     __HAL_RCC_USART2_CLK_ENABLE();
     break;
   case 2:
     __HAL_RCC_USART3_CLK_ENABLE();
     break;
+  case 3:
+#if defined(STM32F103xE)
+    __HAL_RCC_UART4_CLK_ENABLE();
+    break;
+  case 4:
+    __HAL_RCC_UART5_CLK_ENABLE();
+    break;
+#endif
   default:
     break;
   }
@@ -187,7 +202,11 @@ OSStatus platform_uart_init( platform_uart_driver_t* driver, const platform_uart
       err = kUnknownErr;
       goto exit;
   }
-  
+
+  if( driver->tx_dma_handle == NULL && driver->rx_dma_handle == NULL )
+  {
+    goto no_dma;
+  }
   /**************************************************************************
   * Initialise STM32 DMA registers
   * Note: If DMA is used, USART interrupt isn't enabled.
@@ -255,23 +274,12 @@ OSStatus platform_uart_init( platform_uart_driver_t* driver, const platform_uart
   NVIC_EnableIRQ( peripheral->tx_dma_config.irq_vector );
   
   /* Enable TC (transfer complete) and TE (transfer error) interrupts on source */
-  //clear_dma_interrupts( peripheral->tx_dma_config.stream, peripheral->tx_dma_config.complete_flags | peripheral->tx_dma_config.error_flags );
   clear_dma_interrupts( peripheral->tx_dma_config.controller, peripheral->tx_dma_config.complete_flags | peripheral->tx_dma_config.error_flags );
-  //DMA_ITConfig( peripheral->tx_dma_config.stream, DMA_INTERRUPT_FLAGS, ENABLE );
   __HAL_DMA_ENABLE_IT( driver->uart_handle->hdmatx, DMA_INTERRUPT_FLAGS );
   
   /* Enable USART interrupt vector in Cortex-M3 */
-  NVIC_EnableIRQ( uart_irq_vectors[uart_number] );
-  //USART_DMACmd( driver->peripheral->port, USART_DMAReq_Tx, DISABLE );
+  //NVIC_EnableIRQ( uart_irq_vectors[uart_number] );
   CLEAR_BIT( driver->peripheral->port->CR3, USART_CR3_DMAT );
-  
-  /* Enable USART */
-  //USART_Cmd( peripheral->port, ENABLE );
-  __HAL_UART_ENABLE( driver->uart_handle );
-
-  /* Enable both transmit and receive */
-  peripheral->port->CR1 |= USART_CR1_TE;
-  peripheral->port->CR1 |= USART_CR1_RE;
 
   /* Setup ring buffer */
   if ( optional_ring_buffer != NULL )
@@ -287,17 +295,27 @@ OSStatus platform_uart_init( platform_uart_driver_t* driver, const platform_uart
     NVIC_EnableIRQ( peripheral->rx_dma_config.irq_vector );
 
     /* Enable TC (transfer complete) and TE (transfer error) interrupts on source */    
-    //clear_dma_interrupts( peripheral->rx_dma_config.stream, peripheral->rx_dma_config.complete_flags | peripheral->rx_dma_config.error_flags );
     clear_dma_interrupts( peripheral->rx_dma_config.controller, peripheral->rx_dma_config.complete_flags | peripheral->rx_dma_config.error_flags );
-    //DMA_ITConfig( peripheral->rx_dma_config.stream, DMA_INTERRUPT_FLAGS, ENABLE );
     __HAL_DMA_ENABLE_IT( driver->uart_handle->hdmarx, DMA_INTERRUPT_FLAGS );
   }
+no_dma:  
+  /* Enable USART */
+  __HAL_UART_ENABLE( driver->uart_handle );
+  /* Enable USART interrupt vector in Cortex-M3 */
+  NVIC_EnableIRQ( uart_irq_vectors[uart_number] );
+  /* Enable both transmit and receive */
+  peripheral->port->CR1 |= USART_CR1_TE;
+  peripheral->port->CR1 |= USART_CR1_RE;
+  
+  /* Enable USART interrupt vector in Cortex-M3 */
+  NVIC_EnableIRQ( uart_irq_vectors[uart_number] );
+
 #ifdef UART_NOT_USE_DMA
   peripheral->port->CR1 &= ~USART_CR1_RXNEIE;
   peripheral->port->CR3 &= ~USART_CR3_DMAR;
 #endif
 exit:
-  platform_mcu_powersave_enable( );
+  platform_mcu_powersave_enable();
   return err;
 }
 
@@ -310,10 +328,7 @@ OSStatus platform_uart_deinit( platform_uart_driver_t* driver )
 
   require_action_quiet( ( driver != NULL ), exit, err = kParamErr);
 
-  uart_number = platform_uart_get_port_number( driver->peripheral->port );
-
   /* Disable USART */
-  //USART_Cmd( driver->peripheral->port, DISABLE );
   __HAL_UART_DISABLE( driver->uart_handle );
   
   /* Deinitialise USART */
@@ -324,15 +339,11 @@ OSStatus platform_uart_deinit( platform_uart_driver_t* driver )
    **************************************************************************/
 
   /* Deinitialise DMA streams */
-  //DMA_DeInit( driver->peripheral->tx_dma_config.stream );
   HAL_DMA_DeInit( driver->uart_handle->hdmatx );
-  //DMA_DeInit( driver->peripheral->rx_dma_config.stream );
   HAL_DMA_DeInit( driver->uart_handle->hdmarx );
 
   /* Disable TC (transfer complete) interrupt at the source */
-  //DMA_ITConfig( driver->peripheral->tx_dma_config.stream, DMA_INTERRUPT_FLAGS, DISABLE );
   __HAL_DMA_DISABLE_IT( driver->uart_handle->hdmatx, DMA_INTERRUPT_FLAGS );
-  //DMA_ITConfig( driver->peripheral->rx_dma_config.stream, DMA_INTERRUPT_FLAGS, DISABLE );
   __HAL_DMA_DISABLE_IT( driver->uart_handle->hdmarx, DMA_INTERRUPT_FLAGS );
 
   /* Disable transmit DMA interrupt at Cortex-M3 */
@@ -342,14 +353,13 @@ OSStatus platform_uart_deinit( platform_uart_driver_t* driver )
    * De-initialise STM32 USART interrupt
    **************************************************************************/
 
-  //USART_ITConfig( driver->peripheral->port, USART_IT_RXNE, DISABLE );
   __HAL_UART_DISABLE_IT( driver->uart_handle, UART_IT_RXNE );
 
   /* Disable UART interrupt vector on Cortex-M3 */
   NVIC_DisableIRQ( driver->peripheral->rx_dma_config.irq_vector );
 
   /* Disable registers clocks */
-  //uart_peripheral_clock_functions[uart_number]( uart_peripheral_clocks[uart_number], DISABLE );
+  uart_number = platform_uart_get_port_number( driver->peripheral->port );
   switch( uart_number )
   {
   case 0:
@@ -360,6 +370,14 @@ OSStatus platform_uart_deinit( platform_uart_driver_t* driver )
     break;
   case 2:
     __HAL_RCC_USART3_CLK_DISABLE();
+    break;
+#if defined(STM32F103xE)
+  case 3:
+    __HAL_RCC_UART4_CLK_DISABLE();
+    break;
+  case 4:
+    __HAL_RCC_UART5_CLK_DISABLE();
+#endif
     break;
   default:
     break;
@@ -387,6 +405,8 @@ OSStatus platform_uart_transmit_bytes( platform_uart_driver_t* driver, const uin
   mico_rtos_lock_mutex( &driver->tx_mutex );
 
   require_action_quiet( ( driver != NULL ) && ( data_out != NULL ) && ( size != 0 ), exit, err = kParamErr);
+  require_action_quiet( ( driver->uart_handle != NULL ) && ( driver->peripheral != NULL ), exit, err = kParamErr);
+
 #ifdef UART_NOT_USE_DMA
   while (HAL_UART_GetState(driver->uart_handle) != HAL_UART_STATE_READY)
   {
@@ -397,39 +417,42 @@ OSStatus platform_uart_transmit_bytes( platform_uart_driver_t* driver, const uin
       err = -1;
   }
 #else
+  if( driver->tx_dma_handle == NULL )
+  {
+    while (HAL_UART_GetState(driver->uart_handle) != HAL_UART_STATE_READY)
+    {
+      driver->uart_handle->State = HAL_UART_STATE_READY;
+    }
+    if (HAL_UART_Transmit( driver->uart_handle, (uint8_t *)data_out, size,1 ) != HAL_OK)
+    {
+        err = -1;
+    }
+    goto exit;
+  }
   __HAL_DMA_DISABLE( driver->uart_handle->hdmatx );
   /* Clear interrupt status before enabling DMA otherwise error occurs immediately */  
-  //clear_dma_interrupts( driver->peripheral->tx_dma_config.stream, driver->peripheral->tx_dma_config.complete_flags | driver->peripheral->tx_dma_config.error_flags );
   clear_dma_interrupts( driver->peripheral->tx_dma_config.controller, driver->peripheral->tx_dma_config.complete_flags | driver->peripheral->tx_dma_config.error_flags );
   clear_dma_interrupts( driver->peripheral->tx_dma_config.controller, DMA_ISR_HTIF2 );
   /* Init DMA parameters and variables */
   driver->last_transmit_result                    = kGeneralErr;
   driver->tx_size                                 = size;
     
-  //driver->peripheral->tx_dma_config.stream->CR   &= ~(uint32_t) DMA_SxCR_CIRC;
   CLEAR_BIT( driver->peripheral->tx_dma_config.channel->CCR, DMA_CIRCULAR );
-  //driver->peripheral->tx_dma_config.stream->NDTR  = size;
   driver->peripheral->tx_dma_config.channel->CNDTR    = size;
-  //driver->peripheral->tx_dma_config.stream->M0AR  = (uint32_t)data_out;
   driver->peripheral->tx_dma_config.channel->CMAR     = (uint32_t)data_out;
   
-  //USART_DMACmd( driver->peripheral->port, USART_DMAReq_Tx, ENABLE );
   SET_BIT( driver->peripheral->port->CR3, USART_CR3_DMAT );
-  //USART_ClearFlag( driver->peripheral->port, USART_FLAG_TC );
   __HAL_UART_CLEAR_FLAG( driver->uart_handle, UART_FLAG_TC );
-  //driver->peripheral->tx_dma_config.stream->CR   |= DMA_SxCR_EN;
   __HAL_DMA_ENABLE( driver->uart_handle->hdmatx );
   
 /* Wait for transmission complete */
   mico_rtos_get_semaphore( &driver->tx_complete, MICO_NEVER_TIMEOUT );
 
-  //while ( ( driver->peripheral->port->SR & USART_SR_TC ) == 0 )
   while( __HAL_USART_GET_FLAG( driver->uart_handle, USART_FLAG_TC ) == RESET )
   {
   }
 
   /* Disable DMA and clean up */
-  //USART_DMACmd( driver->peripheral->port, USART_DMAReq_Tx, DISABLE );
   CLEAR_BIT( driver->peripheral->port->CR3, USART_CR3_DMAT );
   driver->tx_size = 0;
   err = driver->last_transmit_result;
@@ -503,32 +526,21 @@ static OSStatus receive_bytes( platform_uart_driver_t* driver, void* data, uint3
 
   if ( driver->rx_buffer != NULL )
   {
-//    driver->peripheral->rx_dma_config.stream->CR |= DMA_SxCR_CIRC;
-    //driver->uart_handle->hdmarx->Instance->CCR |= DMA_CIRCULAR;
     SET_BIT( driver->uart_handle->hdmarx->Instance->CCR, DMA_CIRCULAR );
     
-    // Enabled individual byte interrupts so progress can be updated
-//    USART_ClearITPendingBit( driver->peripheral->port, USART_IT_RXNE );
     __HAL_UART_CLEAR_FLAG( driver->uart_handle, UART_IT_RXNE );
-//    USART_ITConfig( driver->peripheral->port, USART_IT_RXNE, ENABLE );
     __HAL_UART_ENABLE_IT( driver->uart_handle, UART_IT_RXNE );
   }
   else
   {
     driver->rx_size = size;
-//    driver->peripheral->rx_dma_config.stream->CR &= ~(uint32_t) DMA_SxCR_CIRC;
     driver->uart_handle->hdmarx->Instance->CCR &= ~(uint32_t) DMA_CIRCULAR;
   }
 
-//  clear_dma_interrupts( driver->peripheral->rx_dma_config.stream, driver->peripheral->rx_dma_config.complete_flags | driver->peripheral->rx_dma_config.error_flags );
   clear_dma_interrupts( driver->peripheral->rx_dma_config.controller, driver->peripheral->tx_dma_config.complete_flags | driver->peripheral->rx_dma_config.error_flags );
-//  driver->peripheral->rx_dma_config.stream->NDTR  = size;
   driver->uart_handle->hdmarx->Instance->CNDTR = size;
-//  driver->peripheral->rx_dma_config.stream->M0AR  = (uint32_t)data;
   driver->uart_handle->hdmarx->Instance->CMAR = (uint32_t)data;
-//  driver->peripheral->rx_dma_config.stream->CR   |= DMA_SxCR_EN;
   driver->uart_handle->hdmarx->Instance->CCR |= DMA_CCR_EN;
-//  USART_DMACmd( driver->peripheral->port, USART_DMAReq_Rx, ENABLE );
   SET_BIT( driver->uart_handle->Instance->CR3, USART_CR3_DMAR );
   
   if ( timeout > 0 )
@@ -567,6 +579,16 @@ uint8_t platform_uart_get_port_number( USART_TypeDef* uart )
     {
         return 2;
     }
+#if defined (STM32F103xE)
+    else if ( uart == UART4 )
+    {
+        return 3;
+    }
+    else if ( uart == UART5 )
+    {
+        return 4;
+    }
+#endif
     else
     {
         return 0xff;
@@ -579,10 +601,7 @@ uint8_t platform_uart_get_port_number( USART_TypeDef* uart )
 
 void platform_uart_irq( platform_uart_driver_t* driver )
 {
-//  platform_uart_port_t* uart = (platform_uart_port_t*) driver->peripheral->port;
-
   // Clear all interrupts. It's safe to do so because only RXNE interrupt is enabled
-  //uart->SR = (uint16_t) ( uart->SR | 0xffff );
   __HAL_UART_CLEAR_FLAG( driver->uart_handle, UART_FLAG_RXNE );
 
   // Update tail
@@ -598,7 +617,6 @@ void platform_uart_irq( platform_uart_driver_t* driver )
 
 void platform_uart_tx_dma_irq( platform_uart_driver_t* driver )
 {
-#if 1
     if ( ( get_dma_irq_status( driver->peripheral->tx_dma_config.controller ) & driver->peripheral->tx_dma_config.complete_flags ) != 0 )
     {
         clear_dma_interrupts( driver->peripheral->tx_dma_config.controller, driver->peripheral->tx_dma_config.complete_flags );
@@ -616,7 +634,6 @@ void platform_uart_tx_dma_irq( platform_uart_driver_t* driver )
         /* Set semaphore regardless of result to prevent waiting thread from locking up */
         mico_rtos_set_semaphore( &driver->tx_complete );
     }
-#endif
 }
 
 void platform_uart_rx_dma_irq( platform_uart_driver_t* driver )

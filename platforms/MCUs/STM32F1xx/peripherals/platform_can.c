@@ -13,20 +13,23 @@
 #include "stm32f1xx.h"
 #include "platform_logging.h"
 
-#include "can_protocol.h"
-
 typedef unsigned int    u32;
 
-#define CAN_FILTER_ID       (0x60)
-#define CAN_FILTER_MASK     ((0x0f<<13)<<3)
-extern uint8_t GetCanMacId(void);
+#define CAN_FILTER_ID       (0x0050 << 13)
+#define CAN_FILTER_MASK     (0x00ff << 13)
+//extern uint8_t GetCanMacId(void);
+static inline void rbuf_enqueue(CanRxMsgTypeDef *msg);
+static inline CanRxMsgTypeDef rbuf_dequeue(void);
+static inline bool is_rbuf_has_data(void);
+static inline void rbuf_clear(void);
+
 OSStatus platform_can_init( const platform_can_driver_t* can )
 {
-    uint32_t can_mac_id = GetCanMacId();
     OSStatus    err = kNoErr;
     CAN_FilterConfTypeDef     CAN_FilterInitStructure;
     
     platform_mcu_powersave_disable();
+ 
     require_action_quiet( can, exit, err = kParamErr);
     require_action_quiet( can->handle, exit, err = kParamErr);
     require_action_quiet( can->port, exit, err = kParamErr );
@@ -60,6 +63,8 @@ OSStatus platform_can_init( const platform_can_driver_t* can )
       require_action_quiet( NULL, exit, err = kParamErr );
     }
     
+    rbuf_clear();
+    
     can->handle->Instance               = can->port;
     can->handle->Init.Prescaler         = 9;
     can->handle->Init.Mode              = CAN_MODE_NORMAL;
@@ -74,12 +79,10 @@ OSStatus platform_can_init( const platform_can_driver_t* can )
     can->handle->Init.TXFP              = DISABLE;
     require_action_quiet( HAL_CAN_Init( can->handle ) == HAL_OK, exit, err = kGeneralErr );
     
-
-    CAN_FilterInitStructure.FilterIdHigh        = ((can_mac_id<<3)<<13)>>16;
-    CAN_FilterInitStructure.FilterIdLow         = ((can_mac_id<<3)<<13) & 0xffff;
-    CAN_FilterInitStructure.FilterMaskIdHigh    = CAN_FILTER_MASK>>16;
-    CAN_FilterInitStructure.FilterMaskIdLow     = CAN_FILTER_MASK & 0xffff;
-
+    CAN_FilterInitStructure.FilterIdHigh        = ((CAN_FILTER_ID << 3) >> 16) & 0xffff;
+    CAN_FilterInitStructure.FilterIdLow         = (uint16_t)(CAN_FILTER_ID << 3) | CAN_ID_EXT;
+    CAN_FilterInitStructure.FilterMaskIdHigh    = (CAN_FILTER_MASK << 3) >> 16;
+    CAN_FilterInitStructure.FilterMaskIdLow     = ((CAN_FILTER_MASK << 3) & 0xffff) | 0x06;
 
     CAN_FilterInitStructure.FilterFIFOAssignment = CAN_FILTER_FIFO0;
     CAN_FilterInitStructure.FilterNumber        = 0;
@@ -90,11 +93,12 @@ OSStatus platform_can_init( const platform_can_driver_t* can )
     require_action_quiet( HAL_CAN_ConfigFilter( can->handle, &CAN_FilterInitStructure ) == HAL_OK,\
       exit, err = kGeneralErr );
     
-    __HAL_CAN_ENABLE_IT( can->handle, CAN_IT_FMP0 );
+    __HAL_CAN_ENABLE_IT( can->handle, CAN_IT_FMP0 );//| CAN_IT_FF0 | CAN_IT_FOV0 );
     
     NVIC_ClearPendingIRQ( USB_LP_CAN1_RX0_IRQn ); 
+    //NVIC_ClearPendingIRQ( USB_HP_CAN1_TX_IRQn ); 
     NVIC_EnableIRQ( USB_LP_CAN1_RX0_IRQn );
-  
+    //NVIC_EnableIRQ( USB_HP_CAN1_TX_IRQn );
 exit:
     platform_mcu_powersave_enable();
     return err;
@@ -150,24 +154,23 @@ OSStatus platform_can_send_message( const platform_can_driver_t* can, uint8_t *m
 exit:
     return err; 
 }
-
 #else
-
 OSStatus platform_can_send_message( const platform_can_driver_t* can, const CanTxMsgTypeDef *msg)
 {
   OSStatus    err = kNoErr;
 
   require_action_quiet( can->handle->pTxMsg, exit, err = kParamErr );
   require_action_quiet( msg->DLC <= 8, exit, err = kParamErr );
-  //memcpy(can->handle->pTxMsg->Data, msg->Data, msg->DLC);
+  
   memcpy(can->handle->pTxMsg, msg, sizeof(CanTxMsgTypeDef));
   
-  require_action_quiet( HAL_CAN_Transmit( can->handle, 0x10 ) == HAL_OK, exit, err = kGeneralErr );
+  require_action_quiet( HAL_CAN_Transmit( can->handle, 0 ) == HAL_OK, exit, err = kGeneralErr );
   
 exit:
     return err; 
 }
 #endif
+#if 0
 OSStatus platform_can_receive_message( const platform_can_driver_t* can, uint8_t *msg )
 {
   OSStatus    err = kNoErr;
@@ -183,41 +186,77 @@ OSStatus platform_can_receive_message( const platform_can_driver_t* can, uint8_t
 exit:
     return err; 
 }
+#else
+OSStatus platform_can_receive_message( const platform_can_driver_t* can, CanRxMsgTypeDef *msg )
+{
+  OSStatus    err = kNoErr;
+  CanRxMsgTypeDef  can_rx_msg;
 
+  require_action_quiet( can->handle->pRxMsg, exit, err = kParamErr );
+  
+  can_rx_msg = rbuf_dequeue();
+  
+  memcpy( msg, &can_rx_msg, sizeof(CanRxMsgTypeDef) );
+  
+exit:
+    return err; 
+}
+#endif
 void platform_can_rx_irq( platform_can_driver_t* can_driver )
 {
   if( can_driver->handle )
   {
     HAL_CAN_IRQHandler( can_driver->handle );
+    rbuf_enqueue( can_driver->handle->pRxMsg);
+    __HAL_CAN_ENABLE_IT( can_driver->handle, CAN_IT_FMP0 );
   }
-  can_driver->rx_complete = 1;
+  //can_driver->rx_complete = 1;  
+  if ( is_rbuf_has_data() )
+  {
+    can_driver->rx_complete += 1;
+  }
 }
 
-//CanRxMsgTypeDef RxMessage;
-void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
+
+#define RBUF_SIZE 10
+static CanRxMsgTypeDef rbuf[RBUF_SIZE];
+static uint8_t  rbuf_head = 0;
+static uint8_t  rbuf_tail = 0;
+
+static inline void rbuf_enqueue(CanRxMsgTypeDef *msg)
 {
-  
-  
-  HAL_CAN_Receive_IT( hcan, CAN_FIFO0);
-//  memcpy( &RxMessage, hcan->pRxMsg, sizeof(CanRxMsgTypeDef) );
-  
-#if 0
-  CanTxMsgTypeDef  *can_tx_msg;
-  CanRxMsgTypeDef  *can_rx_msg;
-  can_tx_msg = hcan->pTxMsg;
-  can_rx_msg = hcan->pRxMsg;
-  
-  can_tx_msg->ExtId     = can_rx_msg->ExtId;
-  can_tx_msg->IDE       = can_rx_msg->IDE;
-  can_tx_msg->RTR       = CAN_RTR_DATA;
-  can_tx_msg->DLC       = can_rx_msg->DLC;
-  
-  for( uint8_t i = 0; i < can_rx_msg->DLC; i++ )
+  uint8_t next = (rbuf_head + 1) % RBUF_SIZE;
+  if (next != rbuf_tail)
   {
-    can_tx_msg->Data[i] = can_rx_msg->Data[i];
+    memcpy(&rbuf[rbuf_head], msg, sizeof(CanRxMsgTypeDef));
+    rbuf_head = next;
   }
-  
-  HAL_CAN_Transmit_IT( hcan );
+#if 0
+  else
+  {
+    printf("rxCanMsgBuf: full!\n");
+  }
 #endif
 }
 
+static inline CanRxMsgTypeDef rbuf_dequeue(void)
+{
+  CanRxMsgTypeDef val;
+  
+  if (rbuf_head != rbuf_tail)
+  {
+    memcpy(&val, &rbuf[rbuf_tail], sizeof(CanRxMsgTypeDef));
+    rbuf_tail = (rbuf_tail + 1) % RBUF_SIZE;
+  }
+  return val;
+}
+
+static inline bool is_rbuf_has_data(void)
+{
+  return (rbuf_head != rbuf_tail);
+}
+
+static inline void rbuf_clear(void)
+{
+  rbuf_head = rbuf_tail = 0;
+}

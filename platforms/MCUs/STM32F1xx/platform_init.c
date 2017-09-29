@@ -156,7 +156,7 @@ void platform_mcu_reset( void )
 HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 {
   /*Configure the SysTick to have interrupt in 10ms time basis*/
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/100);
 
   /*Configure the SysTick IRQ priority */
   HAL_NVIC_SetPriority(SysTick_IRQn, TickPriority ,0);
@@ -171,7 +171,7 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 */
 void init_clocks( void )
 {
-  RCC_ClkInitTypeDef clkinitstruct = {0};
+    RCC_ClkInitTypeDef clkinitstruct = {0};
   RCC_OscInitTypeDef oscinitstruct = {0};
 
   HAL_Init(); 
@@ -270,17 +270,24 @@ void init_architecture( void )
 
 #ifdef BOOTLOADER
   return;
-#endif
+#else
   
   /* Initialise RTC */
 //  platform_rtc_init( );
-  platform_watchdog_init( 2000 );
+#ifndef MICO_DISABLE_WATCHDOG
+  if( kNoErr != platform_watchdog_init( 2000 ) )
+  {
+    platform_mcu_reset();
+  }
+#endif
+
 #ifndef MICO_DISABLE_MCU_POWERSAVE
   /* Initialise MCU powersave */
   platform_mcu_powersave_init( );
 #endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
 
   platform_mcu_powersave_disable( );
+#endif
 }
 
 OSStatus stdio_hardfault( char* data, uint32_t size )
@@ -309,25 +316,17 @@ uint32_t mico_get_time_no_os(void)
 
 #ifdef NO_MICO_RTOS
 
-#ifndef BOOTLOADER
-//#include "serial_leds.h"
-#endif
-extern void SysLedTrigger(void);
+WEAK INLINE void user_period_tick( void )
+{
+  
+}
+
 void sysTickHandler(void)
 {
-/*
-    static uint16_t cnt = 0;
-    //cnt++;
-    if(cnt++ >= 500)
-    {
-        SysLedTrigger();
-        cnt = 1;
-    }
-*/     
-    HAL_IncTick();
-    no_os_tick ++;
-    
-    platform_watchdog_kick( );
+  HAL_IncTick();
+  no_os_tick ++;
+  user_period_tick();
+ // platform_watchdog_kick( );
 }
 
 #else

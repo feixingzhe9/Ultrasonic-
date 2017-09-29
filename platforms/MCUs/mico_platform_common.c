@@ -763,14 +763,21 @@ OSStatus MicoCanMessageSend( mico_can_t can, const CanTxMsgTypeDef *msg)
   return (OSStatus) platform_can_send_message( &platform_can_drivers[ can ], msg);
 }
 #endif
-
+#if 0
 OSStatus MicoCanMessageRead( mico_can_t can, const void *msg )
 {
   if ( can >= MICO_CAN_NONE )
     return kUnsupportedErr;
   return (OSStatus) platform_can_receive_message( &platform_can_drivers[ can ], (uint8_t *)msg );
 }
-
+#else
+OSStatus MicoCanMessageRead( mico_can_t can, const CanRxMsgTypeDef *msg )
+{
+  if ( can >= MICO_CAN_NONE )
+    return kUnsupportedErr;
+  return (OSStatus) platform_can_receive_message( &platform_can_drivers[ can ], (CanRxMsgTypeDef *)msg );
+}
+#endif
 void MicoNanosendDelay( uint64_t delayns )
 {
   platform_nanosecond_delay( delayns );

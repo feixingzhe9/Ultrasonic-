@@ -66,7 +66,11 @@ OSStatus platform_pwm_init( const platform_pwm_t* pwm, uint32_t frequency, float
   HAL_RCC_GetClockConfig( &rcc_clock_frequencies, &latency );
   
   pwm->tim_handle->Instance = pwm->tim;
-  if ( pwm->tim_handle->Instance == TIM1 || pwm->tim_handle->Instance == TIM2 )
+#if !defined (STM32F103xB)
+  if ( pwm->tim_handle->Instance == TIM1 || pwm->tim_handle->Instance == TIM8 )
+#else
+  if ( pwm->tim_handle->Instance == TIM1 )
+#endif
   {
 //    RCC_APB2PeriphClockCmd( pwm->tim_peripheral_clock, ENABLE );
     SET_BIT(RCC->APB2ENR, pwm->tim_peripheral_clock);

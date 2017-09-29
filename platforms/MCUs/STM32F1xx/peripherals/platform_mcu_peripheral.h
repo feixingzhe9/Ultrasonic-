@@ -254,6 +254,7 @@ void     platform_uart_tx_dma_irq            ( platform_uart_driver_t* driver );
 void     platform_uart_rx_dma_irq            ( platform_uart_driver_t* driver );
 
 void     platform_can_rx_irq                 ( platform_can_driver_t* can_driver );
+void     platform_can_tx_irq                 ( platform_can_driver_t* can_driver );
 
 uint8_t  platform_spi_get_port_number        ( platform_spi_port_t* spi );
 

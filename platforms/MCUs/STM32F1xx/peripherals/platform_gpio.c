@@ -18,7 +18,6 @@
 #include "platform.h"
 #include "platform_peripheral.h"
 #include "platform_logging.h"
-#include "app_platform.h"
 
 /******************************************************
 *                    Constants
@@ -175,14 +174,14 @@ exit:
 
 OSStatus platform_gpio_irq_enable( const platform_gpio_t* gpio, platform_gpio_irq_trigger_t trigger, platform_gpio_irq_callback_t handler, void* arg )
 {
-  GPIO_InitTypeDef  gpio_init_structure;
+//  GPIO_InitTypeDef  gpio_init_structure;
   uint32_t interrupt_line = (uint32_t) ( 1 << gpio->pin_number );
   OSStatus err = kNoErr;
   IRQn_Type        interrupt_vector = (IRQn_Type)0;
 
   platform_mcu_powersave_disable();
   require_action_quiet( gpio != NULL, exit, err = kParamErr);
-
+#if 0
   switch ( trigger )
   {
     case IRQ_TRIGGER_RISING_EDGE:
@@ -210,7 +209,7 @@ OSStatus platform_gpio_irq_enable( const platform_gpio_t* gpio, platform_gpio_ir
   gpio_init_structure.Pull  = GPIO_PULLDOWN;
   
   HAL_GPIO_Init( gpio->port, &gpio_init_structure );
-  
+#endif
   if ( ( interrupt_line & 0x001F ) != 0 )
   {
     /* Line 0 to 4 */
@@ -465,17 +464,9 @@ MICO_RTOS_DEFINE_ISR( EXTI4_IRQHandler )
   gpio_irq();
 }
 
-
-//extern uint32_t time_cnt_test;
-//#define UltraSonicLog(format, ...)  custom_log("PowerBoard", format, ##__VA_ARGS__)
-//#include "platform_tim.h"
 MICO_RTOS_DEFINE_ISR( EXTI9_5_IRQHandler )
 {
   gpio_irq();
-  //time_cnt_test = GetTimerCount();
-  //UltraSonicLog("E:%d",time_cnt_test);
-  
-  
 }
 
 MICO_RTOS_DEFINE_ISR( EXTI15_10_IRQHandler )
@@ -483,10 +474,7 @@ MICO_RTOS_DEFINE_ISR( EXTI15_10_IRQHandler )
   gpio_irq();
 }
 
-void EnableSwjAndDisableJtag(void)
-{
-    __HAL_AFIO_REMAP_SWJ_NOJTAG();
-}
+
 
 
 
