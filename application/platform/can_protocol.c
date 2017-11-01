@@ -505,15 +505,12 @@ void can_protocol_period( void )
             continue;
         }
 
-    
-    
-    
-    
-  
+
+        
         if(seg_polo == ONLYONCE)
         {
             //if( (id.CanID_Struct.SourceID < SOURCE_ID_PREPARE_UPDATE) && (id.CanID_Struct.SourceID > SOURCE_ID_CHECK_TRANSMIT) )
-            if(id.CanID_Struct.DestMACID = ultrasonic_src_id)
+            if(id.CanID_Struct.DestMACID == ultrasonic_src_id)
             {
                 tx_len = CmdProcessing(&id, rx_buf.CanData_Struct.Data, rx_data_len - 1, CanTxdataBuff );
                 //process the data here//
