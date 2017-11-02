@@ -23,12 +23,12 @@ typedef unsigned int    u32;
 #define CAN_FILTER_ID       (0x60)
 #define CAN_FILTER_MASK     (0xff<<13)
 extern uint8_t GetCanSrcId(void);
-uint32_t ultrasonic_src_id = 0x6f;
+uint32_t ultrasonic_src_id = 0x60;
 OSStatus platform_can_init( const platform_can_driver_t* can )
 {
 
     //uint32_t can_mac_id = CAN_SUB_PB_ID;
-    //ultrasonic_src_id = GetCanSrcId();
+    ultrasonic_src_id = GetCanSrcId();
     OSStatus    err = kNoErr;
     CAN_FilterConfTypeDef     CAN_FilterInitStructure;
     

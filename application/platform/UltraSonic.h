@@ -56,6 +56,7 @@
 
 
 #define NO_OBJ_DETECTED                 0x00000000
+#define OBJ_IN_BLIND_AREA               0x0001
 #define DANGER_DISTANCE                 50
 #define DANGER_DISTANCE_FILTER_CNT      2
 typedef enum
@@ -80,6 +81,8 @@ typedef struct
     uint8_t cnt;
 }interval_time_t;
 
+
+
 typedef struct
 {
     uint32_t send_time;
@@ -93,6 +96,8 @@ typedef struct
 #define DATA_NOT_READY      0x08
     uint8_t start_flag;
     uint8_t end_flag;
+    uint8_t err_flag;
+    uint8_t in_blind_area_flag;
 }ultra_sonic_data_t;
 
 typedef struct 
