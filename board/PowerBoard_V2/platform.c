@@ -87,57 +87,8 @@ const platform_gpio_t platform_gpio_pins[] =
   [MICO_GPIO_UART3_TX]  = { GPIOA,  2  },
   [MICO_GPIO_UART3_RX]  = { GPIOA,  3  },
 #else
-  [MICO_GPIO_SYS_LED]           = { GPIOC,  9 },
-  [MICO_GPIO_PWRKEY]            = { GPIOD,  4 },
+
   
-  [MICO_GPIO_MOTOR_EN]          = { GPIOE,  2 },
-  [MICO_GPIO_SENSOR_EN]         = { GPIOE,  3 },
-  [MICO_GPIO_LEDS_EN]           = { GPIOE,  4 },
-  [MICO_GPIO_AIUI_EN]           = { GPIOE,  5 },
-  [MICO_GPIO_5V_RES_EN]         = { GPIOE,  6 },
-  [MICO_GPIO_PAD_EN]            = { GPIOF,  0 },
-  [MICO_GPIO_12V_ROUTER_EN]     = { GPIOF,  1 },
-  [MICO_GPIO_2_1_PA_EN]         = { GPIOF,  2 },
-  [MICO_GPIO_DYP_EN]            = { GPIOF,  3 },
-  [MICO_GPIO_X86_EN]            = { GPIOF,  4 },
-  [MICO_GPIO_NV_EN]             = { GPIOF,  5 },
-  [MICO_GPIO_DLP_EN]            = { GPIOG,  2 },
-  [MICO_GPIO_12V_RES_EN]        = { GPIOG,  3 },
-  [MICO_GPIO_PRINTER_EN]        = { GPIOG,  4 },
-  [MICO_GPIO_24V_RES_EN]        = { GPIOG,  5 },
-  [MICO_GPIO_BAT_NV_EN]         = { GPIOG,  6 },
-  [MICO_GPIO_5V_ROUTER_EN]      = { GPIOG,  7 },
-  [MICO_GPIO_5V_EN]             = { GPIOE,  7 },
-  [MICO_GPIO_12V_EN]            = { GPIOE,  8 },
-  [MICO_GPIO_24V_EN]            = { GPIOE,  9 },
-  
-  [MICO_GPIO_CHARGE_ADC]        = { GPIOF,  6 },
-  [MICO_GPIO_BATIN_ADC]         = { GPIOF,  7 },
-  [MICO_GPIO_VBUS_ADC]          = { GPIOF,  8 },
-  [MICO_GPIO_BAT_MOTOR_ADC]     = { GPIOF,  9 },
-  [MICO_GPIO_SWITCH_ADC]        = { GPIOF, 10 },
-  [MICO_GPIO_2_1_PA_ADC]        = { GPIOC,  0 },
-  [MICO_GPIO_PAD_ADC]           = { GPIOC,  1 },
-  [MICO_GPIO_PRINTER_ADC]       = { GPIOC,  2 },
-  [MICO_GPIO_X86_ADC]           = { GPIOC,  3 },
-  [MICO_GPIO_5V_RES1_ADC]       = { GPIOA,  0 },
-  [MICO_GPIO_12V_RES2_ADC]      = { GPIOA,  1 },
-  [MICO_GPIO_BAT_NV_ADC]        = { GPIOA,  2 },
-  [MICO_GPIO_12V_NV_ADC]        = { GPIOA,  3 },
-  [MICO_GPIO_ROUTER_ADC]        = { GPIOA,  4 },
-  [MICO_GPIO_DYP_ADC]           = { GPIOA,  5 },
-  [MICO_GPIO_SENSOR_ADC]        = { GPIOA,  6 },
-  [MICO_GPIO_DLP_ADC]           = { GPIOA,  7 },
-  [MICO_GPIO_IRLED_ADC]         = { GPIOC,  4 },
-  [MICO_GPIO_LEDS_ADC]          = { GPIOC,  5 },
-  [MICO_GPIO_MOTOR_ADC]         = { GPIOB,  0 },
-  [MICO_GPIO_24V_RES1_ADC]      = { GPIOB,  1 },
-  
-  [MICO_GPIO_PWR_NV]            = { GPIOF, 13 },
-  [MICO_GPIO_PWR_DLP]           = { GPIOF, 14 },
-  [MICO_GPIO_PWR_PAD]           = { GPIOF, 15 },
-  [MICO_GPIO_PWR_X86]           = { GPIOG,  0 },
-  [MICO_GPIO_PWR_RES]           = { GPIOG,  1 },
   
   [MICO_GPIO_UART3_TX]          = { GPIOB, 10 },
   [MICO_GPIO_UART3_RX]          = { GPIOB, 11 },
@@ -174,11 +125,6 @@ const platform_gpio_t platform_gpio_pins[] =
   [MICO_GPIO_ID1]               = { GPIOE,  0 },
   [MICO_GPIO_ID2]               = { GPIOE,  1 },
   
-  [MICO_GPIO_SWITCH_EN]         = { GPIOD,  7 },
-  [MICO_GPIO_SWITCH_SEL0]       = { GPIOG,  9 },
-  [MICO_GPIO_SWITCH_SEL1]       = { GPIOG, 10 },
-  [MICO_GPIO_SWITCH_SEL2]       = { GPIOG, 11 },
-  [MICO_GPIO_SWITCH_SEL3]       = { GPIOG, 12 },
 #endif
 };
 
@@ -190,6 +136,7 @@ const platform_gpio_t platform_gpio_pins[] =
 /* TODO : These need fixing */
 ADC_HandleTypeDef adc_handles[2];
 
+#if 0
 const platform_adc_t platform_adc_peripherals[] =
 {
   [MICO_ADC_5V_RES1]       = {ADC1, ADC_CHANNEL_0, &adc_handles[0], 1, &platform_gpio_pins[MICO_GPIO_5V_RES1_ADC]},
@@ -215,7 +162,7 @@ const platform_adc_t platform_adc_peripherals[] =
   [MICO_ADC_BAT_MOTOR]     = {ADC3, ADC_CHANNEL_7, &adc_handles[1], 4, &platform_gpio_pins[MICO_GPIO_BAT_MOTOR_ADC]},
   [MICO_ADC_SWITCH]        = {ADC3, ADC_CHANNEL_8, &adc_handles[1], 5, &platform_gpio_pins[MICO_GPIO_CHARGE_ADC]},
 };
-
+#endif
 TIM_HandleTypeDef tim_handles[1];
 /* PWM mappings */
 const platform_pwm_t platform_pwm_peripherals[] =
@@ -400,50 +347,7 @@ const platform_flash_t platform_flash_peripherals[] =
 platform_flash_driver_t platform_flash_drivers[MICO_FLASH_MAX];
 
 /* Logic partition on flash devices */
-#if 0
-const mico_logic_partition_t mico_partitions[] =
-{
-  [MICO_PARTITION_BOOTLOADER] =
-  {
-    .partition_owner           = MICO_FLASH_EMBEDDED,
-    .partition_description     = "Bootloader",
-    .partition_start_addr      = 0x08000000,
-    .partition_length          = 0x5fff,    //24k bytes
-    .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_DIS,
-  },
-  [MICO_PARTITION_APPLICATION] =
-  {
-    .partition_owner           = MICO_FLASH_EMBEDDED,
-    .partition_description     = "Application",
-    .partition_start_addr      = 0x08007000, 
-    .partition_length          = 0x5000,   //20k bytes
-    .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_DIS,
-  },
-  [MICO_PARTITION_OTA_TEMP] =
-  {
-    .partition_owner           = MICO_FLASH_EMBEDDED,
-    .partition_description     = "OTA Storage",
-    .partition_start_addr      = 0x0800c000,//20k bytes
-    .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_EN,
-  },
-  [MICO_PARTITION_PARAMETER_1] =
-  {
-    .partition_owner           = MICO_FLASH_EMBEDDED,
-    .partition_description     = "PARAMETER1",
-    .partition_start_addr      = 0x08006000,
-    .partition_length          = 0x400,//0x4000, // 16k bytes
-    .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_EN,
-  },
-  [MICO_PARTITION_PARAMETER_2] =
-  {
-    .partition_owner           = MICO_FLASH_EMBEDDED,
-    .partition_description     = "PARAMETER2",
-    .partition_start_addr      = 0x0800C000,
-    .partition_length          = 0x4000, //16k bytes
-    .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_EN,
-  },
-};
-#else
+
 const mico_logic_partition_t mico_partitions[] =
 {
   [MICO_PARTITION_BOOTLOADER] =
@@ -475,7 +379,7 @@ const mico_logic_partition_t mico_partitions[] =
     .partition_owner           = MICO_FLASH_EMBEDDED,
     .partition_description     = "PARAMETER1",
     .partition_start_addr      = 0x08005000,
-    .partition_length          = 0x400, // 1k bytes
+    .partition_length          = 0x1000, // 4k bytes
     .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_EN,
   },
   [MICO_PARTITION_PARAMETER_2] =
@@ -483,11 +387,11 @@ const mico_logic_partition_t mico_partitions[] =
     .partition_owner           = MICO_FLASH_EMBEDDED,
     .partition_description     = "PARAMETER1",
     .partition_start_addr      = 0x08010000,
-    .partition_length          = 0x400, //1k bytes
+    .partition_length          = 0x1000, //4k bytes
     .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_EN,
   },
 };
-#endif
+
 #ifndef BOOTLOADER
 #if  CAN_TEST
 CanTxMsgTypeDef         can_tx_msg;
@@ -584,17 +488,19 @@ MICO_RTOS_DEFINE_ISR( USB_LP_CAN1_RX0_IRQHandler )
 /******************************************************
 *               Function Definitions
 ******************************************************/
-
+#if 0
 static void _switch_irq_handler( void* arg )
 {
+
   (void)(arg);
   MicoGpioDisableIRQ( MICO_GPIO_PWRKEY );
 #ifndef BOOTLOADER
   key_switch_interrupt_cb();
 #endif
   MicoGpioEnableIRQ( MICO_GPIO_PWRKEY , IRQ_TRIGGER_BOTH_EDGES, _switch_irq_handler, NULL);
-}
 
+}
+#endif
 
 bool watchdog_check_last_reset( void )
 {
@@ -649,8 +555,8 @@ void init_platform( void )
   pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
   pin_config.gpio_mode = GPIO_MODE_IT_RISING_FALLING;
   pin_config.gpio_pull = GPIO_PULLDOWN;
-  MicoGpioInitialize( MICO_GPIO_PWRKEY, &pin_config );
-  MicoGpioEnableIRQ( MICO_GPIO_PWRKEY , IRQ_TRIGGER_BOTH_EDGES, _switch_irq_handler, NULL);
+  //MicoGpioInitialize( MICO_GPIO_PWRKEY, &pin_config );
+  //MicoGpioEnableIRQ( MICO_GPIO_PWRKEY , IRQ_TRIGGER_BOTH_EDGES, _switch_irq_handler, NULL);
 }
 
 void init_platform_bootloader( void )

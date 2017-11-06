@@ -77,7 +77,7 @@ int main(void)
 
   init_memory();
   init_architecture();
-  init_platform_bootloader();
+  //init_platform_bootloader();
 
   mico_set_bootload_ver();
   

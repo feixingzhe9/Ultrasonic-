@@ -607,7 +607,7 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
@@ -615,7 +615,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>bootloader.hex</state>
+          <state>bootloader.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -3101,7 +3101,6 @@
           <file>
             <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\EWARM\startup_stm32f103xb_bootloader_EWARM.s</name>
             <excluded>
-              <configuration>POWERBOARD_STM32F103ZE</configuration>
               <configuration>Carson_PB_STM32F103ZE_Master</configuration>
             </excluded>
           </file>

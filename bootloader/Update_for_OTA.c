@@ -66,6 +66,7 @@ typedef struct  _boot_table_t {
 #define update_log(M, ...) custom_log("UPDATE", M, ##__VA_ARGS__)
 #define update_log_trace() custom_log_trace("UPDATE")
 
+
 static OSStatus checkcrc(uint16_t crc_in, int partition_type, int total_len)
 {
     uint16_t crc = 0;
@@ -195,6 +196,8 @@ OSStatus update(void)
         }
       }
     }
+    //err = MicoFlashDisableSecurity( MICO_PARTITION_PARAMETER_1, 0x0, para_partition_info->partition_length );
+    //err = MicoFlashErase( MICO_PARTITION_PARAMETER_1, 0x0, para_partition_info->partition_length );
     goto exit;
   }
 
