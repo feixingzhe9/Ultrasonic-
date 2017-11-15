@@ -104,33 +104,14 @@ POWERBOARD V1.2 platform pin definitions ...
 
 typedef enum
 {
-#if 0
-    MICO_GPIO_SYS_LED,
-    MICO_GPIO_SWITCH,
-    MICO_GPIO_UART1_TX,
-    MICO_GPIO_UART1_RX,
-    MICO_GPIO_UART2_TX,
-    MICO_GPIO_UART2_RX,
-    MICO_GPIO_UART3_TX,
-    MICO_GPIO_UART3_RX,
-#endif
+
 #if 1
     MICO_GPIO_SYS_LED,
 
-    
-
-  
-   
-  
-    
-  
     MICO_GPIO_UART3_TX,
     MICO_GPIO_UART3_RX,
   
     MICO_GPIO_LED_PWM,
-
-    MICO_GPIO_RECHARGE_LED,    
-    MICO_GPIO_IRLED_PWM,
     MICO_GPIO_CAN_RX,
     MICO_GPIO_CAN_TX,
     MICO_GPIO_CAN_STB,
@@ -143,18 +124,13 @@ typedef enum
     MICO_GPIO_I2C_SCL,
     MICO_GPIO_I2C_SDA,
 #endif
-#ifdef HW_V2_1
-    MICO_GPIO_CHARGE_IN,
-    MICO_GPIO_RECHARGE_IN,
-#endif
+
     MICO_GPIO_UART2_TX,
     MICO_GPIO_UART2_RX,
   
     MICO_GPIO_UART1_TX,
     MICO_GPIO_UART1_RX,
   
-    MICO_GPIO_ID1,
-    MICO_GPIO_ID2,
   
     
 #endif
@@ -187,43 +163,7 @@ typedef enum
 
 typedef enum
 {
-    /* following are adc1 channels */
-    MICO_ADC_5V_RES1,
-    MICO_ADC_12V_RES2,
-    MICO_ADC_BAT_NV,
-    MICO_ADC_12V_NV,
-    MICO_ADC_ROUTER_12V,
-    MICO_ADC_DYP,
-    MICO_ADC_SENSOR,
-    MICO_ADC_DLP,
-    MICO_ADC_MOTOR,
-    MICO_ADC_24V_RES1,
-    MICO_ADC_2_1_PA,
-    MICO_ADC_PAD,
-    MICO_ADC_PRINTER,
-    MICO_ADC_X86,
-    MICO_ADC_IRLED,
-    MICO_ADC_LEDS,
-    /* following are adc3 channels */
-    MICO_ADC_CHARGE,
-    MICO_ADC_BATIN,
-    MICO_ADC_VBUS,
-    MICO_ADC_BAT_MOTOR,
-    MICO_ADC_SWITCH,
-    /* begin of virtual adc */
-    MICO_ADC_24V_TS,
-    MICO_ADC_12V_TS,
-    MICO_ADC_5V_TS,
-    MICO_ADC_AIR_TS,
-    MICO_ADC_24V_ALL,
-    MICO_ADC_12V_ALL,
-    MICO_ADC_5V_ALL,
-    MICO_ADC_VDET_24V,
-    MICO_ADC_VDET_12V,
-    MICO_ADC_VDET_5V,
-    MICO_ADC_VDET_BAT,
-    MICO_ADC_AIUI,
-    MICO_ADC_ROUTER_5V,
+    
     /* end of vitual adc */
     MICO_ADC_MAX, /* Denotes the total number of ADC port aliases. Not a valid ADC alias */
     MICO_ADC_NONE,

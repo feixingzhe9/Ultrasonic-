@@ -77,29 +77,10 @@ extern WEAK void bootloader_start(void);
 
 const platform_gpio_t platform_gpio_pins[] =
 {
-#if 0
-  [MICO_GPIO_SYS_LED]   = { GPIOG,  9  }, //{ GPIOC,  9  }, 
-  [MICO_GPIO_PWRKEY]    = { GPIOC,  6  },
-  [MICO_GPIO_UART1_TX]  = { GPIOB,  10 },
-  [MICO_GPIO_UART1_RX]  = { GPIOB,  11 },
-  [MICO_GPIO_UART2_TX]  = { GPIOA,  9  },
-  [MICO_GPIO_UART2_RX]  = { GPIOA,  10 },
-  [MICO_GPIO_UART3_TX]  = { GPIOA,  2  },
-  [MICO_GPIO_UART3_RX]  = { GPIOA,  3  },
-#else
 
-  
-  
   [MICO_GPIO_UART3_TX]          = { GPIOB, 10 },
   [MICO_GPIO_UART3_RX]          = { GPIOB, 11 },
-  
-  [MICO_GPIO_LED_PWM]           = { GPIOC, 6  },//{ GPIOB, 12 },
-#ifdef HW_V2_0
-  [MICO_GPIO_ADAPTER_IN]        = { GPIOD, 10 },
-  [MICO_GPIO_FAN_CTRL]          = { GPIOD, 11 },
-#endif
-  [MICO_GPIO_RECHARGE_LED]      = { GPIOC,  8 }, 
-  [MICO_GPIO_IRLED_PWM]         = { GPIOA,  8 },
+
   [MICO_GPIO_CAN_RX]            = { GPIOA, 11 },
   [MICO_GPIO_CAN_TX]            = { GPIOA, 12 },
   [MICO_GPIO_CAN_STB]           = { GPIOD,  3 },
@@ -112,20 +93,13 @@ const platform_gpio_t platform_gpio_pins[] =
   [MICO_GPIO_I2C_SCL]           = { GPIOB,  6 },
   [MICO_GPIO_I2C_SDA]           = { GPIOB,  7 },
 #endif
-#ifdef HW_V2_1
-  [MICO_GPIO_CHARGE_IN]         = { GPIOB,  5 },
-  [MICO_GPIO_RECHARGE_IN]       = { GPIOB,  6 },
-#endif
+
   [MICO_GPIO_UART2_TX]          = { GPIOD,  5 },
   [MICO_GPIO_UART2_RX]          = { GPIOD,  6 },
   
   [MICO_GPIO_UART1_TX]          = { GPIOA,  9 },
   [MICO_GPIO_UART1_RX]          = { GPIOA, 10 },
-  
-  [MICO_GPIO_ID1]               = { GPIOE,  0 },
-  [MICO_GPIO_ID2]               = { GPIOE,  1 },
-  
-#endif
+
 };
 
 /*
@@ -134,9 +108,10 @@ const platform_gpio_t platform_gpio_pins[] =
 */
 
 /* TODO : These need fixing */
+#if 0
 ADC_HandleTypeDef adc_handles[2];
 
-#if 0
+
 const platform_adc_t platform_adc_peripherals[] =
 {
   [MICO_ADC_5V_RES1]       = {ADC1, ADC_CHANNEL_0, &adc_handles[0], 1, &platform_gpio_pins[MICO_GPIO_5V_RES1_ADC]},
@@ -163,6 +138,7 @@ const platform_adc_t platform_adc_peripherals[] =
   [MICO_ADC_SWITCH]        = {ADC3, ADC_CHANNEL_8, &adc_handles[1], 5, &platform_gpio_pins[MICO_GPIO_CHARGE_ADC]},
 };
 #endif
+#if 0
 TIM_HandleTypeDef tim_handles[1];
 /* PWM mappings */
 const platform_pwm_t platform_pwm_peripherals[] =
@@ -172,6 +148,7 @@ const platform_pwm_t platform_pwm_peripherals[] =
 //  [MICO_PWM_3]  = {TIM2, 4, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, &platform_gpio_pins[MICO_GPIO_19]},    
   /* TODO: fill in the other options here ... */
 };
+#endif
 #if 0
 const platform_spi_t platform_spi_peripherals[] =
 {
@@ -355,30 +332,30 @@ const mico_logic_partition_t mico_partitions[] =
     .partition_owner           = MICO_FLASH_EMBEDDED,
     .partition_description     = "Bootloader",
     .partition_start_addr      = 0x08000000,
-    .partition_length          = 0x5000,    //20k bytes
+    .partition_length          = 0x4000,    //16k bytes
     .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_DIS,
   },
   [MICO_PARTITION_APPLICATION] =
   {
     .partition_owner           = MICO_FLASH_EMBEDDED,
     .partition_description     = "Application",
-    .partition_start_addr      = 0x08006000, 
-    .partition_length          = 0xa000,   //40k bytes
+    .partition_start_addr      = 0x08005000, 
+    .partition_length          = 0xD000,   //52k bytes
     .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_DIS,
   },
   [MICO_PARTITION_OTA_TEMP] =
   {
     .partition_owner           = MICO_FLASH_EMBEDDED,
     .partition_description     = "OTA Storage",
-    .partition_start_addr      = 0x08011000,
-    .partition_length          = 0xa000, //40k bytes
+    .partition_start_addr      = 0x08013000,
+    .partition_length          = 0xD000, //52k bytes
     .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_EN,
   },
   [MICO_PARTITION_PARAMETER_1] =
   {
     .partition_owner           = MICO_FLASH_EMBEDDED,
     .partition_description     = "PARAMETER1",
-    .partition_start_addr      = 0x08005000,
+    .partition_start_addr      = 0x08004000,
     .partition_length          = 0x1000, // 4k bytes
     .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_EN,
   },
@@ -386,7 +363,7 @@ const mico_logic_partition_t mico_partitions[] =
   {
     .partition_owner           = MICO_FLASH_EMBEDDED,
     .partition_description     = "PARAMETER1",
-    .partition_start_addr      = 0x08010000,
+    .partition_start_addr      = 0x08012000,
     .partition_length          = 0x1000, //4k bytes
     .partition_options         = PAR_OPT_READ_EN | PAR_OPT_WRITE_EN,
   },
