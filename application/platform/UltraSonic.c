@@ -76,8 +76,8 @@ ultra_sonic_threshold_t ultra_sonic_threshold_ram =
 ultra_sonic_threshold_t ultra_sonic_threshold_ram = 
 {
     //.threshold[0] = 31,
-    .threshold[1]   = 20,//31,
-    .threshold[2]   = 20,//31,
+    .threshold[1]   = 31,
+    .threshold[2]   = 31,
     .threshold[3]   = 31,
     .threshold[4]   = 30,
     .threshold[5]   = 29,
@@ -292,10 +292,10 @@ void UltraSonicSendCMD(ultra_sonic_cmd_t cmd)
     }
 }
 
-#define BLIND_AREA_MIN          20                          //uint: cm
+#define BLIND_AREA_MIN          15                         //uint: cm
 #define BLIND_AREA_MIN_TIME     (BLIND_AREA_MIN*1000/17)    //uint: us
 
-#define BLIND_AREA_MAX          24                          //uint: cm
+#define BLIND_AREA_MAX          16                          //uint: cm
 #define BLIND_AREA_MAX_TIME     (BLIND_AREA_MAX*1000/17)    //uint: us
 
 //#define BEYOND_BLIND_AREA       3                           //uint: cm
@@ -322,16 +322,17 @@ void UltraSonicStart(void)
     //while(/*(MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) == 0) && */(GetTimerCount() - blind_area_time < BLIND_AREA_MIN_TIME));
     for(;;)
     {
-        if(GetTimerCount() > blind_area_time)
+        uint16_t timer_cnt = GetTimerCount();
+        if(timer_cnt > blind_area_time)
         {
-            if(GetTimerCount() - blind_area_time >= BEFORE_SEND_TIME)    
+            if(timer_cnt - blind_area_time >= BEFORE_SEND_TIME)    
             {
                 break;
             }
         }
-        else if(GetTimerCount() < blind_area_time)
+        else if(timer_cnt < blind_area_time)
         {
-            if(GetTimerCount()  + USER_TIM_MAX_CNT - blind_area_time >= BEFORE_SEND_TIME)    
+            if(timer_cnt  + USER_TIM_MAX_CNT - blind_area_time >= BEFORE_SEND_TIME)    
             {
                 break;
             }
@@ -341,16 +342,17 @@ void UltraSonicStart(void)
     blind_area_time = GetTimerCount();
     for(;;)
     {
-        if(GetTimerCount() > blind_area_time)
+        uint16_t timer_cnt = GetTimerCount();
+        if(timer_cnt > blind_area_time)
         {
-            if(GetTimerCount() - blind_area_time >= BLIND_AREA_MIN_TIME)    
+            if(timer_cnt - blind_area_time >= BLIND_AREA_MIN_TIME)    
             {
                 break;
             }
         }
-        else if(GetTimerCount() < blind_area_time)
+        else if(timer_cnt < blind_area_time)
         {
-            if(GetTimerCount()  + USER_TIM_MAX_CNT - blind_area_time >= BLIND_AREA_MIN_TIME)    
+            if(timer_cnt  + USER_TIM_MAX_CNT - blind_area_time >= BLIND_AREA_MIN_TIME)    
             {
                 break;
             }
@@ -373,16 +375,17 @@ void UltraSonicStart(void)
     //ultra_sonic_data->send_time = GetTimerCount();
     
     while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) == 0) && (GetTimerCount() - blind_area_time < BLIND_AREA_MAX_TIME));
-    if(GetTimerCount() > blind_area_time)
+    uint16_t timer_cnt = GetTimerCount();
+    if(timer_cnt > blind_area_time)
     {
-        if(GetTimerCount() - blind_area_time >= BLIND_AREA_MAX_TIME)    
+        if(timer_cnt - blind_area_time >= BLIND_AREA_MAX_TIME)    
         {
             ultra_sonic_data->in_blind_area_flag = true;
         }
     }
-    else if(GetTimerCount() < blind_area_time)
+    else if(timer_cnt < blind_area_time)
     {
-        if(GetTimerCount()  + USER_TIM_MAX_CNT - blind_area_time >= BLIND_AREA_MAX_TIME)    
+        if(timer_cnt  + USER_TIM_MAX_CNT - blind_area_time >= BLIND_AREA_MAX_TIME)    
         {
             ultra_sonic_data->in_blind_area_flag = true;
         }
@@ -405,13 +408,16 @@ void CompleteAndUploadData(void)
     id.CanID_Struct.ACK = 1;
     id.CanID_Struct.FUNC_ID = CAN_FUN_ID_READ;
     id.CanID_Struct.res = 0;
+    /*
     if(ultra_sonic_data->in_blind_area_flag == true)
     {
         uint16_t tmp = OBJ_IN_BLIND_AREA;           
         CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
         printf("%d\n",tmp);
     }
-    else if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
+    */
+    //else
+      if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
     {
         do
         {
