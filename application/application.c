@@ -25,12 +25,13 @@ int main( void )
   bsp_Init();
   Platform_Init();
   MicoCanInitialize( MICO_CAN1 );
-   
+  CanLongBufInit();
+  
   delay_ms(10);
   UltraSonicInit();
   delay_ms(10);
   
-  CanLongBufInit();
+  
  
   for(;;)
   { 
