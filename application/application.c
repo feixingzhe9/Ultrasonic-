@@ -24,8 +24,9 @@ int main( void )
 
   bsp_Init();
   Platform_Init();
-  MicoCanInitialize( MICO_CAN1 );
   CanLongBufInit();
+  MicoCanInitialize( MICO_CAN1 );
+  
   
   delay_ms(10);
   UltraSonicInit();

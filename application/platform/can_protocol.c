@@ -579,10 +579,16 @@ void CanLongBufInit(void)
 
 #define CAN_LONG_FRAME_TIME_OUT     5000/SYSTICK_PERIOD
 
-#define CAN_COMM_TIME_OUT           5000
-uint32_t can_comm_start_time;
+#define CAN_COMM_TIME_OUT           1000/SYSTICK_PERIOD
+uint32_t can_comm_start_time = 0;
 void can_protocol_period( void )
 {
+    if(os_get_time() - can_comm_start_time >= CAN_COMM_TIME_OUT)
+    {
+        HAL_CAN_DeInit(platform_can_drivers[MICO_CAN1].handle);
+        MicoCanInitialize( MICO_CAN1 );
+        can_comm_start_time = os_get_time();
+    }
     if(IsFifoEmpty(can_fifo) == FALSE)
     {  
         CAN_ID_UNION id;
@@ -596,126 +602,106 @@ void can_protocol_period( void )
         uint8_t rx_data_len;
         
         FifoGetCanPkg(can_fifo, &can_pkg_tmp);
-        
-        memcpy(rx_buf.CanData,  can_pkg_tmp.data.CanData, can_pkg_tmp.len);
-        id.CANx_ID = can_pkg_tmp.id.CANx_ID;
-        seg_polo = can_pkg_tmp.data.CanData_Struct.SegPolo;
-        seg_num = can_pkg_tmp.data.CanData_Struct.SegNum;
-        rx_data_len = can_pkg_tmp.len;
-        
-        if(seg_polo == ONLYONCE)
+        if(can_pkg_tmp.len > 0)
         {
-            //if( (id.CanID_Struct.SourceID < SOURCE_ID_PREPARE_UPDATE) && (id.CanID_Struct.SourceID > SOURCE_ID_CHECK_TRANSMIT) )
-            if(id.CanID_Struct.DestMACID = ultrasonic_src_id)
-            {
-                tx_len = CmdProcessing(&id, rx_buf.CanData_Struct.Data, rx_data_len - 1, CanTxdataBuff );
-                //process the data here//
-                
-                if(tx_len > 0)
-                {
-                    CanTX( MICO_CAN1, id.CANx_ID, CanTxdataBuff, tx_len );
-                }        
-            }
+            can_comm_start_time = os_get_time();
+            memcpy(rx_buf.CanData,  can_pkg_tmp.data.CanData, can_pkg_tmp.len);
+            id.CANx_ID = can_pkg_tmp.id.CANx_ID;
+            seg_polo = can_pkg_tmp.data.CanData_Struct.SegPolo;
+            seg_num = can_pkg_tmp.data.CanData_Struct.SegNum;
+            rx_data_len = can_pkg_tmp.len;
             
-            //CanTX( MICO_CAN1, id.CANx_ID, test_data, sizeof(test_data) );
-            //CanTX( MICO_CAN1, id.CANx_ID, rx_buf.CanData, rx_data_len );
-        }
-        else //long frame
-        {
-            for(uint8_t i = 0; i < CAN_LONG_BUF_NUM; i++)
+            if(seg_polo == ONLYONCE)
             {
-                if(can_long_frame_buf->can_rcv_buf[i].used_len > 0)
+                //if( (id.CanID_Struct.SourceID < SOURCE_ID_PREPARE_UPDATE) && (id.CanID_Struct.SourceID > SOURCE_ID_CHECK_TRANSMIT) )
+                if(id.CanID_Struct.DestMACID = ultrasonic_src_id)
                 {
-                    if(os_get_time() - can_long_frame_buf->can_rcv_buf[i].start_time > CAN_LONG_FRAME_TIME_OUT)
+                    tx_len = CmdProcessing(&id, rx_buf.CanData_Struct.Data, rx_data_len - 1, CanTxdataBuff );
+                    //process the data here//
+                    
+                    if(tx_len > 0)
                     {
-                        can_long_frame_buf->FreeBuf(i);
-                    }
-                }     
-            }
-            
-            if(seg_polo == BEGIAN)
-            {
-                buf_index = can_long_frame_buf->GetTheBufById(id.CANx_ID);
-                if(buf_index == CAN_BUF_NO_THIS_ID)
-                {
-                    buf_index = can_long_frame_buf->GetOneFreeBuf();
-                }
-                else
-                {
-                    //
+                        CanTX( MICO_CAN1, id.CANx_ID, CanTxdataBuff, tx_len );
+                    }        
                 }
                 
-                if((buf_index == CAN_LONG_BUF_FULL) || (buf_index >= CAN_LONG_BUF_NUM))
-                {
-                    CanProtocolLog("LONG FRAME RCV BUF IS FULL! ! ! !\r\n");
-                    
-                    goto exit;
-                }
-                memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[0], rx_buf.CanData_Struct.Data, CAN_ONE_FRAME_DATA_LENTH);
-                can_long_frame_buf->can_rcv_buf[buf_index].used_len = CAN_ONE_FRAME_DATA_LENTH;
-                can_long_frame_buf->can_rcv_buf[buf_index].can_id = id.CANx_ID;
-                can_long_frame_buf->can_rcv_buf[buf_index].start_time = os_get_time();
-                CanProtocolLog("begin\r\n");
+                //CanTX( MICO_CAN1, id.CANx_ID, test_data, sizeof(test_data) );
+                //CanTX( MICO_CAN1, id.CANx_ID, rx_buf.CanData, rx_data_len );
             }
-            else if((seg_polo == TRANSING) || (seg_polo == END))
+#if 1
+            else //long frame
             {
-                buf_index = can_long_frame_buf->GetTheBufById(id.CANx_ID);
-                if((buf_index == CAN_BUF_NO_THIS_ID) || (buf_index >= CAN_LONG_BUF_NUM))
+                for(uint8_t i = 0; i < CAN_LONG_BUF_NUM; i++)
                 {
-                    CanProtocolLog("ERROR ! !\r\n long buff index is %d",buf_index);
-                    goto exit;
+                    if(can_long_frame_buf->can_rcv_buf[i].used_len > 0)
+                    {
+                        if(os_get_time() - can_long_frame_buf->can_rcv_buf[i].start_time > CAN_LONG_FRAME_TIME_OUT)
+                        {
+                            can_long_frame_buf->FreeBuf(i);
+                        }
+                    }     
                 }
-                can_long_frame_buf->can_rcv_buf[buf_index].start_time = os_get_time();
-                if(seg_polo == TRANSING)
+                
+                if(seg_polo == BEGIAN)
                 {
-                    memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[seg_num*CAN_ONE_FRAME_DATA_LENTH], rx_buf.CanData_Struct.Data, CAN_ONE_FRAME_DATA_LENTH);
-                    can_long_frame_buf->can_rcv_buf[buf_index].used_len += CAN_ONE_FRAME_DATA_LENTH;
-                    CanProtocolLog("transing\r\n");
-                }
-                if(seg_polo == END)
-                {
-                    memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[seg_num*CAN_ONE_FRAME_DATA_LENTH], rx_buf.CanData_Struct.Data, rx_data_len - 1);
-                    can_long_frame_buf->can_rcv_buf[buf_index].used_len += rx_data_len - 1; 
+                    buf_index = can_long_frame_buf->GetTheBufById(id.CANx_ID);
+                    if(buf_index == CAN_BUF_NO_THIS_ID)
+                    {
+                        buf_index = can_long_frame_buf->GetOneFreeBuf();
+                    }
+                    else
+                    {
+                        //
+                    }
                     
-                    //process the data here//
-                    /**********************/
-                    //process the data here//
-                    
-                    CanTX( MICO_CAN1, id.CANx_ID, can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf, can_long_frame_buf->can_rcv_buf[buf_index].used_len);  // test :send the data back;             
-                    can_long_frame_buf->FreeBuf(buf_index);
-                    CanProtocolLog("end\r\n");
-                }       
-            }
-        }
-        
-        
-#if 0
-        else if( CanData.FrameType == 1 )
-        {
-            if( CanData.CanID_U.SegmentNum <= 10 )//update prepare
-            {
-                if( CanData.CanID_U.ID != 0 )//muti data process
-                {
-                    CANUpDataLen = CanData.CanID_U.SegmentNum*8;
-                    memcpy( &CanUpdataBuff[CanData.CanID_U.SegmentNum*8], RxMessage.Data, RxMessage.DLC );
+                    if((buf_index == CAN_LONG_BUF_FULL) || (buf_index >= CAN_LONG_BUF_NUM))
+                    {
+                        CanProtocolLog("LONG FRAME RCV BUF IS FULL! ! ! !\r\n");
+                        
+                        goto exit;
+                    }
+                    memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[0], rx_buf.CanData_Struct.Data, CAN_ONE_FRAME_DATA_LENTH);
+                    can_long_frame_buf->can_rcv_buf[buf_index].used_len = CAN_ONE_FRAME_DATA_LENTH;
+                    can_long_frame_buf->can_rcv_buf[buf_index].can_id = id.CANx_ID;
+                    can_long_frame_buf->can_rcv_buf[buf_index].start_time = os_get_time();
+                    CanProtocolLog("begin\r\n");
                 }
-                else
+                else if((seg_polo == TRANSING) || (seg_polo == END))
                 {
-                    CANUpDataLen = CanData.CanID_U.SegmentNum*8 + RxMessage.DLC;
-                    memcpy( &CanUpdataBuff[CanData.CanID_U.SegmentNum*8], RxMessage.Data, RxMessage.DLC );				
-                    //update cmd process
-                    TxCanData = FirmwareUpgrade( CanData.CanID_U.ID, CanUpdataBuff, CANUpDataLen );
-                    CM_CAN_Tx( MICO_CAN1, CanData, TxCanData.pdata, TxCanData.len );
-                    CANUpDataLen = 0;
+                    buf_index = can_long_frame_buf->GetTheBufById(id.CANx_ID);
+                    if((buf_index == CAN_BUF_NO_THIS_ID) || (buf_index >= CAN_LONG_BUF_NUM))
+                    {
+                        CanProtocolLog("ERROR ! !\r\n long buff index is %d",buf_index);
+                        goto exit;
+                    }
+                    can_long_frame_buf->can_rcv_buf[buf_index].start_time = os_get_time();
+                    if(seg_polo == TRANSING)
+                    {
+                        memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[seg_num*CAN_ONE_FRAME_DATA_LENTH], rx_buf.CanData_Struct.Data, CAN_ONE_FRAME_DATA_LENTH);
+                        can_long_frame_buf->can_rcv_buf[buf_index].used_len += CAN_ONE_FRAME_DATA_LENTH;
+                        CanProtocolLog("transing\r\n");
+                    }
+                    if(seg_polo == END)
+                    {
+                        memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[seg_num*CAN_ONE_FRAME_DATA_LENTH], rx_buf.CanData_Struct.Data, rx_data_len - 1);
+                        can_long_frame_buf->can_rcv_buf[buf_index].used_len += rx_data_len - 1; 
+                        
+                        //process the data here//
+                        /**********************/
+                        //process the data here//
+                        
+                        CanTX( MICO_CAN1, id.CANx_ID, can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf, can_long_frame_buf->can_rcv_buf[buf_index].used_len);  // test :send the data back;             
+                        can_long_frame_buf->FreeBuf(buf_index);
+                        CanProtocolLog("end\r\n");
+                    }       
                 }
             }
-            else//update data package
-            {
-                TxCanData = FirmwareUpgrade( CanData.CanID_U.ID, CanUpdataBuff, CANUpDataLen );
-                CM_CAN_Tx( MICO_CAN1, CanData, TxCanData.pdata, TxCanData.len );
-            }
-        }
 #endif
+            
+        }
+        
+        
+        
     }
    
     

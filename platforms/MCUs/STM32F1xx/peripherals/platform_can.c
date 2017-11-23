@@ -120,7 +120,7 @@ OSStatus platform_can_init( const platform_can_driver_t* can )
 
 
     
-    __HAL_CAN_ENABLE_IT( can->handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
+    __HAL_CAN_ENABLE_IT( can->handle, CAN_IT_FMP0 | CAN_IT_FF0 | CAN_IT_FOV0 );
     
     NVIC_ClearPendingIRQ( USB_LP_CAN1_RX0_IRQn ); 
     NVIC_EnableIRQ( USB_LP_CAN1_RX0_IRQn );
@@ -192,8 +192,8 @@ OSStatus platform_can_send_message( const platform_can_driver_t* can, const CanT
   //memcpy(can->handle->pTxMsg->Data, msg->Data, msg->DLC);
   memcpy(can->handle->pTxMsg, msg, sizeof(CanTxMsgTypeDef));
 #if 0 
-  require_action_quiet( HAL_CAN_Transmit_IT( can->handle ) == HAL_OK, exit, err = kGeneralErr );
-  //require_action_quiet( HAL_CAN_Transmit( can->handle, 0x10 ) == HAL_OK, exit, err = kGeneralErr );
+  //require_action_quiet( HAL_CAN_Transmit_IT( can->handle ) == HAL_OK, exit, err = kGeneralErr );
+  require_action_quiet( HAL_CAN_Transmit( can->handle, 0x10 ) == HAL_OK, exit, err = kGeneralErr );
 #else
   if(HAL_CAN_Transmit_IT( can->handle ) != HAL_OK)
   {
@@ -235,6 +235,11 @@ void platform_can_rx_irq( platform_can_driver_t* can_driver )
   {
     /* Call receive function */
     __HAL_CAN_DISABLE_IT(can_driver->handle, CAN_IT_FOV0);
+  }
+  //if(__HAL_CAN_GET_IT_SOURCE(can_driver->handle, CAN_IT_FMP0))
+  {
+    /* Call receive function */
+    //__HAL_CAN_DISABLE_IT(can_driver->handle, CAN_IT_FMP0);
   }
   
   

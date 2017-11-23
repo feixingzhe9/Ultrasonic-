@@ -339,16 +339,16 @@ void UltraSonicStart(void)
 #else
 
 
-#define BLIND_AREA_MIN          9                         //uint: cm
+#define BLIND_AREA_MIN          6                         //uint: cm
 #define BLIND_AREA_MIN_TIME     (BLIND_AREA_MIN*1000/17)    //uint: us
 
-#define BLIND_AREA_MAX          11                          //uint: cm
+#define BLIND_AREA_MAX          10                          //uint: cm
 #define BLIND_AREA_MAX_TIME     (BLIND_AREA_MAX*1000/17)    //uint: us
 
 //#define BEYOND_BLIND_AREA       3                           //uint: cm
 //#define BEYOND_BLIND_AREA_TIME  (BEYOND_BLIND_AREA*1000/17) //uint: us
 
-#define BEFORE_SEND_TIME        (2*1000/17)                 //uint: us
+#define BEFORE_SEND_TIME        (5*1000/17)                 //uint: us
 
 void UltraSonicStart(void)
 {
@@ -478,8 +478,9 @@ void CompleteAndUploadData(void)
 
         //for(i = 0; i < ultra_sonic_data->interval_time.cnt; i++)
         {
-            ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
             
+            ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
+#if 0           
             if((ultra_sonic_data->compute_ditance[i] <= DANGER_DISTANCE) && (++measure_repeat_filter < DANGER_DISTANCE_FILTER_CNT))
             {
                 delay_ms(20 + GetTimerCount() % 30);//random time - 30ms ~ 79ms
@@ -511,7 +512,13 @@ void CompleteAndUploadData(void)
                     }
                 }
                 
-            }                
+            }  
+#else
+            uint16_t distance = ultra_sonic_data->compute_ditance[i];
+            CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
+            
+            
+#endif
         }
         
     }
