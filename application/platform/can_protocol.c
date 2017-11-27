@@ -47,7 +47,7 @@ can_pkg_t can_pkg[CAN_FIFO_SIZE] = {0};
 
 #if 1
 extern uint8_t GetKeyValue(mico_gpio_t gpio);
-uint32_t my_id;
+//uint32_t my_id;
 uint8_t GetCanSrcId(void)
 {
   
@@ -255,10 +255,7 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
                         return  sizeof(tmp);
                     }                   
 #else
-                    if(ultra_sonic_data->start_flag == 0)
-                    {
-                        UltraSonicStart();
-                    }                   
+                    UltraSonicStart();
                     return 0;
 #endif                   
                     break;
@@ -449,7 +446,6 @@ static OSStatus upgradeFinishCheckProcess( CAN_ID_UNION *id )
 uint32_t can_comm_start_time;
 void can_protocol_period( void )
 {
-    
     while(IsFifoEmpty(can_fifo) == FALSE)
     {  
         CAN_ID_UNION id;

@@ -41,8 +41,8 @@ void board_gpios_init( void )
     //MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_EMG_STOP, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_24_V_EN, &pin_config );
-    
-    
+    MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_TRIG, &pin_config );
+    MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_TRIG );
     
     
     MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_24_V_EN ); 
@@ -60,7 +60,7 @@ void board_gpios_init( void )
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S2, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S3, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S4, &pin_config );
-    MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S5, &pin_config );
+    //MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S5, &pin_config );
     
     EnableSwjAndDisableJtag();
 }

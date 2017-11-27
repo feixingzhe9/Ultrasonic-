@@ -116,6 +116,8 @@ typedef enum
     MICO_GPIO_KEY_S4,
     MICO_GPIO_KEY_S5,
     
+    MICO_GPIO_TRIG,
+    
     
     MICO_GPIO_PWRKEY,
     MICO_GPIO_5V_RES1_ADC,

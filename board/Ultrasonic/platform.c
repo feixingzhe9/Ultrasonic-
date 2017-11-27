@@ -88,7 +88,9 @@ const platform_gpio_t platform_gpio_pins[] =
     [MICO_GPIO_KEY_S2]            = { GPIOA,  4 },
     [MICO_GPIO_KEY_S3]            = { GPIOA,  5 },
     [MICO_GPIO_KEY_S4]            = { GPIOA,  6 },
-    [MICO_GPIO_KEY_S5]            = { GPIOA,  7 },
+    //[MICO_GPIO_KEY_S5]            = { GPIOA,  7 },
+    
+    [MICO_GPIO_TRIG]              = { GPIOA,  7 },
 
     [MICO_GPIO_UART3_TX]          = { GPIOB, 10 },
     [MICO_GPIO_UART3_RX]          = { GPIOB, 11 },
@@ -650,6 +652,16 @@ void UltraDataIO_Output(void)//output high
 void V24OutputHigh(void)
 {
     MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_24_V_EN ); 
+}
+
+
+void UltraTrigOutputHigh(void)
+{
+    MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_TRIG ); 
+}
+void UltraTrigOutputLow(void)
+{
+    MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_TRIG ); 
 }
 
 void V24OutputLow(void)

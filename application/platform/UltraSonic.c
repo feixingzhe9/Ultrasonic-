@@ -186,7 +186,7 @@ void UltraSonicInit(void)
     //UltraSonicSetFrqToDest();
     delay_ms(20);
     
-    UltraSonicSetThreshold(ultra_sonic_threshold);
+    //UltraSonicSetThreshold(ultra_sonic_threshold);
     delay_ms(10);
      
 #if 0
@@ -229,6 +229,8 @@ void UltraSonicInit(void)
 
     
 }
+
+
 void Ultra_IO_Output(void)
 {
     UltraDataIO_Output();
@@ -292,104 +294,46 @@ void UltraSonicSendCMD(ultra_sonic_cmd_t cmd)
     }
 }
 
-#define BLIND_AREA_MIN          15                         //uint: cm
-#define BLIND_AREA_MIN_TIME     (BLIND_AREA_MIN*1000/17)    //uint: us
-
-#define BLIND_AREA_MAX          16                          //uint: cm
-#define BLIND_AREA_MAX_TIME     (BLIND_AREA_MAX*1000/17)    //uint: us
-
-//#define BEYOND_BLIND_AREA       3                           //uint: cm
-//#define BEYOND_BLIND_AREA_TIME  (BEYOND_BLIND_AREA*1000/17) //uint: us
-
-#define BEFORE_SEND_TIME        (2*1000/17)                 //uint: us
-
+extern void UltraTrigOutputHigh(void);
+extern void UltraTrigOutputLow(void);
 void UltraSonicStart(void)
 {
-    uint32_t blind_area_time = 0;
+    uint32_t start_time = 0;
+#if 0
     Ultra_IO_Output();
 	UltraIoOutputLow();
 	delay_us(t_snd);
 	UltraIoOutputHigh();
-    blind_area_time = GetTimerCount();
-#if 0
-    while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) == 1) && (GetTimerCount() - blind_area_time < BEFORE_SEND_TIME));
-    if(GetTimerCount() - blind_area_time > BLIND_AREA_MIN_TIME)
-    {
-        ultra_sonic_data->err_flag = 1;
-        return;
-    }
-#endif
-    //while(/*(MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) == 0) && */(GetTimerCount() - blind_area_time < BLIND_AREA_MIN_TIME));
-    for(;;)
-    {
-        uint16_t timer_cnt = GetTimerCount();
-        if(timer_cnt > blind_area_time)
-        {
-            if(timer_cnt - blind_area_time >= BEFORE_SEND_TIME)    
-            {
-                break;
-            }
-        }
-        else if(timer_cnt < blind_area_time)
-        {
-            if(timer_cnt  + USER_TIM_MAX_CNT - blind_area_time >= BEFORE_SEND_TIME)    
-            {
-                break;
-            }
-        }
-    }
-    ultra_sonic_data->send_time = GetTimerCount();
-    blind_area_time = GetTimerCount();
-    for(;;)
-    {
-        uint16_t timer_cnt = GetTimerCount();
-        if(timer_cnt > blind_area_time)
-        {
-            if(timer_cnt - blind_area_time >= BLIND_AREA_MIN_TIME)    
-            {
-                break;
-            }
-        }
-        else if(timer_cnt < blind_area_time)
-        {
-            if(timer_cnt  + USER_TIM_MAX_CNT - blind_area_time >= BLIND_AREA_MIN_TIME)    
-            {
-                break;
-            }
-        }
-    }
-    //delay_us(150);  
+    
+    delay_us(150);  
    
     DISABLE_INTERRUPTS();
     ultra_sonic_data->interval_time.cnt = 0;
-    ultra_sonic_data->end_flag = false;
-    ultra_sonic_data->err_flag = false;
-    ultra_sonic_data->in_blind_area_flag = false;
     memset(ultra_sonic_data->compute_ditance, 0, INTERVAL_TIME_MAX);
-    ultra_sonic_data->end_flag = false;
+    ultra_sonic_data->end_flag = 0;
     ultra_sonic_data->start_flag = 1;
     ENABLE_INTERRUPTS();
     
     Ultra_IO_InputIT();
     
-    //ultra_sonic_data->send_time = GetTimerCount();
+    ultra_sonic_data->send_time = GetTimerCount();
+#endif  
     
-    while((MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) == 0) && (GetTimerCount() - blind_area_time < BLIND_AREA_MAX_TIME));
-    uint16_t timer_cnt = GetTimerCount();
-    if(timer_cnt > blind_area_time)
-    {
-        if(timer_cnt - blind_area_time >= BLIND_AREA_MAX_TIME)    
-        {
-            ultra_sonic_data->in_blind_area_flag = true;
-        }
-    }
-    else if(timer_cnt < blind_area_time)
-    {
-        if(timer_cnt  + USER_TIM_MAX_CNT - blind_area_time >= BLIND_AREA_MAX_TIME)    
-        {
-            ultra_sonic_data->in_blind_area_flag = true;
-        }
-    }
+    UltraTrigOutputHigh();
+    delay_us(10);
+    UltraTrigOutputLow();
+    
+    DISABLE_INTERRUPTS();
+    ultra_sonic_data->interval_time.cnt = 0;
+    memset(ultra_sonic_data->compute_ditance, 0, INTERVAL_TIME_MAX);
+    ultra_sonic_data->end_flag = 0;
+    ultra_sonic_data->start_flag = 1;
+    ENABLE_INTERRUPTS();
+    Ultra_IO_InputIT();
+    start_time = GetTimerCount();
+    //while(GetTimerCount() - start_time < 400);
+    delay_us(400);
+    ultra_sonic_data->send_time = GetTimerCount();
     
     
 }
@@ -402,23 +346,16 @@ void CompleteAndUploadData(void)
 {
     uint8_t i = 0;
     CAN_ID_UNION id;
+    uint16_t interval_time = 0;
     id.CanID_Struct.SourceID = 0x80;
     id.CanID_Struct.DestMACID = 0x60;//test;
     id.CanID_Struct.SrcMACID = ultrasonic_src_id;
     id.CanID_Struct.ACK = 1;
     id.CanID_Struct.FUNC_ID = CAN_FUN_ID_READ;
     id.CanID_Struct.res = 0;
-    /*
-    if(ultra_sonic_data->in_blind_area_flag == true)
+    if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
     {
-        uint16_t tmp = OBJ_IN_BLIND_AREA;           
-        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
-        printf("%d\n",tmp);
-    }
-    */
-    //else
-      if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
-    {
+/*
         do
         {
             ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
@@ -426,11 +363,16 @@ void CompleteAndUploadData(void)
         }while((i < ultra_sonic_data->interval_time.cnt) && (ultra_sonic_data->compute_ditance[i++] <= MEASURE_BLIND_DISTANCE));
         
         if(i > 0)i--;
-
-        //for(i = 0; i < ultra_sonic_data->interval_time.cnt; i++)
+*/
+        
         {
+            //if(ultra_sonic_data->interval_time.time[i] > 400)
+            {
+                //interval_time = ultra_sonic_data->interval_time.time[i] - 400;
+            }
             ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
-            
+            printf("%d\n",ultra_sonic_data->compute_ditance[i]);
+/*           
             if((ultra_sonic_data->compute_ditance[i] <= DANGER_DISTANCE) && (++measure_repeat_filter < DANGER_DISTANCE_FILTER_CNT))
             {
                 delay_ms(20 + GetTimerCount() % 30);//random time - 30ms ~ 79ms
@@ -456,7 +398,8 @@ void CompleteAndUploadData(void)
                     }
                 }
                 
-            }                
+            }
+*/
         }
     }
     else

@@ -11,7 +11,7 @@
 #include "platform_tim.h"
 #define os_PowerBoard_log(format, ...)  custom_log("Ultrasonic", format, ##__VA_ARGS__)
 #define Application_REVISION "v0.1"
-
+ 
 
 const  char menu[] =
 "\r\n"
@@ -37,15 +37,17 @@ int main( void )
   Platform_Init();
   MicoCanInitialize( MICO_CAN1 );
   CanLongBufInit();
+  
   delay_ms(10);
   UltraSonicInit();
   delay_ms(10);
   
-
+  
+ 
   for(;;)
   { 
     can_protocol_period(); 
-
+    UltraSonicStartTick();
     UltraSonicDataTick();
     SysLed();
 #ifdef HOMWEE_TEST 
@@ -54,7 +56,7 @@ int main( void )
   }
 }
 
-#define ULTRASONIC_SEND_TIME   200/SYSTICK_PERIOD
+#define ULTRASONIC_SEND_TIME   300/SYSTICK_PERIOD
 void UltraSonicStartTick(void) 
 {
     static uint32_t start_time_1 = 0;

@@ -195,9 +195,10 @@ OSStatus platform_can_send_message( const platform_can_driver_t* can, const CanT
   require_action_quiet( HAL_CAN_Transmit_IT( can->handle ) == HAL_OK, exit, err = kGeneralErr );
   //require_action_quiet( HAL_CAN_Transmit( can->handle, 0x10 ) == HAL_OK, exit, err = kGeneralErr );
 #else
-  if(HAL_CAN_Transmit_IT( can->handle ) != HAL_OK)
+  //if(HAL_CAN_Transmit_IT( can->handle ) != HAL_OK)
+  if(HAL_CAN_Transmit( can->handle, 0x10 ) != HAL_OK)
   {
-    //platform_can_log("CAN Transmit Error occured ! \r\n");
+    platform_can_log("CAN Transmit Error occured ! \r\n");
   }
 #endif
 exit:

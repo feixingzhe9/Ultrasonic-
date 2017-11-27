@@ -615,7 +615,7 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>2</state>
+          <state>1</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
@@ -623,7 +623,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>Ultrasonic-Single.bin</state>
+          <state>Ultrasonic-Single.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -4110,7 +4110,7 @@
       <group>
         <name>EWARM</name>
         <file>
-          <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\EWARM\startup_stm32f103xe_application_EWARM.s</name>
+          <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\EWARM\startup_stm32f103xb_bootloader_EWARM.s</name>
         </file>
       </group>
       <group>
