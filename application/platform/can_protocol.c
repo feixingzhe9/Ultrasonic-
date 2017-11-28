@@ -91,7 +91,7 @@ uint8_t GetCanSrcId(void)
       
     if((new_key_value != 0) && (new_key_value <= 0x0f))
     {
-        return new_key_value + ULTRASONIC_SRC_ID_BASE;
+        return new_key_value + ULTRASONIC_SRC_ID_BASE - 1;
     }
     CanProtocolLog("Ultrasonic CAN MAC ID out of range ! ! ! \r\n");
     return 0x60;

@@ -47,7 +47,7 @@ int main( void )
   for(;;)
   { 
     can_protocol_period(); 
-    UltraSonicStartTick();
+    //UltraSonicStartTick();
     UltraSonicDataTick();
     SysLed();
 #ifdef HOMWEE_TEST 

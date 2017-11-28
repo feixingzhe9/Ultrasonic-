@@ -345,69 +345,28 @@ static uint16_t last_distance = NO_OBJ_DETECTED;
 void CompleteAndUploadData(void)
 {
     uint8_t i = 0;
+    uint16_t distance = 0;
     CAN_ID_UNION id;
     uint16_t interval_time = 0;
     id.CanID_Struct.SourceID = 0x80;
-    id.CanID_Struct.DestMACID = 0x60;//test;
+    id.CanID_Struct.DestMACID = 0x01;
     id.CanID_Struct.SrcMACID = ultrasonic_src_id;
     id.CanID_Struct.ACK = 1;
     id.CanID_Struct.FUNC_ID = CAN_FUN_ID_READ;
     id.CanID_Struct.res = 0;
     if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
     {
-/*
-        do
-        {
-            ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
+        ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
         
-        }while((i < ultra_sonic_data->interval_time.cnt) && (ultra_sonic_data->compute_ditance[i++] <= MEASURE_BLIND_DISTANCE));
-        
-        if(i > 0)i--;
-*/
-        
-        {
-            //if(ultra_sonic_data->interval_time.time[i] > 400)
-            {
-                //interval_time = ultra_sonic_data->interval_time.time[i] - 400;
-            }
-            ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
-            printf("%d\n",ultra_sonic_data->compute_ditance[i]);
-/*           
-            if((ultra_sonic_data->compute_ditance[i] <= DANGER_DISTANCE) && (++measure_repeat_filter < DANGER_DISTANCE_FILTER_CNT))
-            {
-                delay_ms(20 + GetTimerCount() % 30);//random time - 30ms ~ 79ms
-                UltraSonicStart();  
-            }
-            else               
-            {
-                measure_repeat_filter = 0;   
-                if(ultra_sonic_data->compute_ditance[i] <= MEASURE_BLIND_DISTANCE)
-                {
-                    uint16_t tmp = last_distance;           
-                    CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
-                    printf("%d\n",tmp);
-                }
-                else
-                {
-                    CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&ultra_sonic_data->compute_ditance[i], sizeof(ultra_sonic_data->compute_ditance[i]) ); 
-                    printf("%d\n",ultra_sonic_data->compute_ditance[i]);
-                    last_distance = ultra_sonic_data->compute_ditance[i];
-                    if(last_distance <= MEASURE_BLIND_DISTANCE)
-                    {
-                        printf("WTF ! \r\n");
-                    }
-                }
-                
-            }
-*/
-        }
+        distance = ultra_sonic_data->compute_ditance[i];
+        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
+        printf("%d\n",distance);
     }
     else
     {
-        measure_repeat_filter = 0;
-        uint16_t tmp = NO_OBJ_DETECTED;
-        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&tmp, sizeof(tmp) ); 
-        printf("%d\n",tmp);
+        distance = NO_OBJ_DETECTED;
+        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
+        printf("%d\n",distance);
     }
 }
 

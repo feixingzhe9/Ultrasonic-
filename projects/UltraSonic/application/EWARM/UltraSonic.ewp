@@ -99,7 +99,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>STM32F103x8	ST STM32F103x8</state>
+          <state>STM32F103xB	ST STM32F103xB</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -169,13 +169,14 @@
         <option>
           <name>CCDefines</name>
           <state>USE_STDPERIPH_DRIVER</state>
-          <state>STM32F103xE</state>
+          <state>STM32F10X_MD</state>
+          <state>STM32F103xB</state>
+          <state>USE_STDPERIPH_DRIVER</state>
           <state>xSIZE_OPTIMIZE</state>
           <state>NO_MICO_RTOS</state>
-          <state>xMICO_DISABLE_WATCHDOG</state>
+          <state>MICO_DISABLE_WATCHDOG</state>
           <state>DEBUG=1</state>
           <state>NO_BLOCK_MENU</state>
-          <state>xMIKE_TEST</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -316,7 +317,7 @@
           <state>$PROJ_DIR$\..\..\..\..\platforms\include</state>
           <state>$PROJ_DIR$\..\..\..\..\include</state>
           <state>$PROJ_DIR$\..\..\..\..\include\MiCODrivers</state>
-          <state>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2</state>
+          <state>$PROJ_DIR$\..\..\..\..\board\Ultrasonic</state>
           <state>$PROJ_DIR$\..\..\..\..\platforms\Cortex-M3</state>
           <state>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\peripherals</state>
           <state>$PROJ_DIR$\..\..\..\..\library\utilities</state>
@@ -622,7 +623,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>PowerBoard_Application1.hex</state>
+          <state>Ultrasonic-Single.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -717,7 +718,7 @@
         </option>
         <option>
           <name>IlinkLogFile</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogInitialization</name>
@@ -741,7 +742,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>E:\o\STM32F103ZE\board\PowerBoard_V2\applicationLinkerForIAR.icf</state>
+          <state>$PROJ_DIR$\..\..\..\..\board\Ultrasonic\applicationLinkerForIAR.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -3866,25 +3867,10 @@
         <name>$PROJ_DIR$\..\..\..\..\application\platform\can_protocol.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\..\application\platform\fifo.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\protocol.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\protocol_bak.c</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\protocol_bak.h</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\serial_leds.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\serial_leds.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\serial_uart.c</name>
@@ -3893,22 +3879,22 @@
         <name>$PROJ_DIR$\..\..\..\..\application\platform\serial_uart.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\temp_reference.c</name>
+        <name>$PROJ_DIR$\..\..\..\..\application\platform\uart_protocol.c</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\uart_protocol.c</name>
+        <name>$PROJ_DIR$\..\..\..\..\application\platform\UltraSonic.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\application\platform\UltraSonic.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\upgrade_flash.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\upgrade_flash.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\voltage_detect.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\voltage_detect.h</name>
       </file>
     </group>
     <file>
@@ -3922,12 +3908,8 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\menu.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\application\PowerBoard.c</name>
       <excluded>
         <configuration>Debug</configuration>
-        <configuration>test</configuration>
       </excluded>
     </file>
     <file>
@@ -3940,41 +3922,14 @@
   <group>
     <name>Board</name>
     <group>
-      <name>PowerBoard_V2</name>
+      <name>UltraSonic</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\board_init.c</name>
+        <name>$PROJ_DIR$\..\..\..\..\board\Ultrasonic\board_init.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\key_switch.c</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\platform.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\platform.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\platform_config.h</name>
+        <name>$PROJ_DIR$\..\..\..\..\board\Ultrasonic\platform.c</name>
       </file>
     </group>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\backlight.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\multi_channel_detection.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\stm32f1xx_powerboard.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\stm32f1xx_powerboard.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\board\PowerBoard_V2\tps611xx_bl.c</name>
-    </file>
   </group>
   <group>
     <name>include</name>
@@ -4155,7 +4110,7 @@
       <group>
         <name>EWARM</name>
         <file>
-          <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\EWARM\startup_stm32f103xe_application_EWARM.s</name>
+          <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\EWARM\startup_stm32f103xb_bootloader_EWARM.s</name>
         </file>
       </group>
       <group>
@@ -4311,9 +4266,6 @@
           </excluded>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\peripherals\platform_adc.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\peripherals\platform_can.c</name>
         </file>
         <file>
@@ -4327,6 +4279,12 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\peripherals\platform_pwm.c</name>
+          <excluded>
+            <configuration>Debug</configuration>
+          </excluded>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\peripherals\platform_tim.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\..\platforms\MCUs\STM32F1xx\peripherals\platform_uart.c</name>
