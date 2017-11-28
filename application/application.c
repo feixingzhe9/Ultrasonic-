@@ -35,8 +35,9 @@ int main( void )
   printf ( menu, MODEL, SW_VERSION, HARDWARE_REVISION );
   bsp_Init();
   Platform_Init();
-  MicoCanInitialize( MICO_CAN1 );
   CanLongBufInit();
+  MicoCanInitialize( MICO_CAN1 );
+  
   delay_ms(10);
   UltraSonicInit();
   delay_ms(10);
