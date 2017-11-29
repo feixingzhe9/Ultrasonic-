@@ -255,7 +255,11 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
                         return  sizeof(tmp);
                     }                   
 #else
-                    UltraSonicStart();
+                    if(ultra_sonic_data->start_flag == 0)
+                    {
+                        UltraSonicStart();
+                    }
+                    
                     return 0;
 #endif                   
                     break;
@@ -442,10 +446,17 @@ static OSStatus upgradeFinishCheckProcess( CAN_ID_UNION *id )
 
 #define CAN_LONG_FRAME_TIME_OUT     5000/SYSTICK_PERIOD
 
-#define CAN_COMM_TIME_OUT           5000
+#define CAN_COMM_TIME_OUT           1000
 uint32_t can_comm_start_time;
 void can_protocol_period( void )
 {
+  
+    if(os_get_time() - can_comm_start_time >= CAN_COMM_TIME_OUT)
+    {
+        HAL_CAN_DeInit(platform_can_drivers[MICO_CAN1].handle);
+        MicoCanInitialize( MICO_CAN1 );
+        can_comm_start_time = os_get_time();
+    }
     while(IsFifoEmpty(can_fifo) == FALSE)
     {  
         CAN_ID_UNION id;
@@ -464,7 +475,7 @@ void can_protocol_period( void )
         seg_polo = can_pkg_tmp.data.CanData_Struct.SegPolo;
         seg_num = can_pkg_tmp.data.CanData_Struct.SegNum;
         rx_data_len = can_pkg_tmp.len;
-        
+        can_comm_start_time = os_get_time();
         
         
         
