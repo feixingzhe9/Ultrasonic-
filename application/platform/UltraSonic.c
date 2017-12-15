@@ -370,7 +370,7 @@ void CompleteAndUploadData(void)
     }
 }
 
-#define ULTRASONIC_MEASURE_TIME         35/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_MEASURE_TIME         12/SYSTICK_PERIOD //unit: ms
 #define ULTRASONIC_DATA_EXIST_TIME      500/SYSTICK_PERIOD//unit: ms
 void UltraSonicDataTick(void)
 {
