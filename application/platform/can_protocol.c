@@ -264,16 +264,20 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
 #endif                   
                     break;
                 case CAN_SOURCE_ID_MEASUREMENT_EN:
-                    if(data_in[0] == 1)
+                    if(data_in_len == 1)
                     {
-                        ultra_sonic_data->i_am_en = true;
+                        if(data_in[0] == 1)
+                        {
+                            ultra_sonic_data->i_am_en = true;
+                        }
+                        else if(data_in[0] == 0)
+                        {
+                            ultra_sonic_data->i_am_en = false;
+                        }
+                        data_out[0] = data_in[0];
+                        return 1;
                     }
-                    else if(data_in[0] == 0)
-                    {
-                        ultra_sonic_data->i_am_en = false;
-                    }
-                    return 1;
-                   
+                    
                     break;
                     
                 case CAN_SOURCE_ID_CAN_TEST:
