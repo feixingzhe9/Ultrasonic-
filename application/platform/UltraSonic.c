@@ -296,9 +296,12 @@ void UltraSonicSendCMD(ultra_sonic_cmd_t cmd)
 
 extern void UltraTrigOutputHigh(void);
 extern void UltraTrigOutputLow(void);
+uint32_t measure_cnt = 0;
 void UltraSonicStart(void)
 {
+  
     uint32_t start_time = 0;
+    measure_cnt++;
 #if 0
     Ultra_IO_Output();
 	UltraIoOutputLow();
@@ -370,13 +373,16 @@ void CompleteAndUploadData(void)
     }
 }
 
-#define ULTRASONIC_MEASURE_TIME         12/SYSTICK_PERIOD //unit: ms
-#define ULTRASONIC_DATA_EXIST_TIME      500/SYSTICK_PERIOD//unit: ms
+#define ULTRASONIC_MEASURE_TIME                 12/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_DATA_EXIST_TIME              500/SYSTICK_PERIOD//unit: ms
+#define ULTRASONIC_MEASURE_CRITICAL_TIME        100/SYSTICK_PERIOD //unit: ms
+extern platform_can_driver_t  platform_can_drivers[];
 void UltraSonicDataTick(void)
 {
     static uint32_t start_time_1 = 0;
     static uint32_t start_time_2 = 0;
     static uint8_t flag_1 = 0;
+    static uint8_t flag_2 = 0;
     
     if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
     {
@@ -384,14 +390,28 @@ void UltraSonicDataTick(void)
         {
             start_time_1 = os_get_time();
             flag_1 = 1;
+            flag_2 = 0;
         }
         if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_TIME)
+        {
+           
+            //ultra_sonic_data->start_flag = 0;
+            //ultra_sonic_data->end_flag = 1;
+            //flag_1 = 0; 
+            if(flag_2 == 0)
+            {
+                __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
+                CompleteAndUploadData();
+                flag_2 = 1;
+            }
+            
+        }   
+        if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_CRITICAL_TIME)
         {
            
             ultra_sonic_data->start_flag = 0;
             ultra_sonic_data->end_flag = 1;
             flag_1 = 0; 
-            CompleteAndUploadData();
         }   
     }
  

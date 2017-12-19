@@ -15,6 +15,7 @@
 
 #include "can_protocol.h"
 #include "fifo.h"
+#include "ultrasonic.h"
 
 #define platform_can_log(format, ...)  custom_log("", format, ##__VA_ARGS__)
 
@@ -24,6 +25,7 @@ typedef unsigned int    u32;
 #define CAN_FILTER_MASK     (0xff<<13)
 extern uint8_t GetCanSrcId(void);
 uint32_t ultrasonic_src_id = 0x60;
+uint8_t can_filter = 0x60;
 OSStatus platform_can_init( const platform_can_driver_t* can )
 {
 
@@ -80,9 +82,14 @@ OSStatus platform_can_init( const platform_can_driver_t* can )
     can->handle->Init.TXFP              = DISABLE;
     require_action_quiet( HAL_CAN_Init( can->handle ) == HAL_OK, exit, err = kGeneralErr );
     
-#if 1
+#if 0
     CAN_FilterInitStructure.FilterIdHigh        = ((ultrasonic_src_id<<3)<<13)>>16;//can_mac_id>>16;//((can_mac_id<<3)<<13)>>16;
     CAN_FilterInitStructure.FilterIdLow         = ((ultrasonic_src_id<<3)<<13) & 0xffff| CAN_ID_EXT ;//can_mac_id & 0xffff;//((can_mac_id<<3)<<13) & 0xffff;
+    CAN_FilterInitStructure.FilterMaskIdHigh    = (CAN_FILTER_MASK<<3)>>16;
+    CAN_FilterInitStructure.FilterMaskIdLow     = (CAN_FILTER_MASK<<3) & 0xffff | CAN_ID_EXT | CAN_RTR_REMOTE;
+#else
+    CAN_FilterInitStructure.FilterIdHigh        = ((can_filter<<3)<<13)>>16;//can_mac_id>>16;//((can_mac_id<<3)<<13)>>16;
+    CAN_FilterInitStructure.FilterIdLow         = ((can_filter<<3)<<13) & 0xffff| CAN_ID_EXT ;//can_mac_id & 0xffff;//((can_mac_id<<3)<<13) & 0xffff;
     CAN_FilterInitStructure.FilterMaskIdHigh    = (CAN_FILTER_MASK<<3)>>16;
     CAN_FilterInitStructure.FilterMaskIdLow     = (CAN_FILTER_MASK<<3) & 0xffff | CAN_ID_EXT | CAN_RTR_REMOTE;
 #endif
@@ -243,7 +250,9 @@ void platform_can_rx_irq( platform_can_driver_t* can_driver )
 }
 
 //CanRxMsgTypeDef RxMessage;
-
+extern void UltraSonicStart(void);
+extern platform_can_driver_t  platform_can_drivers[];
+uint32_t can_int_cnt = 0;
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 {
     can_pkg_t can_pkg_tmp;
@@ -251,10 +260,26 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
     
 #if 1
     ///////// put CAN package into fifo
+        
         can_pkg_tmp.id.CANx_ID = hcan->pRxMsg->ExtId;
         can_pkg_tmp.len = hcan->pRxMsg->DLC;
-        memcpy(can_pkg_tmp.data.CanData, hcan->pRxMsg->Data, hcan->pRxMsg->DLC);
-        FifoPutCanPkg(can_fifo, can_pkg_tmp);    
+        if(can_pkg_tmp.id.CanID_Struct.DestMACID == 0x60)
+        {
+            can_int_cnt++;
+            if(ultra_sonic_data->start_flag == 0)
+            {
+                __HAL_CAN_DISABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
+                UltraSonicStart();
+            }
+              //__HAL_CAN_DISABLE_IT
+        }
+        else
+        {
+            memcpy(can_pkg_tmp.data.CanData, hcan->pRxMsg->Data, hcan->pRxMsg->DLC);
+            FifoPutCanPkg(can_fifo, can_pkg_tmp); 
+        }
+         
+        
 #endif
     
 #if 0

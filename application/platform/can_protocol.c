@@ -257,7 +257,7 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
 #else
                     if(ultra_sonic_data->start_flag == 0)
                     {
-                        UltraSonicStart();
+                        //UltraSonicStart();
                     }
                     
                     return 0;
