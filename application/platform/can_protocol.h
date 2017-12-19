@@ -38,7 +38,8 @@
 //////  source id define  //////
 #define CAN_SOURCE_ID_READ_VERSION      0x01    
 
-#define CAN_SOURCE_ID_READ_MEASURE_DATA     0x80
+#define CAN_SOURCE_ID_READ_MEASURE_DATA      0x80
+#define CAN_SOURCE_ID_MEASUREMENT_EN         0x81
 
 #define CAN_SOURCE_ID_CAN_TEST              0x03
 

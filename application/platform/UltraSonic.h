@@ -93,6 +93,7 @@ typedef struct
 #define DATA_NOT_READY      0x08
     uint8_t start_flag;
     uint8_t end_flag;
+    uint8_t i_am_en;
 }ultra_sonic_data_t;
 
 typedef struct 

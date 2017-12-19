@@ -263,6 +263,19 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
                     return 0;
 #endif                   
                     break;
+                case CAN_SOURCE_ID_MEASUREMENT_EN:
+                    if(data_in[0] == 1)
+                    {
+                        ultra_sonic_data->i_am_en = true;
+                    }
+                    else if(data_in[0] == 0)
+                    {
+                        ultra_sonic_data->i_am_en = false;
+                    }
+                    return 1;
+                   
+                    break;
+                    
                 case CAN_SOURCE_ID_CAN_TEST:
                     can_test_cnt++;
                     memcpy(&data_out[0], (uint8_t *)&can_test_cnt, sizeof(can_test_cnt));

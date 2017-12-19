@@ -170,6 +170,7 @@ void UltraSonicInit(void)
     
     memset(ultra_sonic_data, 0, sizeof(ultra_sonic_data_t));
     ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
+    ultra_sonic_data->i_am_en = true;
     
     ultrasonic_frq_calibration->start_flag = 0;
     ultrasonic_frq_calibration->over_time_flag = 0;
@@ -188,44 +189,6 @@ void UltraSonicInit(void)
     
     //UltraSonicSetThreshold(ultra_sonic_threshold);
     delay_ms(10);
-     
-#if 0
-    ultra_sonic_time->f_drv = F_DRV;
-    //ultra_sonic_time->t_deb = T_DEB;
-    ultra_sonic_time->t_snd = T_SND;
-    ultra_sonic_time->t_rec = T_REC;
-    ultra_sonic_time->t_cmd = T_CMD;
-    ultra_sonic_time->t_cmd_prog = T_CMD_PROG;
-    ultra_sonic_time->t_d = T_D;
-    ultra_sonic_time->t_vprog = T_VPROG;
-    ultra_sonic_time->t_0_low = T_0_LOW;
-    ultra_sonic_time->t_0_high = T_0_HIGH;
-    ultra_sonic_time->t_1_low = T_1_LOW;
-    ultra_sonic_time->t_1_high = T_1_HIGH;
-    ultra_sonic_time->t_bit = T_BIT;
-    ultra_sonic_time->t_bit0 = T_BIT0;
-    ultra_sonic_time->t_bit1 = T_BIT1;
-    ultra_sonic_time->t_cal = T_CAL;
-#endif
-
-#if 0   
-    //ultra_sonic_time->t_deb = T_DEB;
-    t_snd = (uint32_t)t_snd;
-    t_rec = (uint32_t)t_rec;
-    t_cmd = (uint32_t)t_cmd;
-    t_cmd_prog = (uint32_t)t_cmd_prog;
-    t_d = (uint32_t)t_d;
-    t_vprog = (uint32_t)t_vprog;
-    t_0_low = (uint32_t)t_0_low;
-    t_0_high = (uint32_t)t_0_high;
-    t_1_low = (uint32_t)t_1_low;
-    t_1_high = (uint32_t)t_1_high;
-    t_bit = (uint32_t)t_bit;
-    t_bit0 = (uint32_t)t_bit0;
-    t_bit1 = (uint32_t)t_bit1;
-    t_cal = (uint32_t)t_cal;
-#endif
-    
 
     
 }
@@ -300,7 +263,7 @@ uint32_t measure_cnt = 0;
 void UltraSonicStart(void)
 {
   
-    uint32_t start_time = 0;
+    //uint32_t start_time = 0;
     measure_cnt++;
 #if 0
     Ultra_IO_Output();
@@ -333,7 +296,7 @@ void UltraSonicStart(void)
     ultra_sonic_data->start_flag = 1;
     ENABLE_INTERRUPTS();
     Ultra_IO_InputIT();
-    start_time = GetTimerCount();
+    //start_time = GetTimerCount();
     //while(GetTimerCount() - start_time < 400);
     delay_us(400);
     ultra_sonic_data->send_time = GetTimerCount();
@@ -343,14 +306,14 @@ void UltraSonicStart(void)
 
 #include "can_protocol.h"
 extern uint32_t ultrasonic_src_id;
-static uint16_t last_distance = NO_OBJ_DETECTED;
+//static uint16_t last_distance = NO_OBJ_DETECTED;
 
 void CompleteAndUploadData(void)
 {
     uint8_t i = 0;
     uint16_t distance = 0;
     CAN_ID_UNION id;
-    uint16_t interval_time = 0;
+    //uint16_t interval_time = 0;
     id.CanID_Struct.SourceID = 0x80;
     id.CanID_Struct.DestMACID = 0x01;
     id.CanID_Struct.SrcMACID = ultrasonic_src_id;
