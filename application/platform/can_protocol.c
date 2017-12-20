@@ -279,6 +279,15 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
                     }
                     
                     break;
+                case CAN_SOURCE_ID_GET_VERSION:
+                    if(data_in_len == 1)
+                    {
+                        memcpy(&data_out[1],SW_VERSION,sizeof(SW_VERSION));
+                        data_out[0] = sizeof(SW_VERSION);
+                        return (data_out[0] + 1);
+                    }
+                    
+                    break;                    
                     
                 case CAN_SOURCE_ID_CAN_TEST:
                     can_test_cnt++;
