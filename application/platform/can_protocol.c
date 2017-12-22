@@ -287,7 +287,18 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
                         return (data_out[0] + 1);
                     }
                     
-                    break;                    
+                    break;   
+                    
+                case CAN_SOURCE_ID_SET_GROUP:
+                    if(data_in_len == 1)
+                    {
+                        ultra_sonic_data->group = data_in[0];
+                        data_out[0] = ultra_sonic_data->group;
+                        return 1;
+                    }
+                    
+                    break;  
+                    
                     
                 case CAN_SOURCE_ID_CAN_TEST:
                     can_test_cnt++;

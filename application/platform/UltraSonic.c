@@ -338,7 +338,7 @@ void CompleteAndUploadData(void)
 
 #define ULTRASONIC_MEASURE_TIME                 12/SYSTICK_PERIOD //unit: ms
 #define ULTRASONIC_DATA_EXIST_TIME              500/SYSTICK_PERIOD//unit: ms
-#define ULTRASONIC_MEASURE_CRITICAL_TIME        100/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_MEASURE_CRITICAL_TIME        80/SYSTICK_PERIOD //unit: ms
 extern platform_can_driver_t  platform_can_drivers[];
 void UltraSonicDataTick(void)
 {
