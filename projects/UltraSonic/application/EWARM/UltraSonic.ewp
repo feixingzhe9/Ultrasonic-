@@ -623,7 +623,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>Ultrasonic-HC_SR04.bin</state>
+          <state>test.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
