@@ -99,7 +99,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>STM32F103x8	ST STM32F103x8</state>
+          <state>STM32F103xB	ST STM32F103xB</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
