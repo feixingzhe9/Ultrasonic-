@@ -285,19 +285,17 @@ void UltraSonicStart(void)
     ultra_sonic_data->send_time = GetTimerCount();
 #endif  
     
+    DISABLE_INTERRUPTS();
     UltraTrigOutputHigh();
     delay_us(10);
     UltraTrigOutputLow();
     
-    DISABLE_INTERRUPTS();
     ultra_sonic_data->interval_time.cnt = 0;
     memset(ultra_sonic_data->compute_ditance, 0, INTERVAL_TIME_MAX);
     ultra_sonic_data->end_flag = 0;
     ultra_sonic_data->start_flag = 1;
     ENABLE_INTERRUPTS();
     Ultra_IO_InputIT();
-    //start_time = GetTimerCount();
-    //while(GetTimerCount() - start_time < 400);
     delay_us(400);
     ultra_sonic_data->send_time = GetTimerCount();
     
@@ -320,12 +318,15 @@ void CompleteAndUploadData(void)
     id.CanID_Struct.ACK = 1;
     id.CanID_Struct.FUNC_ID = CAN_FUN_ID_READ;
     id.CanID_Struct.res = 0;
+    
     if((ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY))
     {
+        DISABLE_INTERRUPTS();
         ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
         
         distance = ultra_sonic_data->compute_ditance[i];
         CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
+        ENABLE_INTERRUPTS();
         printf("%d\n",distance);
     }
     else
@@ -363,8 +364,8 @@ void UltraSonicDataTick(void)
             //flag_1 = 0; 
             if(flag_2 == 0)
             {
-                __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
                 CompleteAndUploadData();
+                __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
                 flag_2 = 1;
             }
             
