@@ -31,6 +31,8 @@ OSStatus platform_can_init( const platform_can_driver_t* can )
 
     //uint32_t can_mac_id = CAN_SUB_PB_ID;
     ultrasonic_src_id = GetCanSrcId();
+    ultra_sonic_data->my_num = ultrasonic_src_id - ULTRASONIC_SRC_ID_BASE;
+    
     OSStatus    err = kNoErr;
     CAN_FilterConfTypeDef     CAN_FilterInitStructure;
     
@@ -264,7 +266,9 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
         can_pkg_tmp.len = hcan->pRxMsg->DLC;
         if((can_pkg_tmp.id.CanID_Struct.DestMACID == 0x60) &&  (can_pkg_tmp.id.CanID_Struct.SrcMACID == 0x01) && (can_pkg_tmp.id.CanID_Struct.SourceID == CAN_SOURCE_ID_READ_MEASURE_DATA))
         {
-            if(hcan->pRxMsg->Data[1] == ultra_sonic_data->group)
+            //if(hcan->pRxMsg->Data[1] == ultra_sonic_data->group)
+            uint32_t measure = *(uint32_t *)&hcan->pRxMsg->Data[1];
+            if(measure & (1 << ultra_sonic_data->my_num))
             {
                 if((ultra_sonic_data->start_flag == 0) && (ultra_sonic_data->i_am_en == true))
                 {

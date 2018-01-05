@@ -95,6 +95,7 @@ typedef struct
     uint8_t end_flag;
     uint8_t i_am_en;
     uint8_t group;
+    uint8_t my_num;
 }ultra_sonic_data_t;
 
 typedef struct 

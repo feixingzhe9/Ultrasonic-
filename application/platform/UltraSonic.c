@@ -22,6 +22,7 @@ extern void UltraIoOutputLow(void);
 extern void UltraIoOutputHigh(void);
 extern void UltraDataIO_Output(void);
 extern void UltraDataIO_Input(void);
+extern void UltraDataIO_Output(void);
 extern void UltraDataIO_InputIT(void);
 extern void V24OutputHigh(void);
 extern void V24OutputLow(void);
@@ -295,6 +296,7 @@ void UltraSonicStart(void)
     ultra_sonic_data->end_flag = 0;
     ultra_sonic_data->start_flag = 1;
     ENABLE_INTERRUPTS();
+    
     Ultra_IO_InputIT();
     delay_us(400);
     ultra_sonic_data->send_time = GetTimerCount();
@@ -335,6 +337,7 @@ void CompleteAndUploadData(void)
         CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
         printf("%d\n",distance);
     }
+    UltraDataIO_Output();
 }
 
 #define ULTRASONIC_MEASURE_TIME                 12/SYSTICK_PERIOD //unit: ms
@@ -344,7 +347,7 @@ extern platform_can_driver_t  platform_can_drivers[];
 void UltraSonicDataTick(void)
 {
     static uint32_t start_time_1 = 0;
-    static uint32_t start_time_2 = 0;
+    //static uint32_t start_time_2 = 0;
     static uint8_t flag_1 = 0;
     static uint8_t flag_2 = 0;
     
@@ -358,15 +361,11 @@ void UltraSonicDataTick(void)
         }
         if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_TIME)
         {
-           
-            //ultra_sonic_data->start_flag = 0;
-            //ultra_sonic_data->end_flag = 1;
-            //flag_1 = 0; 
             if(flag_2 == 0)
             {
                 CompleteAndUploadData();
-                __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
                 flag_2 = 1;
+                //DISABLE_INTERRUPTS();
             }
             
         }   
@@ -376,9 +375,11 @@ void UltraSonicDataTick(void)
             ultra_sonic_data->start_flag = 0;
             ultra_sonic_data->end_flag = 1;
             flag_1 = 0; 
+            __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
+            //ENABLE_INTERRUPTS();
         }   
     }
- 
+ /*
     if(ultra_sonic_data->data_ready_flag == DATA_NEW_COMING)
     {
         start_time_2 = os_get_time();
@@ -387,7 +388,8 @@ void UltraSonicDataTick(void)
     if(os_get_time() - start_time_2 >= ULTRASONIC_DATA_EXIST_TIME)
     {
         ultra_sonic_data->data_ready_flag = DATA_EXPIRED;
-    }    
+    }  
+    */
 }
 #define ULTRASONIC_READ_ERR      0xffffffff
 uint32_t UltraSonicReadData(uint8_t num)

@@ -493,6 +493,7 @@ void can_protocol_period( void )
         HAL_CAN_DeInit(platform_can_drivers[MICO_CAN1].handle);
         MicoCanInitialize( MICO_CAN1 );
         can_comm_start_time = os_get_time();
+        //ENABLE_INTERRUPTS();
     }
     while(IsFifoEmpty(can_fifo) == FALSE)
     {  

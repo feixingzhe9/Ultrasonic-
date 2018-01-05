@@ -614,10 +614,9 @@ void UltraDataIO_Input(void)//interrupt mode
     pin_config.gpio_pull = GPIO_PULLUP;
     MicoGpioInitialize( MICO_GPIO_ULTRA_DATA, &pin_config );
     
-    
-    
     ENABLE_INTERRUPTS();
 }
+
 
 void UltraDataIO_InputIT(void)//interrupt mode 
 {
@@ -635,6 +634,7 @@ void UltraDataIO_InputIT(void)//interrupt mode
     
     ENABLE_INTERRUPTS();
 }
+
 void UltraDataIO_Output(void)//output high
 {
     platform_pin_config_t pin_config;

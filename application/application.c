@@ -126,15 +126,15 @@ static uint32_t emg_test_start_time = 0;
 void EmergencyStopTest(void)
 {
   
-    platform_pin_config_t pin_config;
-    pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
-    pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;// GPIO_MODE_AF_PP;// 
-    pin_config.gpio_pull = GPIO_PULLUP;
+    //platform_pin_config_t pin_config;
+    //pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
+    //pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;// GPIO_MODE_AF_PP;// 
+    //pin_config.gpio_pull = GPIO_PULLUP;
 
     
     
     //  Initialise system led
-    MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_EMG_STOP, &pin_config );
+    //MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_EMG_STOP, &pin_config );
     
     if(os_get_time() - emg_test_start_time >= EMG_TEST_PERIOD)
     {
