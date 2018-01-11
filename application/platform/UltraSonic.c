@@ -131,7 +131,7 @@ void CompleteAndUploadData(void)
     StopTimer();
 }
 
-#define ULTRASONIC_MEASURE_TIME                 5/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_MEASURE_TIME                 13/SYSTICK_PERIOD //unit: ms
 #define ULTRASONIC_DATA_EXIST_TIME              500/SYSTICK_PERIOD//unit: ms
 #define ULTRASONIC_MEASURE_CRITICAL_TIME        50/SYSTICK_PERIOD //unit: ms
 extern platform_can_driver_t  platform_can_drivers[];
