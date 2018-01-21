@@ -269,15 +269,19 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
         if((can_pkg_tmp.id.CanID_Struct.DestMACID == 0x60) &&  (can_pkg_tmp.id.CanID_Struct.SrcMACID == 0x01) && (can_pkg_tmp.id.CanID_Struct.SourceID == CAN_SOURCE_ID_READ_MEASURE_DATA))
         {
             //if(hcan->pRxMsg->Data[1] == ultra_sonic_data->group)
-            uint32_t measure = *(uint32_t *)&hcan->pRxMsg->Data[1];
-            if(measure & (1 << ultra_sonic_data->my_num))
+            if(can_pkg_tmp.len == 5)
             {
-                if((ultra_sonic_data->start_flag == 0) && (ultra_sonic_data->i_am_en == true))
+                uint32_t measure = *(uint32_t *)&hcan->pRxMsg->Data[1];
+                if(measure & (1 << ultra_sonic_data->my_num))
                 {
-                    __HAL_CAN_DISABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
-                    UltraSonicStart();
+                    if((ultra_sonic_data->start_flag == 0) && (ultra_sonic_data->i_am_en == true))
+                    {
+                        __HAL_CAN_DISABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
+                        UltraSonicStart();
+                    }
                 }
             }
+            
             
         }
         else if(can_pkg_tmp.id.CanID_Struct.DestMACID == ultrasonic_src_id) 

@@ -90,7 +90,7 @@ void UltraSonicStart(void)
     ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
     
     delay_us(400);
-    Ultra_IO_InputIT();
+    //Ultra_IO_InputIT();
     
     ultra_sonic_data->send_time = GetTimerCount();
     ENABLE_INTERRUPTS();

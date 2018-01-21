@@ -50,9 +50,12 @@ void board_gpios_init( void )
     
     pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
     pin_config.gpio_mode = GPIO_MODE_INPUT;
-    pin_config.gpio_pull = GPIO_NOPULL;
+    pin_config.gpio_pull = GPIO_PULLDOWN;
     
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_ULTRA_DATA, &pin_config );
+    extern void Ultra_IO_InputIT(void);
+    Ultra_IO_InputIT();
+    
     
     //MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_ULTRA_DATA );
     
