@@ -44,6 +44,9 @@ void UltraSonicInit(void)
     memset(ultra_sonic_data, 0, sizeof(ultra_sonic_data_t));
     ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
     ultra_sonic_data->i_am_en = true;
+    
+    TimerInit();
+    StartTimer();
    
 }
 
@@ -71,8 +74,8 @@ void UltraSonicStart(void)
     //uint32_t start_time = 0;
     measure_cnt++;
 
-    TimerInit();
-    StartTimer();
+    //TimerInit();
+    //StartTimer();
     
     DISABLE_INTERRUPTS();
     UltraTrigOutputHigh();
@@ -85,11 +88,12 @@ void UltraSonicStart(void)
     ultra_sonic_data->end_flag = 0;
     ultra_sonic_data->start_flag = 1;
     ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
-    ENABLE_INTERRUPTS();
+    
     delay_us(400);
     Ultra_IO_InputIT();
     
     ultra_sonic_data->send_time = GetTimerCount();
+    ENABLE_INTERRUPTS();
     
     
 }
@@ -127,8 +131,8 @@ void CompleteAndUploadData(void)
         CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
         printf("%d\n",distance);
     }
-    UltraDataIO_Output();
-    StopTimer();
+    //UltraDataIO_Output();
+    //StopTimer();
 }
 
 #define ULTRASONIC_MEASURE_TIME                 13/SYSTICK_PERIOD //unit: ms

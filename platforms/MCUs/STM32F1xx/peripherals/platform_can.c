@@ -9,6 +9,7 @@
  */
 
 #include "platform.h"
+#include "app_platform.h"
 #include "platform_peripheral.h"
 #include "stm32f1xx.h"
 #include "platform_logging.h"
@@ -254,6 +255,7 @@ void platform_can_rx_irq( platform_can_driver_t* can_driver )
 //CanRxMsgTypeDef RxMessage;
 extern void UltraSonicStart(void);
 extern platform_can_driver_t  platform_can_drivers[];
+extern uint32_t can_comm_start_time;
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 {
     can_pkg_t can_pkg_tmp;
@@ -283,6 +285,8 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
             memcpy(can_pkg_tmp.data.CanData, hcan->pRxMsg->Data, hcan->pRxMsg->DLC);
             FifoPutCanPkg(can_fifo, can_pkg_tmp); 
         }
+        
+        can_comm_start_time = os_get_time();
          
         
 #endif

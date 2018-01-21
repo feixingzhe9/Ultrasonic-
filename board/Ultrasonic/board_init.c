@@ -47,7 +47,16 @@ void board_gpios_init( void )
     
     MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_24_V_EN ); 
     MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_SYS_LED ); 
-    MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_ULTRA_DATA );
+    
+    pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
+    pin_config.gpio_mode = GPIO_MODE_INPUT;
+    pin_config.gpio_pull = GPIO_NOPULL;
+    
+    MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_ULTRA_DATA, &pin_config );
+    
+    //MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_ULTRA_DATA );
+    
+    
     //MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_EMG_STOP );
     
     //

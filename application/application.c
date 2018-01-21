@@ -25,6 +25,12 @@ void UltraSonicStartTick(void);
 #ifdef HOMWEE_TEST 
 void EmergencyStopTest(void);
 #endif
+
+static void MX_IWDG_Init(uint32_t period);
+void feed_dog(void);
+
+IWDG_HandleTypeDef hiwdg;
+
 int main( void )
 {
   init_clocks();
@@ -43,6 +49,9 @@ int main( void )
   UltraSonicInit();
   delay_ms(10);
   
+  MX_IWDG_Init(500);
+  HAL_IWDG_Start(&hiwdg);
+  
   
  
   for(;;)
@@ -54,10 +63,13 @@ int main( void )
 #ifdef HOMWEE_TEST 
     EmergencyStopTest();
 #endif
+    
+    feed_dog();
+    
   }
 }
 
-#define ULTRASONIC_SEND_TIME   300/SYSTICK_PERIOD
+#define ULTRASONIC_SEND_TIME   100/SYSTICK_PERIOD
 void UltraSonicStartTick(void) 
 {
     static uint32_t start_time_1 = 0;
@@ -80,6 +92,7 @@ void UltraSonicStartTick(void)
         flag = 0;
     }
 }
+
 
 #define TEST_PERID      500/SYSTICK_PERIOD
 uint32_t sys_led_start_time = 0;
@@ -143,3 +156,32 @@ void EmergencyStopTest(void)
     }
 }
 #endif
+
+
+
+
+/* IWDG init function */
+static void MX_IWDG_Init(uint32_t period)
+{
+
+  hiwdg.Instance = IWDG;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
+  hiwdg.Init.Reload = period;
+  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+  {
+    //_Error_Handler(__FILE__, __LINE__);
+    printf("error");
+  }
+
+}
+
+#define FEED_DOG_PERIOD     100/SYSTICK_PERIOD
+void feed_dog(void)
+{
+    static uint32_t feed_dog_start_time = 0;
+    if(os_get_time() - feed_dog_start_time > FEED_DOG_PERIOD)
+    {
+        HAL_IWDG_Refresh(&hiwdg);
+        feed_dog_start_time = os_get_time();
+    }
+}

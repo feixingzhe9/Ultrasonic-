@@ -517,7 +517,7 @@ void can_protocol_period( void )
         seg_polo = can_pkg_tmp.data.CanData_Struct.SegPolo;
         seg_num = can_pkg_tmp.data.CanData_Struct.SegNum;
         rx_data_len = can_pkg_tmp.len;
-        can_comm_start_time = os_get_time();
+        //can_comm_start_time = os_get_time();
         
         
         
