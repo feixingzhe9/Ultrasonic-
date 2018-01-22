@@ -37,35 +37,23 @@ void board_gpios_init( void )
     pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;
     pin_config.gpio_pull = GPIO_PULLUP;
     
-    MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_ULTRA_DATA, &pin_config );
-    //MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_EMG_STOP, &pin_config );
+
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
-    MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_24_V_EN, &pin_config );
+
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_TRIG, &pin_config );
     MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_TRIG );
     
     
-    MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_24_V_EN ); 
     MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_SYS_LED ); 
     
     pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
     pin_config.gpio_mode = GPIO_MODE_INPUT;
-    pin_config.gpio_pull = GPIO_PULLDOWN;
+    pin_config.gpio_pull = GPIO_PULLUP;
     
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_ULTRA_DATA, &pin_config );
     extern void Ultra_IO_InputIT(void);
     Ultra_IO_InputIT();
     
-    
-    //MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_ULTRA_DATA );
-    
-    
-    //MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_EMG_STOP );
-    
-    //
-    pin_config.gpio_mode = GPIO_MODE_INPUT;
-    
-    MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_EMG_STOP, &pin_config );
     
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S0, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S1, &pin_config );
@@ -76,6 +64,4 @@ void board_gpios_init( void )
     
     EnableSwjAndDisableJtag();
 }
-
-
 

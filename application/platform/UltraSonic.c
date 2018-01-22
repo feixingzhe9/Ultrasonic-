@@ -25,18 +25,10 @@ extern void UltraDataIO_Input(void);
 extern void UltraDataIO_Output(void);
 extern void UltraDataIO_InputIT(void);
 
-
-
-
 ultra_sonic_data_t ultra_sonic_data_ram;
 ultra_sonic_data_t *ultra_sonic_data = &ultra_sonic_data_ram; 
 
-
-
 uint8_t measure_repeat_filter = 0;
-
-
-
 
 
 void UltraSonicInit(void)
@@ -46,8 +38,7 @@ void UltraSonicInit(void)
     ultra_sonic_data->i_am_en = true;
     
     TimerInit();
-    StartTimer();
-   
+    StartTimer();  
 }
 
 
@@ -71,7 +62,6 @@ uint32_t measure_cnt = 0;
 void UltraSonicStart(void)
 {
   
-    //uint32_t start_time = 0;
     measure_cnt++;
 
     //TimerInit();
@@ -94,8 +84,7 @@ void UltraSonicStart(void)
     
     ultra_sonic_data->send_time = GetTimerCount();
     ENABLE_INTERRUPTS();
-    
-    
+       
 }
 
 #include "can_protocol.h"
@@ -123,13 +112,13 @@ void CompleteAndUploadData(void)
         distance = ultra_sonic_data->compute_ditance[i];
         CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
         ENABLE_INTERRUPTS();
-        printf("%d\n",distance);
+        //printf("%d\n",distance);
     }
     else
     {
         distance = NO_OBJ_DETECTED;
         CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
-        printf("%d\n",distance);
+        //printf("%d\n",distance);
     }
     //UltraDataIO_Output();
     //StopTimer();

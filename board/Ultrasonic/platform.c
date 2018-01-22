@@ -626,7 +626,7 @@ void UltraDataIO_InputIT(void)//interrupt mode
     
     pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
     pin_config.gpio_mode =GPIO_MODE_IT_FALLING |GPIO_MODE_INPUT;
-    pin_config.gpio_pull = GPIO_PULLDOWN;//GPIO_PULLUP;
+    pin_config.gpio_pull = GPIO_PULLUP;//GPIO_PULLUP;
     //MicoGpioOutputHigh(MICO_GPIO_ULTRA_DATA); 
     MicoGpioInitialize( MICO_GPIO_ULTRA_DATA, &pin_config );
     MicoGpioEnableIRQ( MICO_GPIO_ULTRA_DATA , IRQ_TRIGGER_FALLING_EDGE, UltraSonicIRQ_CallBack, NULL);
