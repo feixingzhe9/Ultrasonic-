@@ -49,11 +49,9 @@ int main( void )
   UltraSonicInit();
   delay_ms(10);
   
-  MX_IWDG_Init(550);
+  MX_IWDG_Init(850);
   HAL_IWDG_Start(&hiwdg);
   
-  
- extern void Ultra_IO_InputIT();
   for(;;)
   { 
     can_protocol_period(); 
@@ -65,8 +63,7 @@ int main( void )
 #endif
     
     feed_dog();
-    //Ultra_IO_InputIT();
-    //delay_ms(100);
+    
   }
 }
 

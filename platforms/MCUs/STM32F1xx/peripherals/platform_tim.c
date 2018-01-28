@@ -14,7 +14,7 @@ void TimerInit(void)
     __HAL_RCC_TIM2_CLK_ENABLE();    //enable clock
       
     htimx.Instance = TIM2;
-    htimx.Init.Prescaler = 71;
+    htimx.Init.Prescaler = 719;
     htimx.Init.CounterMode = TIM_COUNTERMODE_UP;
     htimx.Init.Period = 0xffff;
     htimx.Init.ClockDivision=TIM_CLOCKDIVISION_DIV1;

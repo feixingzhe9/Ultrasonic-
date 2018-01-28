@@ -87,6 +87,7 @@ typedef struct
     interval_time_t interval_time;
     uint16_t compute_ditance[INTERVAL_TIME_MAX];   
     uint8_t data_ready_flag;
+    uint8_t measure_err;
 #define DATA_NEW_COMING     0x01
 #define DATA_READY          0x02
 #define DATA_EXPIRED        0x04

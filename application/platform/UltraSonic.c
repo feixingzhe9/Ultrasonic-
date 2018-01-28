@@ -56,34 +56,81 @@ void Ultra_IO_InputIT(void)
     UltraDataIO_InputIT();
 }
 
+
+uint32_t get_delay_time_us(uint32_t start_time, uint32_t now)
+{
+    if(start_time <= now)
+    {
+        return (now - start_time) * 10;
+    }
+    else
+    {   
+        return (USER_TIM_MAX_CNT - (start_time - now)) * 10; 
+    }
+}
 extern void UltraTrigOutputHigh(void);
 extern void UltraTrigOutputLow(void);
 uint32_t measure_cnt = 0;
 void UltraSonicStart(void)
 {
+    uint32_t start_time = 0;
+    uint32_t now_tmp = 0;
   
     measure_cnt++;
 
     //TimerInit();
     //StartTimer();
     
-    DISABLE_INTERRUPTS();
-    UltraTrigOutputHigh();
-    delay_us(10);
-    UltraTrigOutputLow();
+    ultra_sonic_data->measure_err = 0; 
+    if(MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) == 0)
+    {
+        DISABLE_INTERRUPTS();
+        
     
-    ultra_sonic_data->interval_time.cnt = 0;
-    memset(ultra_sonic_data->interval_time.time, 0, INTERVAL_TIME_MAX);  
-    memset(ultra_sonic_data->compute_ditance, 0, INTERVAL_TIME_MAX);
-    ultra_sonic_data->end_flag = 0;
-    ultra_sonic_data->start_flag = 1;
-    ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
-    
-    delay_us(400);
-    //Ultra_IO_InputIT();
-    
-    ultra_sonic_data->send_time = GetTimerCount();
-    ENABLE_INTERRUPTS();
+        UltraTrigOutputHigh();
+        delay_us(10);
+        UltraTrigOutputLow();
+        
+        ultra_sonic_data->interval_time.cnt = 0;
+        memset(ultra_sonic_data->interval_time.time, 0, INTERVAL_TIME_MAX);  
+        memset(ultra_sonic_data->compute_ditance, 0, INTERVAL_TIME_MAX);
+        ultra_sonic_data->end_flag = 0;
+        ultra_sonic_data->start_flag = 1;
+        ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
+        
+        //delay_us(500);
+        //Ultra_IO_InputIT(); 
+        start_time = GetTimerCount();
+        do 
+        {
+            now_tmp = GetTimerCount();
+        }       
+        while( (get_delay_time_us(start_time, now_tmp)  < 35 * 1000 ) &&  (MicoGpioInputGet(MICO_GPIO_ULTRA_DATA) == 0) );
+  
+        
+        if(get_delay_time_us(start_time, now_tmp) < 35 * 1000 )
+        {
+            ultra_sonic_data->send_time = GetTimerCount();
+            ultra_sonic_data->measure_err = 0;
+        }
+        else
+        {
+            ultra_sonic_data->measure_err = 1;
+        }
+     
+        ENABLE_INTERRUPTS();    
+    }
+    else
+    {
+        ultra_sonic_data->interval_time.cnt = 0;
+        memset(ultra_sonic_data->interval_time.time, 0, INTERVAL_TIME_MAX);  
+        memset(ultra_sonic_data->compute_ditance, 0, INTERVAL_TIME_MAX);
+        ultra_sonic_data->end_flag = 0;
+        ultra_sonic_data->start_flag = 1;
+        ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
+        ultra_sonic_data->measure_err = 1;
+    }
+        
        
 }
 
@@ -104,10 +151,15 @@ void CompleteAndUploadData(void)
     id.CanID_Struct.FUNC_ID = CAN_FUN_ID_READ;
     id.CanID_Struct.res = 0;
     
-    if( (ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY) && (ultra_sonic_data->interval_time.cnt > 0) )
+    if(ultra_sonic_data->measure_err == 1)
+    {
+        distance = NO_OBJ_DETECTED;
+        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
+    }
+    else if( (ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY) && (ultra_sonic_data->interval_time.cnt > 0) )
     {
         DISABLE_INTERRUPTS();
-        ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
+        ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /100;
         
         distance = ultra_sonic_data->compute_ditance[i];
         CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
@@ -126,52 +178,42 @@ void CompleteAndUploadData(void)
 
 #define ULTRASONIC_MEASURE_TIME                 13/SYSTICK_PERIOD //unit: ms
 #define ULTRASONIC_DATA_EXIST_TIME              500/SYSTICK_PERIOD//unit: ms
-#define ULTRASONIC_MEASURE_CRITICAL_TIME        50/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_MEASURE_CRITICAL_TIME        80/SYSTICK_PERIOD //unit: ms
 extern platform_can_driver_t  platform_can_drivers[];
 void UltraSonicDataTick(void)
 {
-    static uint32_t start_time_1 = 0;
-    //static uint32_t start_time_2 = 0;
-    static uint8_t flag_1 = 0;
-    static uint8_t flag_2 = 0;
-    
-    if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
+
+    static uint8_t state = 0;
+
+    if(state == 0)
     {
-        if(flag_1 == 0)
-        {
-            start_time_1 = os_get_time();
-            flag_1 = 1;
-            flag_2 = 0;
-        }
-        if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_TIME)
-        {
-            if(flag_2 == 0)
-            {
+        if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
+        {            
+            if(get_delay_time_us(ultra_sonic_data->send_time, GetTimerCount()) >= ULTRASONIC_MEASURE_TIME * 1000)
+            {   
+                
                 CompleteAndUploadData();
-                flag_2 = 1;
-            }
-            
-        }   
-        if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_CRITICAL_TIME)
-        {
-           
-            ultra_sonic_data->start_flag = 0;
-            ultra_sonic_data->end_flag = 1;
-            flag_1 = 0; 
-            __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
-        }   
+                state = 1;
+                
+            }             
+        }
     }
- /*
-    if(ultra_sonic_data->data_ready_flag == DATA_NEW_COMING)
+
+    if(state == 1)
     {
-        start_time_2 = os_get_time();
-        ultra_sonic_data->data_ready_flag  = DATA_READY;
+        if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
+        {        
+            if(get_delay_time_us(ultra_sonic_data->send_time, GetTimerCount()) >= ULTRASONIC_MEASURE_CRITICAL_TIME * 1000)
+            { 
+                ultra_sonic_data->start_flag = 0;
+                ultra_sonic_data->end_flag = 1;
+
+                __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
+                state = 0;
+            }   
+        }
     }
-    if(os_get_time() - start_time_2 >= ULTRASONIC_DATA_EXIST_TIME)
-    {
-        ultra_sonic_data->data_ready_flag = DATA_EXPIRED;
-    }  
-    */
+    
 }
 
 
@@ -183,7 +225,7 @@ void ShowTestLog(void)
     {
         //for(i = 0; i < ultra_sonic_data->interval_time.cnt; i++)
         {
-            ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
+            ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /100;
 #if 1
             UltraSonicLog("%d - distance : %d cm\r\n",i + 1,ultra_sonic_data->compute_ditance[i]);
 #else
@@ -207,7 +249,7 @@ uint16_t UltraSonicGetMeasureData(void)
 {
     if((ultra_sonic_data->data_ready_flag == DATA_NEW_COMING) || (ultra_sonic_data->data_ready_flag == DATA_READY))
     {
-        ultra_sonic_data->compute_ditance[0] = ultra_sonic_data->interval_time.time[0] * 17 /1000;  //the nearest distance data
+        ultra_sonic_data->compute_ditance[0] = ultra_sonic_data->interval_time.time[0] * 17 /100;  //the nearest distance data
         return ultra_sonic_data->compute_ditance[0];
     }
     else
