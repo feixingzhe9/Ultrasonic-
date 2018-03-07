@@ -229,12 +229,12 @@ typedef enum
 } mico_can_t;
 
 
-#define STDIO_UART          MICO_UART_1
+#define STDIO_UART          MICO_UART_2
 #define STDIO_UART_BAUDRATE (115200) 
 
-#define COMM_UART        MICO_UART_1
+#define COMM_UART        MICO_UART_2
 #define COMM_UART_BAUDRATE (115200) 
-#define UART_FOR_APP     MICO_UART_1
+#define UART_FOR_APP     MICO_UART_2
 
 #define USER_TIM_MAX_CNT    65535
 

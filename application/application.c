@@ -12,6 +12,23 @@
 #define os_PowerBoard_log(format, ...)  custom_log("Ultrasonic", format, ##__VA_ARGS__)
 #define Application_REVISION "v0.1"
  
+/* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef huart1;
+DMA_HandleTypeDef hdma_usart1_rx;
+DMA_HandleTypeDef hdma_usart1_tx;
+uint8_t test_data[] = {0x5a,6,0,0,0x60,0xa5};
+uint8_t rcv_buf[50];
+HAL_StatusTypeDef uart_err;
+
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_USART1_UART_Init(void);
+//static void UartSendTest(void);
+static void MX_NVIC_Init(void);
+
+
 
 const  char menu[] =
 "\r\n"
@@ -51,7 +68,17 @@ int main( void )
   
   MX_IWDG_Init(550);
   HAL_IWDG_Start(&hiwdg);
-  
+    HAL_Init();
+    MX_GPIO_Init();
+
+    MX_USART1_UART_Init();
+    MX_NVIC_Init();
+
+
+    if(HAL_UART_Receive_IT(&huart1,rcv_buf,1)!=HAL_OK)
+    {
+        //Error_Handler();
+    }
   
  extern void Ultra_IO_InputIT();
   for(;;)
@@ -65,32 +92,18 @@ int main( void )
 #endif
     
     feed_dog();
-    //Ultra_IO_InputIT();
-    //delay_ms(100);
   }
 }
 
-#define ULTRASONIC_SEND_TIME   100/SYSTICK_PERIOD
+#define ULTRASONIC_SEND_TIME   50/SYSTICK_PERIOD
 void UltraSonicStartTick(void) 
 {
     static uint32_t start_time_1 = 0;
-    static uint32_t start_time2 = 0;
-    static uint8_t flag = 0;
-    
-    //V24OutputHigh();//
 
     if(os_get_time() - start_time_1 >= ULTRASONIC_SEND_TIME)
     {
         UltraSonicStart();
         start_time_1 = os_get_time();
-        start_time2 = os_get_time();
-        flag = 1;
-    }
-
-    if((os_get_time() - start_time2 >= ULTRASONIC_SEND_TIME/2) && (flag == 1))
-    {
-        ShowTestLog();
-        flag = 0;
     }
 }
 
@@ -185,4 +198,107 @@ void feed_dog(void)
         HAL_IWDG_Refresh(&hiwdg);
         feed_dog_start_time = os_get_time();
     }
+}
+
+
+
+#if 0
+uint32_t uart_send_test_start_time = 0;
+#define UART_SEND_TEST_PERIOD       500/SYSTICK_PERIOD
+static void UartSendTest(void)
+{
+    if(os_get_time() - uart_send_test_start_time >= UART_SEND_TEST_PERIOD)
+    {
+        uart_send_test_start_time = os_get_time();
+        HAL_UART_Transmit(&huart2, test_data, sizeof(test_data), 10);
+    }
+}
+#endif
+/** System Clock Configuration
+*/
+void SystemClock_Config(void)
+{
+
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    //_Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    //_Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure the Systick interrupt time 
+    */
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+
+    /**Configure the Systick 
+    */
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+  /* SysTick_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+}
+/* USART2 init function */
+static void MX_USART1_UART_Init(void)
+{
+  __HAL_RCC_USART1_CLK_ENABLE();
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 9600;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    //_Error_Handler(__FILE__, __LINE__);
+  }
+  
+}
+
+static void MX_NVIC_Init(void)
+{
+  /* USART2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(USART1_IRQn);
+}
+
+/** Configure pins as 
+        * Analog 
+        * Input 
+        * Output
+        * EVENT_OUT
+        * EXTI
+*/
+static void MX_GPIO_Init(void)
+{
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
 }

@@ -366,10 +366,65 @@ MICO_RTOS_DEFINE_ISR( USART3_IRQHandler )
 {
   platform_uart_irq( &platform_uart_drivers[MICO_UART_3] );
 }
-
+extern UART_HandleTypeDef huart1;
+char uart_data_buf[14];
+static uint8_t rcv_data_cnt = 0;
+static uint8_t is_frame_start = 0;
+static uint8_t is_frame_end = 0;
+uint32_t rcv_cnt_test = 0;
+uint32_t distance_test = 0;
+#include "StringUtils.h"
+#include "platform_tim.h"
+#include "UltraSonic.h"
+const char frame_head[] = "n0.val=";
 MICO_RTOS_DEFINE_ISR( USART1_IRQHandler )
 {
-  platform_uart_irq( &platform_uart_drivers[MICO_UART_1] );
+    uint8_t rcv_data = huart1.Instance->DR;
+    rcv_cnt_test++;
+    if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
+    {
+        if(rcv_data == 'n')
+        {
+            is_frame_start = 1;
+            is_frame_end = 0;
+            rcv_data_cnt = 0;
+        }
+
+        if((is_frame_start == 1) && (is_frame_end == 0))
+        {
+            uart_data_buf[rcv_data_cnt] = rcv_data;
+            if(rcv_data_cnt < sizeof(uart_data_buf)/sizeof(uart_data_buf[0]))
+            {
+                rcv_data_cnt++;
+            }
+        }
+        else
+        {
+            rcv_data_cnt = 0;
+        }
+        if(rcv_data == 0xff)
+        {
+            is_frame_end = 1;
+            is_frame_start = 0;
+            if(strncmp(&uart_data_buf[0],frame_head, 7) == 0)
+            {
+                if(rcv_data_cnt == 10)
+                {
+                    string_to_unsigned( &uart_data_buf[7],2,&distance_test,0);
+                }
+                else if(rcv_data_cnt == 11)
+                {
+                    string_to_unsigned( &uart_data_buf[7],3,&distance_test,0);
+                }
+                else if(rcv_data_cnt == 12)
+                {
+                    string_to_unsigned( &uart_data_buf[7],4,&distance_test,0);
+                }
+            }
+            rcv_data_cnt = 0;
+        } 
+    }
+    
 }
 
 MICO_RTOS_DEFINE_ISR( USART2_IRQHandler )
@@ -561,45 +616,10 @@ void Set_IO_Direction(mico_gpio_t gpio, io_dir_t b)
 
 extern uint32_t time_cnt_test;
 #define UltraSonicLog(format, ...)  custom_log("UlSo", format, ##__VA_ARGS__)
-#include "platform_tim.h"
-#include "UltraSonic.h"
+
 static void UltraSonicIRQ_CallBack(void* arg )
 {
-    (void)arg;
-#if 1
-    if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
-    {
-        ultra_sonic_data->rcv_time = GetTimerCount();
-        if(ultra_sonic_data->interval_time.cnt < INTERVAL_TIME_MAX)
-        {
-            if(ultra_sonic_data->rcv_time > ultra_sonic_data->send_time)
-            {
-                ultra_sonic_data->interval_time.time[ultra_sonic_data->interval_time.cnt] = ultra_sonic_data->rcv_time - ultra_sonic_data->send_time;        
-            }
-            else if(ultra_sonic_data->rcv_time < ultra_sonic_data->send_time)
-            {
-                ultra_sonic_data->interval_time.time[ultra_sonic_data->interval_time.cnt] = USER_TIM_MAX_CNT - (ultra_sonic_data->send_time - ultra_sonic_data->rcv_time);
-            }
-            ultra_sonic_data->interval_time.cnt++;
-        }
-   
-        ultra_sonic_data->data_ready_flag = DATA_NEW_COMING;
-    }
-    /*
-    if(ultrasonic_frq_calibration->start_flag == 1)
-    {
-        ultrasonic_frq_calibration->end_time = GetTimerCount();
-        if(ultrasonic_frq_calibration->end_time > ultrasonic_frq_calibration->start_time)
-        {
-            ultrasonic_frq_calibration->interval_time = ultrasonic_frq_calibration->end_time - ultrasonic_frq_calibration->start_time;
-        }
-        else if(ultra_sonic_data->rcv_time < ultra_sonic_data->send_time)
-        {
-            ultrasonic_frq_calibration->interval_time = USER_TIM_MAX_CNT - (ultrasonic_frq_calibration->start_time - ultrasonic_frq_calibration->end_time);
-        }
-    }*/
 
-#endif
     
 }
 

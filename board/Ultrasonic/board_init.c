@@ -62,6 +62,11 @@ void board_gpios_init( void )
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S4, &pin_config );
     //MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S5, &pin_config );
     
+    pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
+    pin_config.gpio_mode = GPIO_MODE_INPUT;
+    pin_config.gpio_pull = GPIO_PULLUP;
+    MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_UART1_RX, &pin_config );
+    
     EnableSwjAndDisableJtag();
 }
 
