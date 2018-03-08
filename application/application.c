@@ -95,7 +95,7 @@ int main( void )
   }
 }
 
-#define ULTRASONIC_SEND_TIME   50/SYSTICK_PERIOD
+#define ULTRASONIC_SEND_TIME   100/SYSTICK_PERIOD
 void UltraSonicStartTick(void) 
 {
     static uint32_t start_time_1 = 0;
@@ -283,7 +283,7 @@ static void MX_USART1_UART_Init(void)
 static void MX_NVIC_Init(void)
 {
   /* USART2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(USART1_IRQn, 2, 2);
   HAL_NVIC_EnableIRQ(USART1_IRQn);
 }
 

@@ -65,6 +65,7 @@ void UltraSonicStart(void)
     measure_cnt++;
     ultra_sonic_data->end_flag = 0;
     ultra_sonic_data->start_flag = 1;
+    ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
     DISABLE_INTERRUPTS();
     UltraTrigOutputHigh();
     delay_us(10);
@@ -79,8 +80,9 @@ extern uint32_t ultrasonic_src_id;
 extern uint32_t distance_test;
 void CompleteAndUploadData(void)
 {
-    uint8_t i = 0;
-    uint16_t distance = distance_test;
+    //uint8_t i = 0;
+    uint16_t distance = (distance_test + 5)/10;
+    //uint16_t distance = distance_test ;
     CAN_ID_UNION id;
     //uint16_t interval_time = 0;
     id.CanID_Struct.SourceID = 0x80;
@@ -90,12 +92,12 @@ void CompleteAndUploadData(void)
     id.CanID_Struct.FUNC_ID = CAN_FUN_ID_READ;
     id.CanID_Struct.res = 0;
     
-    if( (ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY) && (ultra_sonic_data->interval_time.cnt > 0) )
+    if( /*(ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && */(ultra_sonic_data->data_ready_flag != DATA_NOT_READY)/* && (ultra_sonic_data->interval_time.cnt > 0)*/ )
     {
         DISABLE_INTERRUPTS();
-        ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
+        //ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
         
-        distance = ultra_sonic_data->compute_ditance[i];
+        //distance = ultra_sonic_data->compute_ditance[i];
         CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
         ENABLE_INTERRUPTS();
         //printf("%d\n",distance);
@@ -110,9 +112,9 @@ void CompleteAndUploadData(void)
     //StopTimer();
 }
 
-#define ULTRASONIC_MEASURE_TIME                 50/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_MEASURE_TIME                 75/SYSTICK_PERIOD //unit: ms
 #define ULTRASONIC_DATA_EXIST_TIME              500/SYSTICK_PERIOD//unit: ms
-#define ULTRASONIC_MEASURE_CRITICAL_TIME        50/SYSTICK_PERIOD //unit: ms
+#define ULTRASONIC_MEASURE_CRITICAL_TIME        80/SYSTICK_PERIOD //unit: ms
 extern platform_can_driver_t  platform_can_drivers[];
 void UltraSonicDataTick(void)
 {
@@ -129,7 +131,7 @@ void UltraSonicDataTick(void)
             flag_1 = 1;
             flag_2 = 0;
         }
-        if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_TIME)
+        if((os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_TIME) || (ultra_sonic_data->data_ready_flag == DATA_READY))
         {
             if(flag_2 == 0)
             {

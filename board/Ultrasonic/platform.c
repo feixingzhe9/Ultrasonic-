@@ -377,10 +377,15 @@ uint32_t distance_test = 0;
 #include "platform_tim.h"
 #include "UltraSonic.h"
 const char frame_head[] = "n0.val=";
+
+uint8_t test_buf[13];
 MICO_RTOS_DEFINE_ISR( USART1_IRQHandler )
 {
     uint8_t rcv_data = huart1.Instance->DR;
+    
     rcv_cnt_test++;
+    test_buf[rcv_cnt_test%13] = rcv_data;
+    
     if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
     {
         if(rcv_data == 'n')
@@ -420,10 +425,13 @@ MICO_RTOS_DEFINE_ISR( USART1_IRQHandler )
                 {
                     string_to_unsigned( &uart_data_buf[7],4,&distance_test,0);
                 }
+                ultra_sonic_data->data_ready_flag = DATA_READY;
+                memset(uart_data_buf, 0, sizeof(uart_data_buf));
             }
             rcv_data_cnt = 0;
         } 
     }
+    //platform_uart_irq( &platform_uart_drivers[MICO_UART_1] );
     
 }
 
