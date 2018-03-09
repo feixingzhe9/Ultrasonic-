@@ -66,6 +66,7 @@ void UltraSonicStart(void)
     ultra_sonic_data->end_flag = 0;
     ultra_sonic_data->start_flag = 1;
     ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
+    ultra_sonic_data->send_time = os_get_time();
     DISABLE_INTERRUPTS();
     UltraTrigOutputHigh();
     delay_us(10);
@@ -98,6 +99,16 @@ void CompleteAndUploadData(void)
         //ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
         
         //distance = ultra_sonic_data->compute_ditance[i];
+#if 1
+        if(distance_test == 20)
+        {
+            if(ultra_sonic_data->rcv_time - ultra_sonic_data->send_time > 40/SYSTICK_PERIOD )
+            {
+                distance = 120;
+            }
+        }
+#endif
+        
         CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
         ENABLE_INTERRUPTS();
         //printf("%d\n",distance);

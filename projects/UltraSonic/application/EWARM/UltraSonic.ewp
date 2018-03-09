@@ -175,7 +175,7 @@
           <state>xSIZE_OPTIMIZE</state>
           <state>NO_MICO_RTOS</state>
           <state>MICO_DISABLE_WATCHDOG</state>
-          <state>DEBUG=1</state>
+          <state>DEBUG=0</state>
           <state>NO_BLOCK_MENU</state>
         </option>
         <option>
@@ -615,7 +615,7 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>2</state>
+          <state>1</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
@@ -623,7 +623,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>test.bin</state>
+          <state>test.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>

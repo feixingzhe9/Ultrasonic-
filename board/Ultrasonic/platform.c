@@ -393,6 +393,7 @@ MICO_RTOS_DEFINE_ISR( USART1_IRQHandler )
             is_frame_start = 1;
             is_frame_end = 0;
             rcv_data_cnt = 0;
+            ultra_sonic_data->rcv_time = os_get_time();
         }
 
         if((is_frame_start == 1) && (is_frame_end == 0))
