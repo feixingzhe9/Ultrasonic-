@@ -82,7 +82,8 @@ extern uint32_t distance_test;
 void CompleteAndUploadData(void)
 {
     //uint8_t i = 0;
-    uint16_t distance = (distance_test + 5)/10;
+    //uint16_t distance = (distance_test + 5)/10;
+    uint16_t distance = distance_test;
     //uint16_t distance = distance_test ;
     CAN_ID_UNION id;
     //uint16_t interval_time = 0;
@@ -104,8 +105,12 @@ void CompleteAndUploadData(void)
         {
             if(ultra_sonic_data->rcv_time - ultra_sonic_data->send_time > 40/SYSTICK_PERIOD )
             {
-                distance = 120;
+                distance = MAX_RANGE;
             }
+        }
+        if(distance > MAX_RANGE)
+        {
+            distance = MAX_RANGE;
         }
 #endif
         

@@ -30,6 +30,8 @@
 
 
 
+#define MAX_RANGE       150//unit:cm
+
 //////////define the destination frequency and allowed errors
 #define DEST_FRQ                    58000
 #define DEST_FRQ_ERROR              250
