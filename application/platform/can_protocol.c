@@ -17,6 +17,13 @@
 #include "upgrade_flash.h"
 
 
+#define COM_ERR_TEST    0
+#if COM_ERR_TEST
+#include <stdlib.h>
+#define COM_ERR_RAND_NUM  300
+#define COM_ERR_ACK_RAND_NUM  4
+#endif
+
 
 #define CanProtocolLog(format, ...)  custom_log("can protocol", format, ##__VA_ARGS__)
 
@@ -441,18 +448,51 @@ static OSStatus upgradeFirmwareRecevingProcess( CAN_ID_UNION *id,  uint8_t *rx_d
   OSStatus err = kNoErr;
   uint32_t packageDataLength = dataLen;
   uint8_t ack;
-  if( !upgradeWriteFlashData( (uint32_t *)(rx_data + 2), packageDataLength - 2 ) )
+  
+  static uint8_t index = 0;
+  static uint8_t group = 0;
+    
+  if((group == rx_data[1]) && (index == rx_data[0]/* & 0x3f*/) && (index + group > 0))
   {
-    ack = 0x00;
-    canAckBack(id->CANx_ID, rx_data, 2);
+#if COM_ERR_TEST
+    uint32_t rand_test;
+    rand_test = rand() % COM_ERR_ACK_RAND_NUM;
+    if(rand_test != COM_ERR_ACK_RAND_NUM>>1)
+#endif   
+    {
+      ack = 0x00;
+      canAckBack(id->CANx_ID, rx_data, 2);
+    }   
   }
-  else
+  else 
   {
-    ack = 0x01;
-    canAckBack(id->CANx_ID, &ack, 1);
-    CanProtocolLog( "mcu write data failed" );
-    goto exit;
+    if( !upgradeWriteFlashData( (uint32_t *)(rx_data + 2), packageDataLength - 2 ) )
+    {
+#if COM_ERR_TEST
+      uint32_t rand_test;
+      rand_test = rand() % COM_ERR_RAND_NUM;
+      if(rand_test != COM_ERR_RAND_NUM>>1)
+#endif
+      {
+        ack = 0x00;
+        canAckBack(id->CANx_ID, rx_data, 2);
+      }
+      
+    }
+    else
+    {
+      ack = 0x01;
+      canAckBack(id->CANx_ID, &ack, 1);
+      CanProtocolLog( "mcu write data failed" );
+      //index = rx_data[0] & 0x3f;
+      //group = rx_data[1];
+      goto exit;
+    }
+    index = rx_data[0]/* & 0x3f*/;
+    group = rx_data[1];
+    
   }
+  
 exit:
   return err;
 }
@@ -547,9 +587,16 @@ void can_protocol_period( void )
         }
         if( id.CanID_Struct.SourceID == 0x11 )//update_receicing
         {
+#if COM_ERR_TEST
+            uint32_t rand_test;
+            rand_test = rand() % COM_ERR_RAND_NUM;
+            if(rand_test != COM_ERR_RAND_NUM>>1)
+#endif
             upgradeFirmwareRecevingProcess(&id, rx_buf.CanData, rx_data_len);
+            
             //goto exit;
             continue;
+            
         }
         if( id.CanID_Struct.SourceID == 0x12 )//update_finish_check
         {
