@@ -73,7 +73,7 @@ uint8_t GetCanSrcId(void)
     while(os_get_time() - start_time <= DEBOUNCE_TIME)
     {
         old_key_value = new_key_value;
-#if 1       
+#if 0       
         tmp_1 = GetKeyValue(MICO_GPIO_KEY_S0);
         tmp_2 = GetKeyValue(MICO_GPIO_KEY_S1);
         tmp_3 = GetKeyValue(MICO_GPIO_KEY_S2); 
@@ -86,8 +86,8 @@ uint8_t GetCanSrcId(void)
         new_key_value |=  GetKeyValue(MICO_GPIO_KEY_S1)<<1;
         new_key_value |=  GetKeyValue(MICO_GPIO_KEY_S2)<<2;
         new_key_value |=  GetKeyValue(MICO_GPIO_KEY_S3)<<3;
-        new_key_value |=  GetKeyValue(MICO_GPIO_KEY_S4)<<4;
-        new_key_value |=  GetKeyValue(MICO_GPIO_KEY_S5)<<5;
+        new_key_value |=  (GetKeyValue(MICO_GPIO_KEY_S4) == 1? 0:1)<<4;
+        //new_key_value |=  GetKeyValue(MICO_GPIO_KEY_S5)<<5;
 #endif   
         if(new_key_value != old_key_value)
         {
@@ -96,7 +96,7 @@ uint8_t GetCanSrcId(void)
     }
 
       
-    if((new_key_value != 0) && (new_key_value <= 0x0f))
+    if((new_key_value != 0) && (new_key_value <= 0x1f))
     {
         return new_key_value + ULTRASONIC_SRC_ID_BASE - 1;
     }
