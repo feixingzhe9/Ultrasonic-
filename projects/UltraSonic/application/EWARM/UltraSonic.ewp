@@ -177,6 +177,7 @@
           <state>MICO_DISABLE_WATCHDOG</state>
           <state>DEBUG=1</state>
           <state>NO_BLOCK_MENU</state>
+          <state>OPEN_WATCH_DOG</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -3888,7 +3889,7 @@
         <name>$PROJ_DIR$\..\..\..\..\application\platform\UltraSonic.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\UltraSonic.h</name>
+        <name>$PROJ_DIR$\..\..\..\..\application\platform\ultrasonic.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\upgrade_flash.c</name>

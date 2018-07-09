@@ -61,13 +61,14 @@ uint8_t GetCanSrcId(void)
 #define DEBOUNCE_TIME       100/SYSTICK_PERIOD
     uint8_t new_key_value = 0;
     uint8_t old_key_value = 0;
+#if 0
     uint8_t tmp_1 = 0;
     uint8_t tmp_2 = 0;
     uint8_t tmp_3 = 0;
     uint8_t tmp_4 = 0;
     uint8_t tmp_5 = 0;
     uint8_t tmp_6 = 0;
-    
+#endif 
     static uint32_t start_time = 0;
     start_time = os_get_time();
     while(os_get_time() - start_time <= DEBOUNCE_TIME)
@@ -101,7 +102,7 @@ uint8_t GetCanSrcId(void)
         return new_key_value + ULTRASONIC_SRC_ID_BASE - 1;
     }
     CanProtocolLog("Ultrasonic CAN MAC ID out of range ! ! ! \r\n");
-    return 0x60;
+    return 0xff;
         
 }
 #endif

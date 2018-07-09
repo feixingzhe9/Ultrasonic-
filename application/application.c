@@ -26,7 +26,10 @@ void UltraSonicStartTick(void);
 void EmergencyStopTest(void);
 #endif
 
+#ifdef OPEN_WATCH_DOG 
 static void MX_IWDG_Init(uint32_t period);
+#endif
+
 void feed_dog(void);
 
 IWDG_HandleTypeDef hiwdg;
@@ -48,10 +51,10 @@ int main( void )
   delay_ms(10);
   UltraSonicInit();
   delay_ms(10);
-  
+#ifdef OPEN_WATCH_DOG  
   MX_IWDG_Init(550);
   HAL_IWDG_Start(&hiwdg);
-  
+#endif  
   
  extern void Ultra_IO_InputIT();
   for(;;)
@@ -63,10 +66,9 @@ int main( void )
 #ifdef HOMWEE_TEST 
     EmergencyStopTest();
 #endif
-    
+#ifdef OPEN_WATCH_DOG     
     feed_dog();
-    //Ultra_IO_InputIT();
-    //delay_ms(100);
+#endif
   }
 }
 
@@ -160,7 +162,7 @@ void EmergencyStopTest(void)
 
 
 
-
+#ifdef OPEN_WATCH_DOG 
 /* IWDG init function */
 static void MX_IWDG_Init(uint32_t period)
 {
@@ -175,6 +177,7 @@ static void MX_IWDG_Init(uint32_t period)
   }
 
 }
+#endif
 
 #define FEED_DOG_PERIOD     50/SYSTICK_PERIOD
 void feed_dog(void)
