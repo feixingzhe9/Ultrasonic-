@@ -1,19 +1,19 @@
 #pragma once
 
 /******************************************************
-*                      Macros
-******************************************************/
+ *                      Macros
+ ******************************************************/
 
 /******************************************************
-*                    Constants
-******************************************************/
+ *                    Constants
+ ******************************************************/
 
 #define HARDWARE_REVISION   "US_sensor_V1.0"
 #define DEFAULT_NAME        "ULTRASONIC"
 #define MODEL               "ULTRASONIC_SINGLE"
 
 /* MICO RTOS tick rate in Hz */
-#define NBOS_DEFAULT_TICK_RATE_HZ                   (1000) 
+#define NBOS_DEFAULT_TICK_RATE_HZ                   (1000)
 
 /************************************************************************
  * Uncomment to disable watchdog. For debugging only */
@@ -57,14 +57,14 @@ Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
 #define INTERNAL_FLASH_SIZE            (INTERNAL_FLASH_END_ADDRESS - INTERNAL_FLASH_START_ADDRESS + 1)
 
 #define NBOS_FLASH_FOR_BOOT         NBOS_INTERNAL_FLASH
-#define BOOT_START_ADDRESS          (uint32_t)0x08000400 
-#define BOOT_END_ADDRESS            (uint32_t)0x08004FFF 
+#define BOOT_START_ADDRESS          (uint32_t)0x08000400
+#define BOOT_END_ADDRESS            (uint32_t)0x08004FFF
 #define BOOT_FLASH_SIZE             (BOOT_END_ADDRESS - BOOT_START_ADDRESS + 1)
 
 #define NBOS_FLASH_FOR_PARA         NBOS_INTERNAL_FLASH
-#define PARA_START_ADDRESS          (uint32_t)0x08005000 
+#define PARA_START_ADDRESS          (uint32_t)0x08005000
 #define PARA_END_ADDRESS            (uint32_t)0x08005FFF
-#define PARA_FLASH_SIZE             (PARA_END_ADDRESS - PARA_START_ADDRESS + 1)  
+#define PARA_FLASH_SIZE             (PARA_END_ADDRESS - PARA_START_ADDRESS + 1)
 
 #define NBOS_FLASH_FOR_APPLICATION  NBOS_INTERNAL_FLASH
 #define APPLICATION_START_ADDRESS   (uint32_t)0x08006000

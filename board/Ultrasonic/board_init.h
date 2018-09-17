@@ -4,9 +4,9 @@
  * @author  Adam Huang
  * @version V1.0.0
  * @date    26-Nov-2016
- * @brief   
+ * @brief
  ******************************************************************************
-*/
+ */
 #pragma once
 
 #include "platform_peripheral.h"

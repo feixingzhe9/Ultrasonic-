@@ -4,9 +4,9 @@
  * @author  Adam Huang
  * @version V1.0.0
  * @date    26-Nov-2016
- * @brief   
+ * @brief
  ******************************************************************************
-*/
+ */
 #include "board_init.h"
 #include "platform.h"
 #include "mico_platform.h"
@@ -25,42 +25,42 @@ void board_gpios_init( void )
     pin_config.gpio_mode = GPIO_MODE_AF_PP;// GPIO_MODE_OUTPUT_PP;//
     pin_config.gpio_pull = GPIO_PULLUP;
 
-    
-    
+
+
     //  Initialise system led
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
-    
+
     EnableSwjAndDisableJtag();
-    
+
     pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
     pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;
     pin_config.gpio_pull = GPIO_PULLUP;
-    
+
 
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
 
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_TRIG, &pin_config );
     MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_TRIG );
-    
-    
-    MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_SYS_LED ); 
-    
+
+
+    MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_SYS_LED );
+
     pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
     pin_config.gpio_mode = GPIO_MODE_INPUT;
     pin_config.gpio_pull = GPIO_PULLUP;
-    
+
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_ULTRA_DATA, &pin_config );
     extern void Ultra_IO_InputIT(void);
     Ultra_IO_InputIT();
-    
-    
+
+
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S0, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S1, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S2, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S3, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S4, &pin_config );
     //MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S5, &pin_config );
-    
+
     EnableSwjAndDisableJtag();
 }
 
