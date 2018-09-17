@@ -11,7 +11,6 @@
 #define os_PowerBoard_log(format, ...)  custom_log("Ultrasonic", format, ##__VA_ARGS__)
 #define Application_REVISION "v0.1"
 
-
 const  char menu[] =
 "\r\n"
 "Application for %s,\r\nSOFTWARE_VERSION: %s,\r\nHARDWARE_REVISION: %s\r\n";
@@ -45,7 +44,6 @@ int main( void )
     CanLongBufInit();
     MicoCanInitialize( MICO_CAN1 );
 
-
     delay_ms(10);
     UltraSonicInit();
     delay_ms(10);
@@ -77,8 +75,6 @@ void UltraSonicStartTick(void)
     static uint32_t start_time2 = 0;
     static uint8_t flag = 0;
 
-    //V24OutputHigh();//
-
     if(os_get_time() - start_time_1 >= ULTRASONIC_SEND_TIME)
     {
         UltraSonicStart();
@@ -107,8 +103,6 @@ void SysLed(void)
     pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;// GPIO_MODE_AF_PP;//
     pin_config.gpio_pull = GPIO_PULLUP;
 
-
-
     //  Initialise system led
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
 
@@ -130,8 +124,6 @@ void SysLed(void)
 }
 
 
-
-
 #ifdef HOMWEE_TEST
 
 #define EMG_TEST_PERIOD     1000/SYSTICK_PERIOD
@@ -145,8 +137,6 @@ void EmergencyStopTest(void)
     //pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;// GPIO_MODE_AF_PP;//
     //pin_config.gpio_pull = GPIO_PULLUP;
 
-
-
     //  Initialise system led
     //MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_EMG_STOP, &pin_config );
 
@@ -157,7 +147,6 @@ void EmergencyStopTest(void)
     }
 }
 #endif
-
 
 
 #ifdef OPEN_WATCH_DOG

@@ -1,10 +1,7 @@
-
 #include "fifo.h"
-
 
 static uint32_t FifoSurplusSize(can_fifo_t *head); //
 static uint8_t IsFifoFull(can_fifo_t *head);         //
-
 
 uint8_t FifoInit(can_fifo_t *head, can_pkg_t *buf, uint32_t len)
 {
@@ -47,8 +44,6 @@ uint32_t FifoValidSize(can_fifo_t *head)
             : (head->rear - head->front));
 }
 
-
-
 uint8_t FifoPutCanPkg(can_fifo_t *head, const can_pkg_t data)
 {
     if(head == NULL)
@@ -67,7 +62,6 @@ uint8_t FifoPutCanPkg(can_fifo_t *head, const can_pkg_t data)
     return TRUE;
 }
 
-
 uint8_t FifoGetCanPkg(can_fifo_t *head, can_pkg_t *data)
 {
     if(head == NULL)
@@ -84,4 +78,3 @@ uint8_t FifoGetCanPkg(can_fifo_t *head, can_pkg_t *data)
 
     return TRUE;
 }
-

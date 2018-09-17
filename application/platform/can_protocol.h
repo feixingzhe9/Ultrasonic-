@@ -36,7 +36,6 @@
 #define CAN_FUN_ID_READ         0x02
 #define CAN_FUN_ID_TRIGGER      0x03
 
-
 //////  source id define  //////
 #define CAN_SOURCE_ID_READ_VERSION      0x01
 
@@ -44,8 +43,6 @@
 #define CAN_SOURCE_ID_MEASUREMENT_EN         0x81
 #define CAN_SOURCE_ID_GET_VERSION           0x82
 #define CAN_SOURCE_ID_SET_GROUP             0x83
-
-
 
 #define CAN_SOURCE_ID_CAN_TEST              0x03
 
@@ -70,9 +67,6 @@ typedef struct
     uint16_t len;
     uint8_t *pdata;
 }CAN_TXDATA_STRUCT;
-
-
-
 
 typedef union
 {
@@ -129,9 +123,6 @@ extern uint8_t CanUpdataBuff[64];
 extern uint8_t CanRxdataBuff[64];
 #endif
 
-
-
-
 void RxMsgHandle(uint32_t ID,uint8_t* pdata);
 
 void CM_CAN_Init(void);
@@ -148,27 +139,4 @@ void can_protocol_period( void );
 extern void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len);
 void CanLongBufInit(void);
 
-/*******************  Bit definition for ExtId bytes  ********************/
-#define EXTID_FRAME_TYPE_BITS						((uint32_t)0x10000000)
-#define EXTID_SRC_ID_BITS						((uint32_t)0x0FC00000)
-#define EXTID_DST_ID_BITS						((uint32_t)0x003F0000)
-/* normal */
-#define EXTID_PROPERTY_BITS						((uint32_t)0x0000C000)
-#define EXTID_FUNC_ID_BITS						((uint32_t)0x00003F80)
-#define EXTID_SEGMENT_NUM_D_BITS					((uint32_t)0x00000078)
-#define EXTID_ACK_D_BITS						((uint32_t)0x00000004)
-#define EXTID_END_FLAG_D_BITS						((uint32_t)0x00000002)
-#define EXTID_RESEND_D_BITS						((uint32_t)0x00000001)
-/* update */
-#define EXTID_ACK_U_BITS						((uint32_t)0x00008000)
-#define EXTID_RESEND_U_BITS						((uint32_t)0x00004000)
-#define EXTID_SEGMENT_NUM_U_BITS					((uint32_t)0x00003FFF)
-
-#define EXTID_SRC_ID_BITS_NUM						(22U)
-#define EXTID_DST_ID_BITS_NUM						(16U)
-#define EXTID_PROPERTY_BITS_NUM						(14U)
-#define EXTID_FUNC_ID_BITS_NUM						(4U)
-
-#define EXTID_FRAME_TYPE_DATA						(0)
-#define EXTID_FRAME_TYPE_UPDATE						(1)
 #endif

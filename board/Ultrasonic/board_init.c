@@ -25,8 +25,6 @@ void board_gpios_init( void )
     pin_config.gpio_mode = GPIO_MODE_AF_PP;// GPIO_MODE_OUTPUT_PP;//
     pin_config.gpio_pull = GPIO_PULLUP;
 
-
-
     //  Initialise system led
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
 
@@ -35,7 +33,6 @@ void board_gpios_init( void )
     pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
     pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;
     pin_config.gpio_pull = GPIO_PULLUP;
-
 
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
 
@@ -53,7 +50,6 @@ void board_gpios_init( void )
     extern void Ultra_IO_InputIT(void);
     Ultra_IO_InputIT();
 
-
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S0, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S1, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S2, &pin_config );
@@ -63,4 +59,3 @@ void board_gpios_init( void )
 
     EnableSwjAndDisableJtag();
 }
-

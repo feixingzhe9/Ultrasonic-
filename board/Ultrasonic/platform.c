@@ -75,7 +75,6 @@ extern WEAK void bootloader_start(void);
 
 const platform_gpio_t platform_gpio_pins[] =
 {
-
     [MICO_GPIO_ULTRA_DATA]        = { GPIOB,  13 },
 
     [MICO_GPIO_24_V_EN]           = { GPIOA,  0 },
@@ -94,22 +93,10 @@ const platform_gpio_t platform_gpio_pins[] =
     [MICO_GPIO_UART3_RX]          = { GPIOB, 11 },
 
     [MICO_GPIO_LED_PWM]           = { GPIOC, 6  },//{ GPIOB, 12 },
-    [MICO_GPIO_ADAPTER_IN]        = { GPIOD, 10 },
-    [MICO_GPIO_FAN_CTRL]          = { GPIOD, 11 },
 
-    [MICO_GPIO_RECHARGE_LED]      = { GPIOC,  8 },
-    [MICO_GPIO_IRLED_PWM]         = { GPIOA,  8 },
     [MICO_GPIO_CAN_RX]            = { GPIOA, 11 },
     [MICO_GPIO_CAN_TX]            = { GPIOA, 12 },
     [MICO_GPIO_CAN_STB]           = { GPIOD,  3 },
-
-    [MICO_GPIO_SPI_NSS]           = { GPIOA, 15 },
-    //[MICO_GPIO_SPI_SCK]           = { GPIOB,  3 },
-    [MICO_GPIO_SPI_MISO]          = { GPIOB,  4 },
-    [MICO_GPIO_SPI_MOSI]          = { GPIOB,  5 },
-
-    [MICO_GPIO_I2C_SCL]           = { GPIOB,  6 },
-    [MICO_GPIO_I2C_SDA]           = { GPIOB,  7 },
 
     [MICO_GPIO_UART2_TX]          = { GPIOD,  5 },
     [MICO_GPIO_UART2_RX]          = { GPIOD,  6 },
@@ -119,7 +106,6 @@ const platform_gpio_t platform_gpio_pins[] =
 
     [MICO_GPIO_EMG_STOP]          = { GPIOA, 8  },
 
-
 };
 
 /*
@@ -128,57 +114,7 @@ const platform_gpio_t platform_gpio_pins[] =
  */
 
 /* TODO : These need fixing */
-ADC_HandleTypeDef adc_handles[2];
 
-const platform_adc_t platform_adc_peripherals[] =
-{
-    [MICO_ADC_5V_RES1]       = {ADC1, ADC_CHANNEL_0, &adc_handles[0], 1, &platform_gpio_pins[MICO_GPIO_5V_RES1_ADC]},
-    [MICO_ADC_12V_RES2]      = {ADC1, ADC_CHANNEL_1, &adc_handles[0], 2, &platform_gpio_pins[MICO_GPIO_12V_RES2_ADC]}
-};
-
-TIM_HandleTypeDef tim_handles[1];
-/* PWM mappings */
-const platform_pwm_t platform_pwm_peripherals[] =
-{
-    [MICO_PWM_IRLED] = {TIM1, &tim_handles[0], TIM_CHANNEL_1, RCC_APB2ENR_TIM1EN, NULL, &platform_gpio_pins[MICO_GPIO_IRLED_PWM]},    /* or TIM10/Ch1                       */
-
-    /* TODO: fill in the other options here ... */
-};
-#if 0
-const platform_spi_t platform_spi_peripherals[] =
-{
-    [MICO_SPI_1]  =
-    {
-        .port                  = SPI1,
-        .gpio_af               = GPIO_AF_SPI1,
-        .peripheral_clock_reg  = RCC_APB2Periph_SPI1,
-        .peripheral_clock_func = RCC_APB2PeriphClockCmd,
-        .pin_mosi              = &platform_gpio_pins[MICO_GPIO_9],
-        .pin_miso              = &platform_gpio_pins[MICO_GPIO_8],
-        .pin_clock             = &platform_gpio_pins[MICO_GPIO_7],
-        .tx_dma =
-        {
-            .controller          = DMA2,
-            .stream              = DMA2_Stream5,
-            .channel             = DMA_Channel_3,
-            .irq_vector          = DMA2_Stream5_IRQn,
-            .complete_flags      = DMA_HISR_TCIF5,
-            .error_flags         = ( DMA_HISR_TEIF5 | DMA_HISR_FEIF5 | DMA_HISR_DMEIF5 ),
-        },
-        .rx_dma =
-        {
-            .controller          = DMA2,
-            .stream              = DMA2_Stream0,
-            .channel             = DMA_Channel_3,
-            .irq_vector          = DMA2_Stream0_IRQn,
-            .complete_flags      = DMA_LISR_TCIF0,
-            .error_flags         = ( DMA_LISR_TEIF0 | DMA_LISR_FEIF0 | DMA_LISR_DMEIF0 ),
-        },
-    }
-};
-
-platform_spi_driver_t platform_spi_drivers[MICO_SPI_MAX];
-#endif
 
 const platform_uart_t platform_uart_peripherals[] =
 {
@@ -250,29 +186,7 @@ platform_uart_driver_t platform_uart_drivers[] =
         .tx_dma_handle = &uart_tx_dmaHandle[1],
     }
 };
-#if 0
-const platform_i2c_t platform_i2c_peripherals[] =
-{
-    [MICO_I2C_1] =
-    {
-        .port                    = I2C1,
-        .pin_scl                 = &platform_gpio_pins[MICO_GPIO_1],
-        .pin_sda                 = &platform_gpio_pins[MICO_GPIO_2],
-        .peripheral_clock_reg    = RCC_APB1Periph_I2C1,
-        .tx_dma                  = DMA1,
-        .tx_dma_peripheral_clock = RCC_AHB1Periph_DMA1,
-        .tx_dma_stream           = DMA1_Stream7,
-        .rx_dma_stream           = DMA1_Stream0,
-        .tx_dma_stream_id        = 7,
-        .rx_dma_stream_id        = 0,
-        .tx_dma_channel          = DMA_Channel_1,
-        .rx_dma_channel          = DMA_Channel_1,
-        .gpio_af                 = GPIO_AF_I2C1
-    },
-};
 
-platform_i2c_driver_t platform_i2c_drivers[MICO_I2C_MAX];
-#endif
 //platform_flash_driver_t platform_flash_drivers[MICO_FLASH_MAX];
 
 /* Flash memory devices */
@@ -468,19 +382,6 @@ void platform_init_peripheral_irq_priorities( void )
 void init_platform( void )
 {
 
-
-
-    //AFIO_MAPR_SWJ_CFG_JTAGDISABLE
-
-
-#if 0
-    //  Initialise switch
-    pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
-    pin_config.gpio_mode = GPIO_MODE_IT_RISING_FALLING;
-    pin_config.gpio_pull = GPIO_PULLDOWN;
-    MicoGpioInitialize( MICO_GPIO_PWRKEY, &pin_config );
-    MicoGpioEnableIRQ( MICO_GPIO_PWRKEY , IRQ_TRIGGER_BOTH_EDGES, _switch_irq_handler, NULL);
-#endif
 }
 
 void init_platform_bootloader( void )
@@ -493,16 +394,7 @@ void init_platform_bootloader( void )
     MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_SYS_LED );
 }
 
-#if 0
-void MicoSysLed(bool onoff)
-{
-    if (onoff) {
-        MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_SYS_LED );
-    } else {
-        MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_SYS_LED );
-    }
-}
-#endif
+
 
 bool MicoShouldEnterBootloader(void)
 {
@@ -512,52 +404,6 @@ bool MicoShouldEnterBootloader(void)
         return false;
 }
 
-#if 0
-void Set_IO_Direction(mico_gpio_t gpio, io_dir_t b)
-{
-    platform_pin_config_t pin_config;
-#if 0
-    pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
-
-    if(b == IO_INPUT)
-    {
-        pin_config.gpio_mode = GPIO_MODE_INPUT;
-    }
-    if(b == IO_OUTPUT)
-    {
-        pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;
-        pin_config.gpio_pull = GPIO_PULLUP;
-    }
-    MicoGpioInitialize( (mico_gpio_t)gpio, &pin_config );
-    if(b == IO_OUTPUT)
-    {
-        MicoGpioOutputHigh( (mico_gpio_t)gpio );
-    }
-#endif
-    if(b == IO_OUTPUT)
-    {
-
-        pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
-        pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;
-        pin_config.gpio_pull = GPIO_PULLUP;
-
-        MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_ULTRA_DATA, &pin_config );
-        MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_ULTRA_DATA );
-    }
-    if(b == IO_INPUT)
-    {
-        pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
-        pin_config.gpio_mode = GPIO_MODE_INPUT;
-
-        MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_ULTRA_DATA, &pin_config );
-        MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_ULTRA_DATA );
-    }
-
-
-}
-#endif
-
-extern uint32_t time_cnt_test;
 #define UltraSonicLog(format, ...)  custom_log("UlSo", format, ##__VA_ARGS__)
 #include "platform_tim.h"
 #include "UltraSonic.h"
@@ -633,26 +479,6 @@ void UltraDataIO_InputIT(void)//interrupt mode
     ENABLE_INTERRUPTS();
 }
 
-void UltraDataIO_Output(void)//output high
-{
-    platform_pin_config_t pin_config;
-    pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
-    pin_config.gpio_mode = GPIO_MODE_OUTPUT_PP;
-    pin_config.gpio_pull = GPIO_PULLUP;
-
-    MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_ULTRA_DATA, &pin_config );
-    MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_ULTRA_DATA );
-
-    MicoGpioDisableIRQ(MICO_GPIO_ULTRA_DATA);
-
-}
-
-void V24OutputHigh(void)
-{
-    MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_24_V_EN );
-}
-
-
 void UltraTrigOutputHigh(void)
 {
     MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_TRIG );
@@ -660,16 +486,6 @@ void UltraTrigOutputHigh(void)
 void UltraTrigOutputLow(void)
 {
     MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_TRIG );
-}
-
-void V24OutputLow(void)
-{
-    MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_24_V_EN );
-}
-
-void UltraIoOutputLow(void)
-{
-    MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_ULTRA_DATA );
 }
 
 void UltraIoOutputHigh(void)

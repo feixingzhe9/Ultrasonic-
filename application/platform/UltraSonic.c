@@ -1,35 +1,25 @@
-/////////////Ultrasonic Double//////////
+/////////////Ultrasonic HC-SR-04//////////
 ////////////////////////////////////////
 #include "platform.h"
 #include "stm32f1xx.h"
 #include "UltraSonic.h"
-
 #include "Debug.h"
-
 #include "platform_internal.h"
 #include "platform_config.h"
-
-
-
 #include "UltraSonic.h"
-
 #include "platform_tim.h"
 
 #define UltraSonicLog(format, ...)  custom_log("Ultrasonic", format, ##__VA_ARGS__)
 
-extern void Set_IO_Direction(mico_gpio_t gpio, io_dir_t b);
-extern void UltraIoOutputLow(void);
+
 extern void UltraIoOutputHigh(void);
-extern void UltraDataIO_Output(void);
 extern void UltraDataIO_Input(void);
-extern void UltraDataIO_Output(void);
 extern void UltraDataIO_InputIT(void);
 
 ultra_sonic_data_t ultra_sonic_data_ram;
 ultra_sonic_data_t *ultra_sonic_data = &ultra_sonic_data_ram;
 
 uint8_t measure_repeat_filter = 0;
-
 
 void UltraSonicInit(void)
 {
@@ -41,16 +31,6 @@ void UltraSonicInit(void)
     StartTimer();
 }
 
-
-void Ultra_IO_Output(void)
-{
-    UltraDataIO_Output();
-}
-
-void Ultra_IO_Input(void)
-{
-    UltraDataIO_Input();
-}
 void Ultra_IO_InputIT(void)
 {
     UltraDataIO_InputIT();
@@ -150,11 +130,10 @@ void UltraSonicDataTick(void)
                 CompleteAndUploadData();
                 flag_2 = 1;
             }
-
         }
+
         if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_CRITICAL_TIME)
         {
-
             ultra_sonic_data->start_flag = 0;
             ultra_sonic_data->end_flag = 1;
             flag_1 = 0;
@@ -174,7 +153,6 @@ void UltraSonicDataTick(void)
      */
 }
 
-
 void ShowTestLog(void)
 {
     uint8_t i = 0;
@@ -192,7 +170,6 @@ void ShowTestLog(void)
         }
     }
 
-
 #if 0
     if(ultrasonic_frq_calibration->start_flag == 1)
     {
@@ -201,7 +178,6 @@ void ShowTestLog(void)
     }
 #endif
 }
-
 
 uint16_t UltraSonicGetMeasureData(void)
 {

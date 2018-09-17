@@ -466,16 +466,12 @@ MICO_RTOS_DEFINE_ISR( EXTI4_IRQHandler )
 }
 
 
-//extern uint32_t time_cnt_test;
+
 //#define UltraSonicLog(format, ...)  custom_log("PowerBoard", format, ##__VA_ARGS__)
 //#include "platform_tim.h"
 MICO_RTOS_DEFINE_ISR( EXTI9_5_IRQHandler )
 {
   gpio_irq();
-  //time_cnt_test = GetTimerCount();
-  //UltraSonicLog("E:%d",time_cnt_test);
-  
-  
 }
 
 MICO_RTOS_DEFINE_ISR( EXTI15_10_IRQHandler )

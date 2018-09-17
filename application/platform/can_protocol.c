@@ -9,11 +9,8 @@
 #include "stm32f1xx.h"
 #include "Debug.h"
 #include "UltraSonic.h"
-
 #include "fifo.h"
-
 #include "upgrade_flash.h"
-
 
 #define COM_ERR_TEST    0
 #if COM_ERR_TEST
@@ -21,7 +18,6 @@
 #define COM_ERR_RAND_NUM  300
 #define COM_ERR_ACK_RAND_NUM  4
 #endif
-
 
 #define CanProtocolLog(format, ...)  custom_log("can protocol", format, ##__VA_ARGS__)
 
@@ -90,7 +86,6 @@ uint8_t GetCanSrcId(void)
         }
     }
 
-
     if((new_key_value != 0) && (new_key_value <= 0x1f))
     {
         return new_key_value + ULTRASONIC_SRC_ID_BASE - 1;
@@ -106,7 +101,6 @@ uint8_t GetCanSrcId(void)
 #define BEGIAN         0x01
 #define TRANSING       0x02
 #define END            0x03
-
 
 void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len)
 {
@@ -197,9 +191,7 @@ void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len)
                     }
                 }
             }
-
         }
-
     }
 }
 
@@ -472,7 +464,6 @@ static OSStatus upgradeFirmwareRecevingProcess( CAN_ID_UNION *id,  uint8_t *rx_d
                 ack = 0x00;
                 canAckBack(id->CANx_ID, rx_data, 2);
             }
-
         }
         else
         {
@@ -485,7 +476,6 @@ static OSStatus upgradeFirmwareRecevingProcess( CAN_ID_UNION *id,  uint8_t *rx_d
         }
         index = rx_data[0]/* & 0x3f*/;
         group = rx_data[1];
-
     }
 
 exit:

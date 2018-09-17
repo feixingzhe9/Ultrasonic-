@@ -153,9 +153,6 @@ extern "C"
         MICO_GPIO_UART1_TX,
         MICO_GPIO_UART1_RX,
 
-        MICO_GPIO_ID1,
-        MICO_GPIO_ID2,
-
         MICO_GPIO_EMG_STOP,
 
 #endif
