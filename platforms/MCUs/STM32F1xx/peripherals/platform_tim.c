@@ -2,7 +2,7 @@
 #include "platform.h"
 #include "platform_peripheral.h"
 #include "platform_logging.h"
-#include "app_platform.h"
+
 #include "platform_tim.h"
 
 

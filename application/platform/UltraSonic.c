@@ -9,7 +9,7 @@
 #include "platform_internal.h"
 #include "platform_config.h"
 
-#include "app_platform.h"
+
 
 #include "UltraSonic.h"
 

@@ -9,7 +9,7 @@
  */
 
 #include "platform.h"
-#include "app_platform.h"
+
 #include "platform_peripheral.h"
 #include "stm32f1xx.h"
 #include "platform_logging.h"

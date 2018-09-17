@@ -40,9 +40,7 @@
 #include "platform_logging.h"
 #include "mico_platform.h"
 //#include "keypad/gpio_button/button.h"
-#ifndef BOOTLOADER
-#include "app_platform.h"
-#endif
+
 /******************************************************
 *                      Macros
 ******************************************************/

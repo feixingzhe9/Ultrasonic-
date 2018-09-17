@@ -4,9 +4,8 @@
 */
 
 #include "can_protocol.h"
-#include "protocol.h"
 #include "platform.h"
-#include "app_platform.h"
+
 #include "stm32f1xx.h"
 #include "stm32f1xx_powerboard.h"
 #include "Debug.h"
@@ -36,7 +35,6 @@ extern platform_can_driver_t  platform_can_drivers[];
 uint8_t CanTxdataBuff[CAN_LONG_FRAME_LENTH_MAX] = {0};
 
 
-
 uint8_t swVersion[] = SW_VERSION;
 uint8_t hwVersion[] = HW_VERSION;
 
@@ -47,9 +45,6 @@ can_fifo_t can_fifo_ram;
 can_fifo_t *can_fifo = &can_fifo_ram;
 
 can_pkg_t can_pkg[CAN_FIFO_SIZE] = {0};
-
- 
-
 
 
 #if 1
@@ -343,11 +338,13 @@ static uint8_t GetOneFreeBuf(void)
     }
     return CAN_LONG_BUF_FULL;
 }
+
 static void FreeBuf(uint8_t index)
 {
     can_long_frame_buf->can_rcv_buf[index].can_id = 0;
     can_long_frame_buf->can_rcv_buf[index].used_len = 0;
 }
+
 #define CAN_BUF_NO_THIS_ID      0xfe
 static uint8_t GetTheBufById(uint32_t id)
 {
@@ -360,6 +357,7 @@ static uint8_t GetTheBufById(uint32_t id)
     }
     return CAN_BUF_NO_THIS_ID;
 }
+
 void CanLongBufInit(void)
 { 
     can_long_frame_buf->GetOneFreeBuf = GetOneFreeBuf;
@@ -370,10 +368,6 @@ void CanLongBufInit(void)
     
     FifoInit(can_fifo, can_pkg, CAN_FIFO_SIZE);
 }
-
-
-
-
 
 void canAckBack(uint32_t CANx_ID, const uint8_t * const pdata, uint16_t len)
 {
@@ -408,6 +402,7 @@ void canAckBack(uint32_t CANx_ID, const uint8_t * const pdata, uint16_t len)
       }
   }
 }
+
 static OSStatus upgradePrepareProcess(CAN_ID_UNION id, uint8_t *md5, uint8_t *firmware_Size )
 {
   OSStatus err = kNoErr;
@@ -521,11 +516,6 @@ static OSStatus upgradeFinishCheckProcess( CAN_ID_UNION *id )
 }
 
 
-
-
-
-
-
 #define CAN_LONG_FRAME_TIME_OUT     5000/SYSTICK_PERIOD
 
 #define CAN_COMM_TIME_OUT           1000
@@ -559,10 +549,7 @@ void can_protocol_period( void )
         seg_num = can_pkg_tmp.data.CanData_Struct.SegNum;
         rx_data_len = can_pkg_tmp.len;
         //can_comm_start_time = os_get_time();
-        
-        
-        
-    
+
         if( id.CanID_Struct.SourceID == 0x10 )//update_prepare
         {
             static uint8_t md5[16];
@@ -606,8 +593,6 @@ void can_protocol_period( void )
             continue;
         }
 
-
-        
         if(seg_polo == ONLYONCE)
         {
             //if( (id.CanID_Struct.SourceID < SOURCE_ID_PREPARE_UPDATE) && (id.CanID_Struct.SourceID > SOURCE_ID_CHECK_TRANSMIT) )
@@ -689,16 +674,8 @@ void can_protocol_period( void )
                 }       
             }
         }
-
     }
-   
-    
+
 exit:    
     return;
 }
-
-
-
-
-
-

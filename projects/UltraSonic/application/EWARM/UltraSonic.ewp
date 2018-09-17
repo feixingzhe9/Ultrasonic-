@@ -3856,12 +3856,6 @@
     <group>
       <name>platform</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\app_platform.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\app_platform.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\can_protocol.c</name>
       </file>
       <file>
@@ -3871,25 +3865,10 @@
         <name>$PROJ_DIR$\..\..\..\..\application\platform\fifo.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\protocol.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\serial_uart.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\serial_uart.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\uart_protocol.c</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\UltraSonic.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\ultrasonic.h</name>
+        <name>$PROJ_DIR$\..\..\..\..\application\platform\UltraSonic.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\upgrade_flash.c</name>

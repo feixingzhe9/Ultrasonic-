@@ -97,7 +97,10 @@ POWERBOARD V1.2 platform pin definitions ...
 +---------------+----+------+-------------+--------------+----------------+
 *
 */
-  
+#define os_get_time                   HAL_GetTick
+
+#define SYSTICK_PERIOD                1      //1ms
+
 #define MICO_UNUSED 0xFF
 
 typedef enum

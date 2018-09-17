@@ -10,8 +10,7 @@
 #include "board_init.h"
 #include "platform.h"
 #include "mico_platform.h"
-#include "app_platform.h"
-//#include "serial_leds.h"
+
 
 #define board_log(M, ...) custom_log("Board", M, ##__VA_ARGS__)
 #define board_log_trace() custom_log_trace("Board")

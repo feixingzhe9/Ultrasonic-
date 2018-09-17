@@ -3,8 +3,7 @@
 #include "platform_internal.h"
 #include "platform_config.h"
 #include "board_init.h"
-#include "protocol.h"
-#include "app_platform.h"
+
 #include "upgrade_flash.h"
 #include "can_protocol.h"
 #include "UltraSonic.h"
@@ -42,8 +41,7 @@ int main( void )
 
   os_PowerBoard_log( "System clock = %d Hz",HAL_RCC_GetHCLKFreq() );
   printf ( menu, MODEL, SW_VERSION, HARDWARE_REVISION );
-  bsp_Init();
-  Platform_Init();
+  board_gpios_init();
   CanLongBufInit();
   MicoCanInitialize( MICO_CAN1 );
   
