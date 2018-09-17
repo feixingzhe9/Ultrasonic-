@@ -7,7 +7,6 @@
 #include "platform.h"
 
 #include "stm32f1xx.h"
-#include "stm32f1xx_powerboard.h"
 #include "Debug.h"
 #include "UltraSonic.h"
 

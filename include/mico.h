@@ -50,7 +50,7 @@
 #include "common.h"
 #include "mico_rtos.h"
 //#include "mico_wlan.h"
-#include "mico_socket.h"
+
 //#include "mico_security.h"
 #include "mico_platform.h"
 //#include "mico_system.h"
