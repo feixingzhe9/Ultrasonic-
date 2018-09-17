@@ -26,19 +26,19 @@ extern void UltraDataIO_Output(void);
 extern void UltraDataIO_InputIT(void);
 
 ultra_sonic_data_t ultra_sonic_data_ram;
-ultra_sonic_data_t *ultra_sonic_data = &ultra_sonic_data_ram; 
+ultra_sonic_data_t *ultra_sonic_data = &ultra_sonic_data_ram;
 
 uint8_t measure_repeat_filter = 0;
 
 
 void UltraSonicInit(void)
-{  
+{
     memset(ultra_sonic_data, 0, sizeof(ultra_sonic_data_t));
     ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
     ultra_sonic_data->i_am_en = true;
-    
+
     TimerInit();
-    StartTimer();  
+    StartTimer();
 }
 
 
@@ -61,30 +61,30 @@ extern void UltraTrigOutputLow(void);
 uint32_t measure_cnt = 0;
 void UltraSonicStart(void)
 {
-  
+
     measure_cnt++;
 
     //TimerInit();
     //StartTimer();
-    
+
     DISABLE_INTERRUPTS();
     UltraTrigOutputHigh();
     delay_us(10);
     UltraTrigOutputLow();
-    
+
     ultra_sonic_data->interval_time.cnt = 0;
-    memset(ultra_sonic_data->interval_time.time, 0, INTERVAL_TIME_MAX);  
+    memset(ultra_sonic_data->interval_time.time, 0, INTERVAL_TIME_MAX);
     memset(ultra_sonic_data->compute_ditance, 0, INTERVAL_TIME_MAX);
     ultra_sonic_data->end_flag = 0;
     ultra_sonic_data->start_flag = 1;
     ultra_sonic_data->data_ready_flag = DATA_NOT_READY;
-    
+
     delay_us(400);
     //Ultra_IO_InputIT();
-    
+
     ultra_sonic_data->send_time = GetTimerCount();
     ENABLE_INTERRUPTS();
-       
+
 }
 
 #include "can_protocol.h"
@@ -103,21 +103,21 @@ void CompleteAndUploadData(void)
     id.CanID_Struct.ACK = 1;
     id.CanID_Struct.FUNC_ID = CAN_FUN_ID_READ;
     id.CanID_Struct.res = 0;
-    
+
     if( (ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY) && (ultra_sonic_data->interval_time.cnt > 0) )
     {
         DISABLE_INTERRUPTS();
         ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
-        
+
         distance = ultra_sonic_data->compute_ditance[i];
-        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
+        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) );
         ENABLE_INTERRUPTS();
         //printf("%d\n",distance);
     }
     else
     {
         distance = NO_OBJ_DETECTED;
-        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) ); 
+        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) );
         //printf("%d\n",distance);
     }
     //UltraDataIO_Output();
@@ -134,7 +134,7 @@ void UltraSonicDataTick(void)
     //static uint32_t start_time_2 = 0;
     static uint8_t flag_1 = 0;
     static uint8_t flag_2 = 0;
-    
+
     if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
     {
         if(flag_1 == 0)
@@ -150,28 +150,28 @@ void UltraSonicDataTick(void)
                 CompleteAndUploadData();
                 flag_2 = 1;
             }
-            
-        }   
+
+        }
         if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_CRITICAL_TIME)
         {
-           
+
             ultra_sonic_data->start_flag = 0;
             ultra_sonic_data->end_flag = 1;
-            flag_1 = 0; 
+            flag_1 = 0;
             __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
-        }   
+        }
     }
- /*
-    if(ultra_sonic_data->data_ready_flag == DATA_NEW_COMING)
-    {
-        start_time_2 = os_get_time();
-        ultra_sonic_data->data_ready_flag  = DATA_READY;
-    }
-    if(os_get_time() - start_time_2 >= ULTRASONIC_DATA_EXIST_TIME)
-    {
-        ultra_sonic_data->data_ready_flag = DATA_EXPIRED;
-    }  
-    */
+    /*
+       if(ultra_sonic_data->data_ready_flag == DATA_NEW_COMING)
+       {
+       start_time_2 = os_get_time();
+       ultra_sonic_data->data_ready_flag  = DATA_READY;
+       }
+       if(os_get_time() - start_time_2 >= ULTRASONIC_DATA_EXIST_TIME)
+       {
+       ultra_sonic_data->data_ready_flag = DATA_EXPIRED;
+       }
+     */
 }
 
 
@@ -191,15 +191,15 @@ void ShowTestLog(void)
 #endif
         }
     }
-    
 
-#if 0   
+
+#if 0
     if(ultrasonic_frq_calibration->start_flag == 1)
     {
         tmp = 1000000/ultrasonic_frq_calibration->interval_time;
         UltraSonicLog("frq : %d\r\n", tmp*2*12);
     }
-#endif    
+#endif
 }
 
 
@@ -214,5 +214,5 @@ uint16_t UltraSonicGetMeasureData(void)
     {
         return NO_OBJ_DETECTED;
     }
-          
+
 }

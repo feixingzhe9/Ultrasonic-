@@ -11,7 +11,7 @@
 #define F_DRV			    58000
 #if 1
 #define T_DEB               0
-#define T_SND 				(uint32_t)(6*1000*1000/F_DRV)  //  
+#define T_SND 				(uint32_t)(6*1000*1000/F_DRV)  //
 #define T_REC 				(uint32_t)(12*1000*1000/F_DRV)
 #define T_CMD 				(uint32_t)(18*1000*1000/F_DRV)
 #define T_CMD_PROG 		    (uint32_t)(18*1000*1000/F_DRV)
@@ -38,13 +38,13 @@
 #define MAX_FRQ                     70000
 
 #define ULTRA_FRQ_STEP_SIZE         300
-#define ULTRA_SEARCH_FRQ_STEP_SIZE  500 
+#define ULTRA_SEARCH_FRQ_STEP_SIZE  500
 
 #define SEARCH_FRQ_COMPENSATION     1000
 
 #define MEASURE_BLIND_DISTANCE      22
 
-#define T_0_LOW_MAX         t_0_low*1.3 
+#define T_0_LOW_MAX         t_0_low*1.3
 #define T_0_LOW_MIN         t_0_low*0.7
 #define T_0_HIGH_MAX
 #define T_0_HIGH_MIN
@@ -68,13 +68,13 @@ typedef enum
     US_CMD_EE_READ = 0x04,
     US_CMD_EE_PROGRAM = 0x06,
     US_CMD_MEASURE_CONFIG,
-    US_CMD_FREQUENCY_CALIBRARION = 0x03,    
+    US_CMD_FREQUENCY_CALIBRARION = 0x03,
 }ultra_sonic_cmd_t;
 
 
- 
+
 #define INTERVAL_TIME_MAX   10
-typedef struct 
+typedef struct
 {
     uint32_t time[INTERVAL_TIME_MAX];
     uint8_t cnt;
@@ -85,7 +85,7 @@ typedef struct
     uint32_t send_time;
     uint32_t rcv_time;
     interval_time_t interval_time;
-    uint16_t compute_ditance[INTERVAL_TIME_MAX];   
+    uint16_t compute_ditance[INTERVAL_TIME_MAX];
     uint8_t data_ready_flag;
 #define DATA_NEW_COMING     0x01
 #define DATA_READY          0x02
@@ -98,7 +98,7 @@ typedef struct
     uint8_t my_num;
 }ultra_sonic_data_t;
 
-typedef struct 
+typedef struct
 {
     uint32_t start_time;
     uint32_t end_time;
@@ -121,12 +121,12 @@ typedef struct
     uint16_t status;
     uint8_t start_flag;
     uint8_t cnt;
-#define ULTRA_READ_EE     (1<<0)   
+#define ULTRA_READ_EE     (1<<0)
 }ultra_sonic_status_t;
 
 #define THRES_NUM   15
-typedef struct 
-{ 
+typedef struct
+{
     uint32_t threshold[THRES_NUM];
     uint32_t tres_scale;
     uint32_t thres_ini;
@@ -135,7 +135,7 @@ typedef struct
     uint32_t parity_1;
     uint32_t parity_2;
     uint32_t parity_3;
-    uint32_t parity_4;   
+    uint32_t parity_4;
 }ultra_sonic_threshold_t;
 
 typedef struct
@@ -148,30 +148,30 @@ typedef struct
     volatile uint32_t filt_adjust;
     volatile uint32_t f_drv_adj;
     volatile uint32_t drv_cur;
-    volatile uint32_t amp_gain; 
+    volatile uint32_t amp_gain;
     volatile uint32_t nothing;
-#else  
-    #if 1  
-        //volatile uint32_t nothing     :12;
-        volatile uint32_t amp_gain    :4;   
-        volatile uint32_t drv_cur     :4;
-        volatile uint32_t f_drv_adj   :7;
-        volatile uint32_t filt_adjust :1;
-        volatile uint32_t noise_cfg   :2;
-        volatile uint32_t io_mask     :1;
-        volatile uint32_t spare_bit   :1;
-             
-    #else   
-        //volatile uint32_t nothing     :12;
-        volatile uint32_t spare_bit   :1;
-        volatile uint32_t io_mask     :1;
-        volatile uint32_t noise_cfg   :2;
-        volatile uint32_t filt_adjust :1;
-        volatile uint32_t f_drv_adj   :7;
-        volatile uint32_t drv_cur     :4;
-        volatile uint32_t amp_gain    :4; 
-        
-    #endif
+#else
+#if 1
+    //volatile uint32_t nothing     :12;
+    volatile uint32_t amp_gain    :4;
+    volatile uint32_t drv_cur     :4;
+    volatile uint32_t f_drv_adj   :7;
+    volatile uint32_t filt_adjust :1;
+    volatile uint32_t noise_cfg   :2;
+    volatile uint32_t io_mask     :1;
+    volatile uint32_t spare_bit   :1;
+
+#else
+    //volatile uint32_t nothing     :12;
+    volatile uint32_t spare_bit   :1;
+    volatile uint32_t io_mask     :1;
+    volatile uint32_t noise_cfg   :2;
+    volatile uint32_t filt_adjust :1;
+    volatile uint32_t f_drv_adj   :7;
+    volatile uint32_t drv_cur     :4;
+    volatile uint32_t amp_gain    :4;
+
+#endif
 #endif
 }ultra_sonic_ee_data_t;
 
@@ -241,7 +241,7 @@ typedef struct
     uint32_t t_cal;
 }ultra_sonic_time_t;
 
-void UltraSonicStart(void); 
+void UltraSonicStart(void);
 //extern uint32_t UltraSonicReadEE(void);
 extern uint32_t UltraSonicReadEE(ultra_sonic_ee_data_ut *ee_data);
 extern uint32_t UltraSonicFrqCalibrationStart(void);
@@ -269,27 +269,27 @@ extern volatile uint32_t estimate_frq;
 #if 1
 #define asm            __asm
 #define delay_300ns()     do {asm("nop");asm("nop");asm("nop");asm("nop");\
-                              asm("nop");asm("nop");asm("nop");asm("nop");\
-                              asm("nop");asm("nop");asm("nop");asm("nop");\
-                              asm("nop");asm("nop");asm("nop");asm("nop");\
-                              asm("nop");asm("nop");asm("nop");asm("nop");\
-                              asm("nop");asm("nop");} while(1==0)
-                                
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");} while(1==0)
+
 #define delay_600ns()     do { asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");asm("nop");asm("nop");\
-                               asm("nop");asm("nop");} while(1==0)
-                                
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");asm("nop");asm("nop");\
+    asm("nop");asm("nop");} while(1==0)
+
 #define delay_us(n)       do { for(uint32_t i=0;i<n;i++){delay_300ns();delay_600ns();}\
-                                } while(0==1)
+} while(0==1)
 //#else
 
 #define delay_ms          HAL_Delay

@@ -18,12 +18,12 @@ typedef struct{
     uint32_t   rear;
 }can_fifo_t;
 
-                              
+
 #define TRUE    1
 #define FALSE   0
 
-                                  
-                              
+
+
 extern can_fifo_t *can_fifo;
 
 
@@ -36,6 +36,6 @@ uint8_t FifoPuts(can_fifo_t *head, uint8_t *data, uint32_t len);
 uint8_t FifoGets(can_fifo_t *head, uint8_t *data, uint32_t len);
 uint8_t FifoPutCanPkg(can_fifo_t *head, const can_pkg_t data);
 uint8_t FifoGetCanPkg(can_fifo_t *head, can_pkg_t *data);
-							
+
 #endif //queue.h end
 /**************************Copyright BestFu 2014-05-14*************************/

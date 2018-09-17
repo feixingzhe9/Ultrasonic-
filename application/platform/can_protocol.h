@@ -1,7 +1,7 @@
-/* 
-*  Author: Adam Huang
-*  Date:2017/01/23
-*/
+/*
+ *  Author: Adam Huang
+ *  Date:2017/01/23
+ */
 
 #ifndef __CAN_PROTOOCOL_H
 #define __CAN_PROTOOCOL_H
@@ -38,7 +38,7 @@
 
 
 //////  source id define  //////
-#define CAN_SOURCE_ID_READ_VERSION      0x01    
+#define CAN_SOURCE_ID_READ_VERSION      0x01
 
 #define CAN_SOURCE_ID_READ_MEASURE_DATA      0x80
 #define CAN_SOURCE_ID_MEASUREMENT_EN         0x81
@@ -52,23 +52,23 @@
 
 typedef union
 {
-	 struct{
-		uint32_t start_address; // the address of the bin saved on flash.
-		uint32_t length; // file real length
-		uint8_t version[8];
-		uint8_t type; // B:bootloader, P:boot_table, A:application, 
-		uint8_t upgrade_type; //u:upgrade, 
-		uint8_t reserved[6];
-	}boot_table_t;
- char data[24];
- }BOOTLOADER_UNION;
+    struct{
+        uint32_t start_address; // the address of the bin saved on flash.
+        uint32_t length; // file real length
+        uint8_t version[8];
+        uint8_t type; // B:bootloader, P:boot_table, A:application,
+        uint8_t upgrade_type; //u:upgrade,
+        uint8_t reserved[6];
+    }boot_table_t;
+    char data[24];
+}BOOTLOADER_UNION;
 
 
 typedef struct
 {
-	uint8_t FuncID;
-	uint16_t len;
-	uint8_t *pdata;
+    uint8_t FuncID;
+    uint16_t len;
+    uint8_t *pdata;
 }CAN_TXDATA_STRUCT;
 
 
@@ -76,27 +76,27 @@ typedef struct
 
 typedef union
 {
-	struct
-	{
-		uint32_t SourceID  : 8;
-		uint32_t FUNC_ID   : 4;
-		uint32_t ACK       : 1;
-		uint32_t DestMACID : 8;
-		uint32_t SrcMACID  : 8;
-		uint32_t res       : 3;
-	}CanID_Struct;
-	uint32_t  CANx_ID;
+    struct
+    {
+        uint32_t SourceID  : 8;
+        uint32_t FUNC_ID   : 4;
+        uint32_t ACK       : 1;
+        uint32_t DestMACID : 8;
+        uint32_t SrcMACID  : 8;
+        uint32_t res       : 3;
+    }CanID_Struct;
+    uint32_t  CANx_ID;
 }CAN_ID_UNION;
 
 typedef union
 {
-	struct
-	{
+    struct
+    {
         uint8_t SegNum  : 6;
         uint8_t SegPolo : 2;
-		uint8_t Data[7];
-	}CanData_Struct;
-	uint8_t CanData[8];
+        uint8_t Data[7];
+    }CanData_Struct;
+    uint8_t CanData[8];
 }CAN_DATA_UNION;
 
 #define CAN_ONE_FRAME_DATA_LENTH    7
@@ -105,9 +105,9 @@ typedef union
 typedef struct
 {
     uint32_t can_id;
-    uint32_t start_time; 
+    uint32_t start_time;
     uint16_t used_len;
-    uint8_t rcv_buf[CAN_LONG_FRAME_LENTH_MAX];   
+    uint8_t rcv_buf[CAN_LONG_FRAME_LENTH_MAX];
 }CAN_RCV_BUFFER_T;
 
 typedef uint8_t (*GetOneFreeBufFn)(void);
@@ -118,7 +118,7 @@ typedef void (*FreeBufFn)(uint8_t);
 typedef struct
 {
     CAN_RCV_BUFFER_T can_rcv_buf[CAN_LONG_BUF_NUM];
-    GetOneFreeBufFn GetOneFreeBuf; 
+    GetOneFreeBufFn GetOneFreeBuf;
     GetTheBufByIdFn GetTheBufById;
     FreeBufFn FreeBuf;
 }CAN_LONG_BUF_T;
