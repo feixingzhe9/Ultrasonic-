@@ -47,21 +47,23 @@ int main( void )
     delay_ms(10);
     UltraSonicInit();
     delay_ms(10);
+
 #ifdef OPEN_WATCH_DOG
     MX_IWDG_Init(550);
     HAL_IWDG_Start(&hiwdg);
 #endif
 
-    extern void Ultra_IO_InputIT();
     for(;;)
     {
         can_protocol_period();
         //UltraSonicStartTick();
         UltraSonicDataTick();
         SysLed();
+
 #ifdef HOMWEE_TEST
         EmergencyStopTest();
 #endif
+
 #ifdef OPEN_WATCH_DOG
         feed_dog();
 #endif

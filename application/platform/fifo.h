@@ -6,8 +6,8 @@
 
 typedef struct
 {
-    CAN_ID_UNION    id;
-    CAN_DATA_UNION  data;
+    can_id_union    id;
+    can_data_union  data;
     uint8_t len;
 }can_pkg_t;
 

@@ -77,7 +77,6 @@ const platform_gpio_t platform_gpio_pins[] =
 {
     [MICO_GPIO_ULTRA_DATA]        = { GPIOB,  13 },
 
-    [MICO_GPIO_24_V_EN]           = { GPIOA,  0 },
     //[MICO_GPIO_SYS_LED]           = { GPIOC,  9 },//{ GPIOC,  11 },//{ GPIOB,  3 },
     [MICO_GPIO_SYS_LED]           = { GPIOB,  3 },
     [MICO_GPIO_KEY_S0]            = { GPIOA,  2 },
@@ -91,8 +90,6 @@ const platform_gpio_t platform_gpio_pins[] =
 
     [MICO_GPIO_UART3_TX]          = { GPIOB, 10 },
     [MICO_GPIO_UART3_RX]          = { GPIOB, 11 },
-
-    [MICO_GPIO_LED_PWM]           = { GPIOC, 6  },//{ GPIOB, 12 },
 
     [MICO_GPIO_CAN_RX]            = { GPIOA, 11 },
     [MICO_GPIO_CAN_TX]            = { GPIOA, 12 },
@@ -340,7 +337,6 @@ MICO_RTOS_DEFINE_ISR( USB_LP_CAN1_RX0_IRQHandler )
  ******************************************************/
 
 
-
 bool watchdog_check_last_reset( void )
 {
     if ( RCC->CSR & RCC_CSR_IWDGRSTF )
@@ -393,8 +389,6 @@ void init_platform_bootloader( void )
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
     MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_SYS_LED );
 }
-
-
 
 bool MicoShouldEnterBootloader(void)
 {
@@ -461,7 +455,6 @@ void UltraDataIO_Input(void)//interrupt mode
     ENABLE_INTERRUPTS();
 }
 
-
 void UltraDataIO_InputIT(void)//interrupt mode
 {
     platform_pin_config_t pin_config;
@@ -475,7 +468,6 @@ void UltraDataIO_InputIT(void)//interrupt mode
     MicoGpioInitialize( MICO_GPIO_ULTRA_DATA, &pin_config );
     MicoGpioEnableIRQ( MICO_GPIO_ULTRA_DATA , IRQ_TRIGGER_FALLING_EDGE, UltraSonicIRQ_CallBack, NULL);
 
-
     ENABLE_INTERRUPTS();
 }
 
@@ -483,6 +475,7 @@ void UltraTrigOutputHigh(void)
 {
     MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_TRIG );
 }
+
 void UltraTrigOutputLow(void)
 {
     MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_TRIG );

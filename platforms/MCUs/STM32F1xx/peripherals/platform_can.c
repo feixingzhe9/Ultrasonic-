@@ -264,9 +264,9 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 #if 1
     ///////// put CAN package into fifo
         
-        can_pkg_tmp.id.CANx_ID = hcan->pRxMsg->ExtId;
+        can_pkg_tmp.id.canx_id = hcan->pRxMsg->ExtId;
         can_pkg_tmp.len = hcan->pRxMsg->DLC;
-        if((can_pkg_tmp.id.CanID_Struct.DestMACID == 0x60) &&  (can_pkg_tmp.id.CanID_Struct.SrcMACID == 0x01) && (can_pkg_tmp.id.CanID_Struct.SourceID == CAN_SOURCE_ID_READ_MEASURE_DATA))
+        if((can_pkg_tmp.id.canx_id_t.dest_mac_id == 0x60) &&  (can_pkg_tmp.id.canx_id_t.src_mac_id == 0x01) && (can_pkg_tmp.id.canx_id_t.source_id == CAN_SOURCE_ID_READ_MEASURE_DATA))
         {
             //if(hcan->pRxMsg->Data[1] == ultra_sonic_data->group)
             if(can_pkg_tmp.len == 5)
@@ -284,9 +284,9 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
             
             
         }
-        else if(can_pkg_tmp.id.CanID_Struct.DestMACID == ultrasonic_src_id) 
+        else if(can_pkg_tmp.id.canx_id_t.dest_mac_id == ultrasonic_src_id) 
         {
-            memcpy(can_pkg_tmp.data.CanData, hcan->pRxMsg->Data, hcan->pRxMsg->DLC);
+            memcpy(can_pkg_tmp.data.can_data, hcan->pRxMsg->Data, hcan->pRxMsg->DLC);
             FifoPutCanPkg(can_fifo, can_pkg_tmp); 
         }
         

@@ -24,17 +24,17 @@
 __IO uint32_t flag = 0xff;
 
 //CanRxMsgTypeDef RxMessage;
-CanTxMsgTypeDef TxMessage;
+CanTxMsgTypeDef tx_message;
 
 extern platform_can_driver_t  platform_can_drivers[];
-uint8_t CanTxdataBuff[CAN_LONG_FRAME_LENTH_MAX] = {0};
+uint8_t can_tx_buf[CAN_LONG_FRAME_LENTH_MAX] = {0};
 
 
 uint8_t swVersion[] = SW_VERSION;
 uint8_t hwVersion[] = HW_VERSION;
 
-CAN_TXDATA_STRUCT  CommandProcessing( uint32_t func_ID, uint8_t* dstPtr, uint8_t* pdata, uint32_t len );
-//CAN_TXDATA_STRUCT FirmwareUpgrade(uint32_t ID,uint8_t* pdata,uint32_t len);
+can_tx_data_t  CommandProcessing( uint32_t func_ID, uint8_t* dstPtr, uint8_t* pdata, uint32_t len );
+//can_tx_data_t FirmwareUpgrade(uint32_t ID,uint8_t* pdata,uint32_t len);
 
 can_fifo_t can_fifo_ram;
 can_fifo_t *can_fifo = &can_fifo_ram;
@@ -102,35 +102,35 @@ uint8_t GetCanSrcId(void)
 #define TRANSING       0x02
 #define END            0x03
 
-void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len)
+void CanTX(mico_can_t can_type, uint32_t canx_id,uint8_t* pdata,uint16_t len)
 {
     //return ;
     uint16_t t_len;
     uint16_t roundCount;
     uint8_t modCount;
-    CAN_DATA_UNION TxMsg = {0};
-    //CanTxMsgTypeDef *TxMessage = platform_can_drivers[can_type].handle->pTxMsg;
+    can_data_union tx_msg = {0};
+    //CanTxMsgTypeDef *tx_message = platform_can_drivers[can_type].handle->pTxMsg;
 
     t_len = len;
     roundCount = t_len/7;
     modCount = t_len%7;
 
-    TxMessage.ExtId = CANx_ID;
-    TxMessage.IDE   = CAN_ID_EXT;					 //扩展模式
-    TxMessage.RTR   = CAN_RTR_DATA;				 //发送的是数据
+    tx_message.ExtId = canx_id;
+    tx_message.IDE   = CAN_ID_EXT;					 //扩展模式
+    tx_message.RTR   = CAN_RTR_DATA;				 //发送的是数据
     //if(roundCount <= 1)
     if(t_len <= 7)
     {
-        TxMsg.CanData_Struct.SegPolo = ONLYONCE;
-        TxMessage.DLC = t_len+1;		
+        tx_msg.can_data_t.seg_polo = ONLYONCE;
+        tx_message.DLC = t_len+1;		
 
 
-        memcpy(&TxMessage.Data[1],pdata,t_len);
-        TxMessage.Data[0] = TxMsg.CanData[0];
+        memcpy(&tx_message.Data[1],pdata,t_len);
+        tx_message.Data[0] = tx_msg.can_data[0];
 
         if((CAN_USED->TSR&0x1C000000))
         {
-            MicoCanMessageSend(MICO_CAN1, &TxMessage);//
+            MicoCanMessageSend(MICO_CAN1, &tx_message);//
         }
         else
         {
@@ -147,25 +147,25 @@ void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len)
                 //SET SEGPOLO				
                 if( num == 0)
                 {
-                    TxMsg.CanData_Struct.SegPolo = BEGIAN;
+                    tx_msg.can_data_t.seg_polo = BEGIAN;
                 }
                 else
                 {
-                    TxMsg.CanData_Struct.SegPolo = TRANSING;
+                    tx_msg.can_data_t.seg_polo = TRANSING;
                 }
 
                 if( modCount == 0 && num == roundCount-1)
                 {
-                    TxMsg.CanData_Struct.SegPolo = END;
+                    tx_msg.can_data_t.seg_polo = END;
                 }
 
-                TxMsg.CanData_Struct.SegNum = num;
-                memcpy(TxMsg.CanData_Struct.Data, &pdata[num*7], 7);
-                memcpy(TxMessage.Data, TxMsg.CanData, 8);
-                TxMessage.DLC = 8;
+                tx_msg.can_data_t.seg_num = num;
+                memcpy(tx_msg.can_data_t.Data, &pdata[num*7], 7);
+                memcpy(tx_message.Data, tx_msg.can_data, 8);
+                tx_message.DLC = 8;
                 if((CAN_USED->TSR&0x1C000000))
                 {
-                    MicoCanMessageSend(MICO_CAN1, &TxMessage);//发送报文	
+                    MicoCanMessageSend(MICO_CAN1, &tx_message);//发送报文	
                 }
                 else
                 {
@@ -176,14 +176,14 @@ void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len)
                 if( modCount !=0 && num == roundCount-1 )
                 {
                     num++;
-                    TxMsg.CanData_Struct.SegPolo = END;
-                    TxMsg.CanData_Struct.SegNum = num;
-                    memcpy(TxMsg.CanData_Struct.Data,&pdata[num*7],modCount);
-                    memcpy(TxMessage.Data,TxMsg.CanData,modCount+1);
-                    TxMessage.DLC = modCount+1;
+                    tx_msg.can_data_t.seg_polo = END;
+                    tx_msg.can_data_t.seg_num = num;
+                    memcpy(tx_msg.can_data_t.Data,&pdata[num*7],modCount);
+                    memcpy(tx_message.Data,tx_msg.can_data,modCount+1);
+                    tx_message.DLC = modCount+1;
                     if((CAN_USED->TSR&0x1C000000))
                     {
-                        MicoCanMessageSend(MICO_CAN1, &TxMessage);//
+                        MicoCanMessageSend(MICO_CAN1, &tx_message);//
                     }
                     else
                     {
@@ -200,24 +200,24 @@ void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len)
 extern uint32_t ultrasonic_src_id;
 static uint32_t can_test_cnt = 0;
 
-uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t data_in_len, uint8_t *data_out)
+uint16_t CmdProcessing(can_id_union *id, const uint8_t *data_in, const uint16_t data_in_len, uint8_t *data_out)
 {
     //uint8_t data_out_len;
-    id->CanID_Struct.ACK = 1;
-    id->CanID_Struct.DestMACID = id->CanID_Struct.SrcMACID;
-    id->CanID_Struct.SrcMACID = ultrasonic_src_id;
-    id->CanID_Struct.res = 0;
-    //id->CanID_Struct.FUNC_ID =
+    id->canx_id_t.ack = 1;
+    id->canx_id_t.dest_mac_id = id->canx_id_t.src_mac_id;
+    id->canx_id_t.src_mac_id = ultrasonic_src_id;
+    id->canx_id_t.res = 0;
+    //id->canx_id_t.func_id =
 
 
-    switch(id->CanID_Struct.FUNC_ID)
+    switch(id->canx_id_t.func_id)
     {
         case CAN_FUN_ID_RESET:
             platform_mcu_reset();
             break;
         case CAN_FUN_ID_WRITE:
         case CAN_FUN_ID_READ:
-            switch(id->CanID_Struct.SourceID)
+            switch(id->canx_id_t.source_id)
             {
                 case CAN_SOURCE_ID_READ_VERSION:
 #if 0
@@ -314,8 +314,8 @@ uint16_t CmdProcessing(CAN_ID_UNION *id, const uint8_t *data_in, const uint16_t 
     return CMD_NOT_FOUND;
 }
 
-CAN_LONG_BUF_T can_long_frame_buf_ram;
-CAN_LONG_BUF_T *can_long_frame_buf = &can_long_frame_buf_ram;
+can_long_buf_t can_long_frame_buf_ram;
+can_long_buf_t *can_long_frame_buf = &can_long_frame_buf_ram;
 
 #define CAN_LONG_BUF_FULL   0xff
 static uint8_t GetOneFreeBuf(void)
@@ -360,69 +360,69 @@ void CanLongBufInit(void)
     FifoInit(can_fifo, can_pkg, CAN_FIFO_SIZE);
 }
 
-void canAckBack(uint32_t CANx_ID, const uint8_t * const pdata, uint16_t len)
+void CanAckBack(uint32_t canx_id, const uint8_t * const pdata, uint16_t len)
 {
     uint16_t t_len;
-    CanTxMsgTypeDef TxMessage;
-    CAN_ID_UNION id;
+    CanTxMsgTypeDef tx_message;
+    can_id_union id;
     uint8_t src_mac_id_temp;
-    CAN_DATA_UNION TxMsg;
+    can_data_union tx_msg;
 
-    id.CANx_ID = CANx_ID;
-    id.CanID_Struct.ACK = 1;
-    src_mac_id_temp = id.CanID_Struct.DestMACID;
-    id.CanID_Struct.DestMACID = id.CanID_Struct.SrcMACID;
-    id.CanID_Struct.SrcMACID = src_mac_id_temp;
+    id.canx_id = canx_id;
+    id.canx_id_t.ack = 1;
+    src_mac_id_temp = id.canx_id_t.dest_mac_id;
+    id.canx_id_t.dest_mac_id = id.canx_id_t.src_mac_id;
+    id.canx_id_t.src_mac_id = src_mac_id_temp;
 
-    TxMessage.ExtId = id.CANx_ID;
-    TxMessage.IDE   = CAN_ID_EXT;					 //扩展模式
-    TxMessage.RTR   = CAN_RTR_DATA;				 //发送的是数据
+    tx_message.ExtId = id.canx_id;
+    tx_message.IDE   = CAN_ID_EXT;					 //扩展模式
+    tx_message.RTR   = CAN_RTR_DATA;				 //发送的是数据
 
     t_len = len;
     if( t_len <=7 )
     {
-        TxMsg.CanData_Struct.SegPolo = ONLYONCE;
-        TxMsg.CanData_Struct.SegNum = 0;
-        memcpy( TxMsg.CanData_Struct.Data, (const void *)pdata, t_len );
-        memcpy( TxMessage.Data, TxMsg.CanData, t_len + 1 );
+        tx_msg.can_data_t.seg_polo = ONLYONCE;
+        tx_msg.can_data_t.seg_num = 0;
+        memcpy( tx_msg.can_data_t.Data, (const void *)pdata, t_len );
+        memcpy( tx_message.Data, tx_msg.can_data, t_len + 1 );
 
-        TxMessage.DLC = t_len + 1;
+        tx_message.DLC = t_len + 1;
         if( (CAN_USED->TSR & 0x1C000000) )
         {
-            MicoCanMessageSend(MICO_CAN1, &TxMessage );//
+            MicoCanMessageSend(MICO_CAN1, &tx_message );//
         }
     }
 }
 
-static OSStatus upgradePrepareProcess(CAN_ID_UNION id, uint8_t *md5, uint8_t *firmware_Size )
+static OSStatus UpgradePrepareProcess(can_id_union id, uint8_t *md5, uint8_t *firmware_Size )
 {
     OSStatus err = kNoErr;
-    uint32_t firmwareSize;
+    uint32_t firmware_size;
     mico_logic_partition_t *ota_partition_info;
     uint8_t ack;
 
     ota_partition_info = MicoFlashGetInfo( MICO_PARTITION_OTA_TEMP );
     require_action( ota_partition_info->partition_owner != MICO_FLASH_NONE, exit, err = kUnsupportedErr );
 
-    firmwareSize = ReadBig32(firmware_Size);
-    if( firmwareSize > ota_partition_info->partition_length )
+    firmware_size = ReadBig32(firmware_Size);
+    if( firmware_size > ota_partition_info->partition_length )
     {
         ack = 0x01;
-        canAckBack(id.CANx_ID, &ack, 1);
+        CanAckBack(id.canx_id, &ack, 1);
         CanProtocolLog( "not enough storage" );
         goto exit;
     }
-    CanProtocolLog( "firmwareSize is:%d", firmwareSize );
-    if( !upgradePrepareFlash( md5, firmwareSize ) )
+    CanProtocolLog( "firmware_size is:%d", firmware_size );
+    if( !upgradePrepareFlash( md5, firmware_size ) )
     {
         ack = 0x00;
-        canAckBack(id.CANx_ID, &ack, 1);
+        CanAckBack(id.canx_id, &ack, 1);
         CanProtocolLog( "mcu prepare ok" );
     }
     else
     {
         ack = 0x02;
-        canAckBack(id.CANx_ID, &ack, 1);
+        CanAckBack(id.canx_id, &ack, 1);
         CanProtocolLog( "mcu retry later" );
     }
 
@@ -430,7 +430,7 @@ exit:
     return err;
 }
 
-static OSStatus upgradeFirmwareRecevingProcess( CAN_ID_UNION *id,  uint8_t *rx_data, uint8_t dataLen)
+static OSStatus UpgradeFirmwareRecevingProcess( can_id_union *id,  uint8_t *rx_data, uint8_t dataLen)
 {
     OSStatus err = kNoErr;
     uint32_t packageDataLength = dataLen;
@@ -448,7 +448,7 @@ static OSStatus upgradeFirmwareRecevingProcess( CAN_ID_UNION *id,  uint8_t *rx_d
 #endif
         {
             ack = 0x00;
-            canAckBack(id->CANx_ID, rx_data, 2);
+            CanAckBack(id->canx_id, rx_data, 2);
         }
     }
     else
@@ -462,13 +462,13 @@ static OSStatus upgradeFirmwareRecevingProcess( CAN_ID_UNION *id,  uint8_t *rx_d
 #endif
             {
                 ack = 0x00;
-                canAckBack(id->CANx_ID, rx_data, 2);
+                CanAckBack(id->canx_id, rx_data, 2);
             }
         }
         else
         {
             ack = 0x01;
-            canAckBack(id->CANx_ID, &ack, 1);
+            CanAckBack(id->canx_id, &ack, 1);
             CanProtocolLog( "mcu write data failed" );
             //index = rx_data[0] & 0x3f;
             //group = rx_data[1];
@@ -482,7 +482,7 @@ exit:
     return err;
 }
 
-static OSStatus upgradeFinishCheckProcess( CAN_ID_UNION *id )
+static OSStatus upgradeFinishCheckProcess( can_id_union *id )
 {
     OSStatus err = kNoErr;
     uint8_t ack;
@@ -490,14 +490,14 @@ static OSStatus upgradeFinishCheckProcess( CAN_ID_UNION *id )
     if( !upgradeCheckFlash() )
     {
         ack = 0x00;
-        canAckBack(id->CANx_ID, &ack, 1);
+        CanAckBack(id->canx_id, &ack, 1);
         CanProtocolLog("MD5 success,sent right ack");
         platform_mcu_reset();
     }
     else
     {
         ack = 0x01;
-        canAckBack(id->CANx_ID, &ack, 1);
+        CanAckBack(id->canx_id, &ack, 1);
         CanProtocolLog("MD5 err,sent err ack");
     }
 
@@ -521,10 +521,10 @@ void can_protocol_period( void )
     }
     while(IsFifoEmpty(can_fifo) == FALSE)
     {
-        CAN_ID_UNION id;
+        can_id_union id;
         can_pkg_t can_pkg_tmp;
         uint16_t tx_len;
-        CAN_DATA_UNION rx_buf;
+        can_data_union rx_buf;
         uint8_t buf_index;
         uint8_t seg_polo;
         uint8_t seg_num;
@@ -532,50 +532,50 @@ void can_protocol_period( void )
 
         FifoGetCanPkg(can_fifo, &can_pkg_tmp);
 
-        memcpy(rx_buf.CanData,  can_pkg_tmp.data.CanData, can_pkg_tmp.len);
-        id.CANx_ID = can_pkg_tmp.id.CANx_ID;
-        seg_polo = can_pkg_tmp.data.CanData_Struct.SegPolo;
-        seg_num = can_pkg_tmp.data.CanData_Struct.SegNum;
+        memcpy(rx_buf.can_data,  can_pkg_tmp.data.can_data, can_pkg_tmp.len);
+        id.canx_id = can_pkg_tmp.id.canx_id;
+        seg_polo = can_pkg_tmp.data.can_data_t.seg_polo;
+        seg_num = can_pkg_tmp.data.can_data_t.seg_num;
         rx_data_len = can_pkg_tmp.len;
         //can_comm_start_time = os_get_time();
 
-        if( id.CanID_Struct.SourceID == 0x10 )//update_prepare
+        if( id.canx_id_t.source_id == 0x10 )//update_prepare
         {
             static uint8_t md5[16];
-            static uint8_t firmwareSize[4];
+            static uint8_t firmware_size[4];
 
             //memcpy( &rx_buf, RxMessage.Data, RxMessage.DLC );
-            if( rx_buf.CanData_Struct.SegPolo == BEGIAN )
+            if( rx_buf.can_data_t.seg_polo == BEGIAN )
             {
-                memcpy(&md5[0], rx_buf.CanData_Struct.Data, 7 );
+                memcpy(&md5[0], rx_buf.can_data_t.Data, 7 );
             }
-            if( rx_buf.CanData_Struct.SegPolo == TRANSING )
+            if( rx_buf.can_data_t.seg_polo == TRANSING )
             {
-                memcpy(&md5[7], rx_buf.CanData_Struct.Data, 7 );
+                memcpy(&md5[7], rx_buf.can_data_t.Data, 7 );
             }
-            if( rx_buf.CanData_Struct.SegPolo == END )
+            if( rx_buf.can_data_t.seg_polo == END )
             {
-                memcpy(&md5[14], &rx_buf.CanData_Struct.Data[0], 2 );
-                memcpy(&firmwareSize[0], &rx_buf.CanData_Struct.Data[2], 4 );
-                upgradePrepareProcess(id, md5, firmwareSize);
+                memcpy(&md5[14], &rx_buf.can_data_t.Data[0], 2 );
+                memcpy(&firmware_size[0], &rx_buf.can_data_t.Data[2], 4 );
+                UpgradePrepareProcess(id, md5, firmware_size);
             }
             //goto exit;
             continue;
         }
-        if( id.CanID_Struct.SourceID == 0x11 )//update_receicing
+        if( id.canx_id_t.source_id == 0x11 )//update_receicing
         {
 #if COM_ERR_TEST
             uint32_t rand_test;
             rand_test = rand() % COM_ERR_RAND_NUM;
             if(rand_test != COM_ERR_RAND_NUM>>1)
 #endif
-                upgradeFirmwareRecevingProcess(&id, rx_buf.CanData, rx_data_len);
+                UpgradeFirmwareRecevingProcess(&id, rx_buf.can_data, rx_data_len);
 
             //goto exit;
             continue;
 
         }
-        if( id.CanID_Struct.SourceID == 0x12 )//update_finish_check
+        if( id.canx_id_t.source_id == 0x12 )//update_finish_check
         {
             upgradeFinishCheckProcess(&id);
             //goto exit;
@@ -584,15 +584,15 @@ void can_protocol_period( void )
 
         if(seg_polo == ONLYONCE)
         {
-            //if( (id.CanID_Struct.SourceID < SOURCE_ID_PREPARE_UPDATE) && (id.CanID_Struct.SourceID > SOURCE_ID_CHECK_TRANSMIT) )
-            if(id.CanID_Struct.DestMACID == ultrasonic_src_id)
+            //if( (id.canx_id_t.source_id < SOURCE_ID_PREPARE_UPDATE) && (id.canx_id_t.source_id > SOURCE_ID_CHECK_TRANSMIT) )
+            if(id.canx_id_t.dest_mac_id == ultrasonic_src_id)
             {
-                tx_len = CmdProcessing(&id, rx_buf.CanData_Struct.Data, rx_data_len - 1, CanTxdataBuff );
+                tx_len = CmdProcessing(&id, rx_buf.can_data_t.Data, rx_data_len - 1, can_tx_buf );
                 //process the data here//
 
                 if(tx_len > 0)
                 {
-                    CanTX( MICO_CAN1, id.CANx_ID, CanTxdataBuff, tx_len );
+                    CanTX( MICO_CAN1, id.canx_id, can_tx_buf, tx_len );
                 }
             }
         }
@@ -611,7 +611,7 @@ void can_protocol_period( void )
 
             if(seg_polo == BEGIAN)
             {
-                buf_index = can_long_frame_buf->GetTheBufById(id.CANx_ID);
+                buf_index = can_long_frame_buf->GetTheBufById(id.canx_id);
                 if(buf_index == CAN_BUF_NO_THIS_ID)
                 {
                     buf_index = can_long_frame_buf->GetOneFreeBuf();
@@ -627,15 +627,15 @@ void can_protocol_period( void )
 
                     goto exit;
                 }
-                memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[0], rx_buf.CanData_Struct.Data, CAN_ONE_FRAME_DATA_LENTH);
+                memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[0], rx_buf.can_data_t.Data, CAN_ONE_FRAME_DATA_LENTH);
                 can_long_frame_buf->can_rcv_buf[buf_index].used_len = CAN_ONE_FRAME_DATA_LENTH;
-                can_long_frame_buf->can_rcv_buf[buf_index].can_id = id.CANx_ID;
+                can_long_frame_buf->can_rcv_buf[buf_index].can_id = id.canx_id;
                 can_long_frame_buf->can_rcv_buf[buf_index].start_time = os_get_time();
                 CanProtocolLog("begin\r\n");
             }
             else if((seg_polo == TRANSING) || (seg_polo == END))
             {
-                buf_index = can_long_frame_buf->GetTheBufById(id.CANx_ID);
+                buf_index = can_long_frame_buf->GetTheBufById(id.canx_id);
                 if((buf_index == CAN_BUF_NO_THIS_ID) || (buf_index >= CAN_LONG_BUF_NUM))
                 {
                     CanProtocolLog("ERROR ! !\r\n long buff index is %d",buf_index);
@@ -644,20 +644,20 @@ void can_protocol_period( void )
                 can_long_frame_buf->can_rcv_buf[buf_index].start_time = os_get_time();
                 if(seg_polo == TRANSING)
                 {
-                    memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[seg_num*CAN_ONE_FRAME_DATA_LENTH], rx_buf.CanData_Struct.Data, CAN_ONE_FRAME_DATA_LENTH);
+                    memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[seg_num*CAN_ONE_FRAME_DATA_LENTH], rx_buf.can_data_t.Data, CAN_ONE_FRAME_DATA_LENTH);
                     can_long_frame_buf->can_rcv_buf[buf_index].used_len += CAN_ONE_FRAME_DATA_LENTH;
                     CanProtocolLog("transing\r\n");
                 }
                 if(seg_polo == END)
                 {
-                    memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[seg_num*CAN_ONE_FRAME_DATA_LENTH], rx_buf.CanData_Struct.Data, rx_data_len - 1);
+                    memcpy(&can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf[seg_num*CAN_ONE_FRAME_DATA_LENTH], rx_buf.can_data_t.Data, rx_data_len - 1);
                     can_long_frame_buf->can_rcv_buf[buf_index].used_len += rx_data_len - 1;
 
                     //process the data here//
                     /**********************/
                     //process the data here//
 
-                    CanTX( MICO_CAN1, id.CANx_ID, can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf, can_long_frame_buf->can_rcv_buf[buf_index].used_len);  // test :send the data back;
+                    CanTX( MICO_CAN1, id.canx_id, can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf, can_long_frame_buf->can_rcv_buf[buf_index].used_len);  // test :send the data back;
                     can_long_frame_buf->FreeBuf(buf_index);
                     CanProtocolLog("end\r\n");
                 }

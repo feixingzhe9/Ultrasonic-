@@ -103,130 +103,107 @@ extern "C"
 
 #define MICO_UNUSED 0xFF
 
-    typedef enum
-    {
-#if 1
+typedef enum
+{
+    MICO_GPIO_ULTRA_DATA,
 
-        MICO_GPIO_ULTRA_DATA,
+    MICO_GPIO_SYS_LED,
 
-        MICO_GPIO_24_V_EN,
-        MICO_GPIO_SYS_LED,
+    MICO_GPIO_KEY_S0,
+    MICO_GPIO_KEY_S1,
+    MICO_GPIO_KEY_S2,
+    MICO_GPIO_KEY_S3,
+    MICO_GPIO_KEY_S4,
+    MICO_GPIO_KEY_S5,
 
-        MICO_GPIO_KEY_S0,
-        MICO_GPIO_KEY_S1,
-        MICO_GPIO_KEY_S2,
-        MICO_GPIO_KEY_S3,
-        MICO_GPIO_KEY_S4,
-        MICO_GPIO_KEY_S5,
+    MICO_GPIO_TRIG,
 
-        MICO_GPIO_TRIG,
+    MICO_GPIO_UART3_TX,
+    MICO_GPIO_UART3_RX,
 
+    MICO_GPIO_CAN_RX,
+    MICO_GPIO_CAN_TX,
+    MICO_GPIO_CAN_STB,
 
-        MICO_GPIO_PWRKEY,
-        MICO_GPIO_5V_RES1_ADC,
-        MICO_GPIO_12V_RES2_ADC,
+    MICO_GPIO_UART2_TX,
+    MICO_GPIO_UART2_RX,
 
-        MICO_GPIO_UART3_TX,
-        MICO_GPIO_UART3_RX,
+    MICO_GPIO_UART1_TX,
+    MICO_GPIO_UART1_RX,
 
-        MICO_GPIO_LED_PWM,
-        MICO_GPIO_ADAPTER_IN,
-        MICO_GPIO_FAN_CTRL,
+    MICO_GPIO_EMG_STOP,
 
-        MICO_GPIO_RECHARGE_LED,
-        MICO_GPIO_IRLED_PWM,
-        MICO_GPIO_CAN_RX,
-        MICO_GPIO_CAN_TX,
-        MICO_GPIO_CAN_STB,
+    MICO_GPIO_MAX, /* Denotes the total number of GPIO port aliases. Not a valid GPIO alias */
+    MICO_GPIO_NONE,
+} mico_gpio_t;
 
-        MICO_GPIO_SPI_NSS,
-        MICO_GPIO_SPI_SCK,
-        MICO_GPIO_SPI_MISO,
-        MICO_GPIO_SPI_MOSI,
-
-        MICO_GPIO_I2C_SCL,
-        MICO_GPIO_I2C_SDA,
-
-        MICO_GPIO_UART2_TX,
-        MICO_GPIO_UART2_RX,
-
-        MICO_GPIO_UART1_TX,
-        MICO_GPIO_UART1_RX,
-
-        MICO_GPIO_EMG_STOP,
-
-#endif
-        MICO_GPIO_MAX, /* Denotes the total number of GPIO port aliases. Not a valid GPIO alias */
-        MICO_GPIO_NONE,
-    } mico_gpio_t;
-
-    typedef enum
-    {
-        IO_INPUT,
-        IO_OUTPUT,
-        IO_DIR_MAX,
-    } io_dir_t;
-    typedef enum
-    {
-        MICO_SPI_1,
-        MICO_SPI_MAX, /* Denotes the total number of SPI port aliases. Not a valid SPI alias */
-        MICO_SPI_NONE,
-    } mico_spi_t;
+typedef enum
+{
+    IO_INPUT,
+    IO_OUTPUT,
+    IO_DIR_MAX,
+} io_dir_t;
+typedef enum
+{
+    MICO_SPI_1,
+    MICO_SPI_MAX, /* Denotes the total number of SPI port aliases. Not a valid SPI alias */
+    MICO_SPI_NONE,
+} mico_spi_t;
 
 
-    typedef enum
-    {
-        MICO_I2C_1,
-        MICO_I2C_MAX, /* Denotes the total number of I2C port aliases. Not a valid I2C alias */
-        MICO_I2C_NONE,
-    } mico_i2c_t;
+typedef enum
+{
+    MICO_I2C_1,
+    MICO_I2C_MAX, /* Denotes the total number of I2C port aliases. Not a valid I2C alias */
+    MICO_I2C_NONE,
+} mico_i2c_t;
 
-    typedef enum
-    {
-        MICO_PWM_IRLED,
-        MICO_PWM_2,
-        MICO_PWM_3,
-        MICO_PWM_MAX, /* Denotes the total number of PWM port aliases. Not a valid PWM alias */
-        MICO_PWM_NONE,
-    } mico_pwm_t;
+typedef enum
+{
+    MICO_PWM_IRLED,
+    MICO_PWM_2,
+    MICO_PWM_3,
+    MICO_PWM_MAX, /* Denotes the total number of PWM port aliases. Not a valid PWM alias */
+    MICO_PWM_NONE,
+} mico_pwm_t;
 
-    typedef enum
-    {
-        /* following are adc1 channels */
-        MICO_ADC_5V_RES1,
-        MICO_ADC_12V_RES2,
-        MICO_ADC_BAT_NV,
+typedef enum
+{
+    /* following are adc1 channels */
+    MICO_ADC_5V_RES1,
+    MICO_ADC_12V_RES2,
+    MICO_ADC_BAT_NV,
 
-        MICO_ADC_NONE,
-    } mico_adc_t;
+    MICO_ADC_NONE,
+} mico_adc_t;
 
-    typedef enum
-    {
-        MICO_UART_1,
-        MICO_UART_2,
-        MICO_UART_3,
-        MICO_UART_MAX, /* Denotes the total number of UART port aliases. Not a valid UART alias */
-        MICO_UART_NONE,
-    } mico_uart_t;
+typedef enum
+{
+    MICO_UART_1,
+    MICO_UART_2,
+    MICO_UART_3,
+    MICO_UART_MAX, /* Denotes the total number of UART port aliases. Not a valid UART alias */
+    MICO_UART_NONE,
+} mico_uart_t;
 
-    typedef enum
-    {
-        MICO_FLASH_EMBEDDED,
-        MICO_FLASH_MAX,
-        MICO_FLASH_NONE,
-    } mico_flash_t;
+typedef enum
+{
+    MICO_FLASH_EMBEDDED,
+    MICO_FLASH_MAX,
+    MICO_FLASH_NONE,
+} mico_flash_t;
 
-    typedef enum
-    {
-        MICO_PARTITION_USER_MAX
-    } mico_user_partition_t;
+typedef enum
+{
+    MICO_PARTITION_USER_MAX
+} mico_user_partition_t;
 
-    typedef enum
-    {
-        MICO_CAN1,
-        MICO_CAN_MAX,
-        MICO_CAN_NONE,
-    } mico_can_t;
+typedef enum
+{
+    MICO_CAN1,
+    MICO_CAN_MAX,
+    MICO_CAN_NONE,
+} mico_can_t;
 
 
 #define STDIO_UART          MICO_UART_1

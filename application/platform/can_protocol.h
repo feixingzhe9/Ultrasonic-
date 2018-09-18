@@ -66,32 +66,32 @@ typedef struct
     uint8_t FuncID;
     uint16_t len;
     uint8_t *pdata;
-}CAN_TXDATA_STRUCT;
+}can_tx_data_t;
 
 typedef union
 {
     struct
     {
-        uint32_t SourceID  : 8;
-        uint32_t FUNC_ID   : 4;
-        uint32_t ACK       : 1;
-        uint32_t DestMACID : 8;
-        uint32_t SrcMACID  : 8;
+        uint32_t source_id  : 8;
+        uint32_t func_id   : 4;
+        uint32_t ack       : 1;
+        uint32_t dest_mac_id : 8;
+        uint32_t src_mac_id  : 8;
         uint32_t res       : 3;
-    }CanID_Struct;
-    uint32_t  CANx_ID;
-}CAN_ID_UNION;
+    }canx_id_t;
+    uint32_t  canx_id;
+}can_id_union;
 
 typedef union
 {
     struct
     {
-        uint8_t SegNum  : 6;
-        uint8_t SegPolo : 2;
+        uint8_t seg_num  : 6;
+        uint8_t seg_polo : 2;
         uint8_t Data[7];
-    }CanData_Struct;
-    uint8_t CanData[8];
-}CAN_DATA_UNION;
+    }can_data_t;
+    uint8_t can_data[8];
+}can_data_union;
 
 #define CAN_ONE_FRAME_DATA_LENTH    7
 #define CAN_SEG_NUM_MAX             64
@@ -102,7 +102,7 @@ typedef struct
     uint32_t start_time;
     uint16_t used_len;
     uint8_t rcv_buf[CAN_LONG_FRAME_LENTH_MAX];
-}CAN_RCV_BUFFER_T;
+}can_rcv_buf_t;
 
 typedef uint8_t (*GetOneFreeBufFn)(void);
 typedef uint8_t (*GetTheBufByIdFn)(uint32_t);
@@ -111,11 +111,11 @@ typedef void (*FreeBufFn)(uint8_t);
 #define CAN_LONG_BUF_NUM    2
 typedef struct
 {
-    CAN_RCV_BUFFER_T can_rcv_buf[CAN_LONG_BUF_NUM];
+    can_rcv_buf_t can_rcv_buf[CAN_LONG_BUF_NUM];
     GetOneFreeBufFn GetOneFreeBuf;
     GetTheBufByIdFn GetTheBufById;
     FreeBufFn FreeBuf;
-}CAN_LONG_BUF_T;
+}can_long_buf_t;
 
 
 #if 0
@@ -131,12 +131,12 @@ void RxMsgHandle(uint32_t ID,uint8_t* pdata);
 void CAN_SetMsg(void);
 
 void CM_CanSetMsg(uint32_t id,uint8_t ide,uint8_t rtr,uint8_t dlc,uint8_t* pdata);
-void CM_CAN_Tx( mico_can_t can_type, CAN_ID_UNION id, uint8_t* pdata, uint16_t len );
+void CM_CAN_Tx( mico_can_t can_type, can_id_union id, uint8_t* pdata, uint16_t len );
 
 void UploadAdcData(void);
 
 void can_protocol_period( void );
-extern void CanTX(mico_can_t can_type, uint32_t CANx_ID,uint8_t* pdata,uint16_t len);
+extern void CanTX(mico_can_t can_type, uint32_t canx_id,uint8_t* pdata,uint16_t len);
 void CanLongBufInit(void);
 
 #endif

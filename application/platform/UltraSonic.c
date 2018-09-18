@@ -75,14 +75,14 @@ void CompleteAndUploadData(void)
 {
     uint8_t i = 0;
     uint16_t distance = 0;
-    CAN_ID_UNION id;
+    can_id_union id;
     //uint16_t interval_time = 0;
-    id.CanID_Struct.SourceID = 0x80;
-    id.CanID_Struct.DestMACID = 0x01;
-    id.CanID_Struct.SrcMACID = ultrasonic_src_id;
-    id.CanID_Struct.ACK = 1;
-    id.CanID_Struct.FUNC_ID = CAN_FUN_ID_READ;
-    id.CanID_Struct.res = 0;
+    id.canx_id_t.source_id = 0x80;
+    id.canx_id_t.dest_mac_id = 0x01;
+    id.canx_id_t.src_mac_id = ultrasonic_src_id;
+    id.canx_id_t.ack = 1;
+    id.canx_id_t.func_id = CAN_FUN_ID_READ;
+    id.canx_id_t.res = 0;
 
     if( (ultra_sonic_data->data_ready_flag != DATA_EXPIRED) && (ultra_sonic_data->data_ready_flag != DATA_NOT_READY) && (ultra_sonic_data->interval_time.cnt > 0) )
     {
@@ -90,14 +90,14 @@ void CompleteAndUploadData(void)
         ultra_sonic_data->compute_ditance[i] = ultra_sonic_data->interval_time.time[i] * 17 /1000;
 
         distance = ultra_sonic_data->compute_ditance[i];
-        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) );
+        CanTX( MICO_CAN1, id.canx_id, (uint8_t *)&distance, sizeof(distance) );
         ENABLE_INTERRUPTS();
         //printf("%d\n",distance);
     }
     else
     {
         distance = NO_OBJ_DETECTED;
-        CanTX( MICO_CAN1, id.CANx_ID, (uint8_t *)&distance, sizeof(distance) );
+        CanTX( MICO_CAN1, id.canx_id, (uint8_t *)&distance, sizeof(distance) );
         //printf("%d\n",distance);
     }
     //UltraDataIO_Output();
