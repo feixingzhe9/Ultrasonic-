@@ -4,7 +4,7 @@
 
 void timer_init(void);
 void start_timer(void);
-void StopTimer(void);
+void stop_timer(void);
 uint32_t get_timer_count(void);
 
 #endif

@@ -30,16 +30,16 @@
  */
 
 
-/** @mainpage MICO 
+/** @mainpage MICO
 
-    This documentation describes the MICO APIs.
-    It consists of:
-     - MICO Core APIs   
-     - MICO Hardware Abstract Layer APIs    
-     - MICO Algorithm APIs        
-     - MICO System APIs        
-     - MICO Middleware APIs
-     - MICO Drivers interface
+  This documentation describes the MICO APIs.
+  It consists of:
+  - MICO Core APIs
+  - MICO Hardware Abstract Layer APIs
+  - MICO Algorithm APIs
+  - MICO System APIs
+  - MICO Middleware APIs
+  - MICO Drivers interface
  */
 
 #ifndef __MICO_H_
@@ -63,27 +63,27 @@
 #define MicoGetMemoryInfo           mico_memory_info
 
 /** @defgroup MICO_Core_APIs MICO Core APIs
-  * @brief MiCO Initialization, RTOS, TCP/IP stack, and Network Management
-  */
-
-/** @addtogroup MICO_Core_APIs
-  * @{
-  */
-
-/** \defgroup MICO_Init_Info Initialization and Tools
-  * @brief Get MiCO version or RF version, flash usage information or init MiCO TCPIP stack
-  * @{
+ * @brief MiCO Initialization, RTOS, TCP/IP stack, and Network Management
  */
 
- /******************************************************
+/** @addtogroup MICO_Core_APIs
+ * @{
+ */
+
+/** \defgroup MICO_Init_Info Initialization and Tools
+ * @brief Get MiCO version or RF version, flash usage information or init MiCO TCPIP stack
+ * @{
+ */
+
+/******************************************************
  *                    Structures
  ******************************************************/
 
 typedef struct  {
-  int num_of_chunks;  /**< number of free chunks*/
-  int total_memory;  /**< maximum total allocated space*/
-  int allocted_memory; /**< total allocated space*/
-  int free_memory; /**< total free space*/
+    int num_of_chunks;  /**< number of free chunks*/
+    int total_memory;  /**< maximum total allocated space*/
+    int allocted_memory; /**< total allocated space*/
+    int free_memory; /**< total free space*/
 } micoMemInfo_t;
 
 
@@ -92,64 +92,64 @@ typedef struct  {
  ******************************************************/
 
 /**
-  * @brief  Get RF driver's version.
-  *
-  * @note   Create a memery buffer to store the version characters.
-  *         THe input buffer length should be 40 bytes at least.
-  * @note   This must be executed after micoInit().
-  * @param  inVersion: Buffer address to store the RF driver. 
-  * @param  inLength: Buffer size. 
-  *
-  * @return int
-  */
+ * @brief  Get RF driver's version.
+ *
+ * @note   Create a memery buffer to store the version characters.
+ *         THe input buffer length should be 40 bytes at least.
+ * @note   This must be executed after micoInit().
+ * @param  inVersion: Buffer address to store the RF driver.
+ * @param  inLength: Buffer size.
+ *
+ * @return int
+ */
 int MicoGetRfVer( char* outVersion, uint8_t inLength );
 
 /**
-  * @brief  Get MICO's version.
-  *
-  * @param  None 
-  *
-  * @return Point to the MICO's version string.
-  */
+ * @brief  Get MICO's version.
+ *
+ * @param  None
+ *
+ * @return Point to the MICO's version string.
+ */
 char* MicoGetVer( void );
 
 /**
-  * @brief  Initialize the TCPIP stack thread, RF driver thread, and other
-            supporting threads needed for wlan connection. Do some necessary
-            initialization
-  *
-  * @param  None
-  *
-  * @return None
-  */
+ * @brief  Initialize the TCPIP stack thread, RF driver thread, and other
+ supporting threads needed for wlan connection. Do some necessary
+ initialization
+ *
+ * @param  None
+ *
+ * @return None
+ */
 void MicoInit( void );
 
 /**
-  * @brief  Get memory usage information
-  *
-  * @param  None 
-  *
-  * @return Point to structure of memory usage information in heap
-  */
+ * @brief  Get memory usage information
+ *
+ * @param  None
+ *
+ * @return Point to structure of memory usage information in heap
+ */
 micoMemInfo_t* MicoGetMemoryInfo( void );
 
 
 /**
-  * @brief  Get an identifier id from device, every id is unique and will not change in life-time
-  *
-  * @param  identifier length 
-  *
-  * @return Point to the identifier 
-  */
+ * @brief  Get an identifier id from device, every id is unique and will not change in life-time
+ *
+ * @param  identifier length
+ *
+ * @return Point to the identifier
+ */
 const uint8_t* mico_generate_cid( uint8_t *length );
 
 #endif /* __MICO_H_ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 

@@ -29,9 +29,9 @@ typedef struct {
 } save_flash_data_t;
 extern save_flash_data_t        flashTable;
 
-OSStatus upgradePrepareFlash( uint8_t *md5, uint32_t Size );
+OSStatus prepare_upgrade_flash( uint8_t *md5, uint32_t Size );
 OSStatus upgradeWriteFlashData( uint32_t* Data, uint32_t DataLength );
-OSStatus upgradeCheckFlash( void );
+OSStatus check_upgrade_finish( void );
 OSStatus MICOBootConfiguration( save_flash_data_t *flashTable );
 
 #endif //#ifndef __UPGRADE_FLASH_H__

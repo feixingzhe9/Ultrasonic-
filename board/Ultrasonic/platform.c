@@ -475,7 +475,7 @@ void SysLedTrigger(void)
     MicoGpioOutputTrigger(MICO_GPIO_SYS_LED);
 }
 
-uint8_t GetKeyValue(mico_gpio_t gpio)
+uint8_t get_key_value(mico_gpio_t gpio)
 {
     if((gpio >= MICO_GPIO_KEY_S0) && (gpio <= MICO_GPIO_KEY_S5))
     {

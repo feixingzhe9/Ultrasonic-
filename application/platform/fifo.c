@@ -1,9 +1,8 @@
 #include "fifo.h"
 
-static uint32_t FifoSurplusSize(can_fifo_t *head); //
-static uint8_t IsFifoFull(can_fifo_t *head);         //
+static uint8_t is_fifo_full(can_fifo_t *head);         //
 
-uint8_t FifoInit(can_fifo_t *head, can_pkg_t *buf, uint32_t len)
+uint8_t fifo_init(can_fifo_t *head, can_pkg_t *buf, uint32_t len)
 {
     if(head == NULL)
     {
@@ -16,7 +15,7 @@ uint8_t FifoInit(can_fifo_t *head, can_pkg_t *buf, uint32_t len)
     return TRUE;
 }
 
-void FifoRst(can_fifo_t *head)
+void fifo_reset(can_fifo_t *head)
 {
     if(head == NULL)
     {
@@ -26,31 +25,31 @@ void FifoRst(can_fifo_t *head)
     head->rear = 0;
 }
 
-uint8_t IsFifoEmpty(can_fifo_t *head)
+uint8_t is_fifo_empty(can_fifo_t *head)
 {
     return ((head->front == head->rear) ? TRUE : FALSE);
 }
 
-static uint8_t IsFifoFull(can_fifo_t *head)
+static uint8_t is_fifo_full(can_fifo_t *head)
 {
     return ((head->front == ((head->rear + 1) % head->size)) ? TRUE : FALSE);
 }
 
 
-uint32_t FifoValidSize(can_fifo_t *head)
+uint32_t get_fifo_valid_size(can_fifo_t *head)
 {
     return ((head->rear < head->front)
             ? (head->rear + head->size - head->front)
             : (head->rear - head->front));
 }
 
-uint8_t FifoPutCanPkg(can_fifo_t *head, const can_pkg_t data)
+uint8_t put_can_pkg_to_fifo(can_fifo_t *head, const can_pkg_t data)
 {
     if(head == NULL)
     {
         return FALSE;
     }
-    if(IsFifoFull(head) == TRUE)
+    if(is_fifo_full(head) == TRUE)
     {
         return FALSE;
     }
@@ -62,13 +61,13 @@ uint8_t FifoPutCanPkg(can_fifo_t *head, const can_pkg_t data)
     return TRUE;
 }
 
-uint8_t FifoGetCanPkg(can_fifo_t *head, can_pkg_t *data)
+uint8_t get_can_pkg_from_fifo(can_fifo_t *head, can_pkg_t *data)
 {
     if(head == NULL)
     {
         return FALSE;
     }
-    if(IsFifoEmpty(head) == TRUE)
+    if(is_fifo_empty(head) == TRUE)
     {
         return FALSE;
     }

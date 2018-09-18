@@ -96,7 +96,7 @@ void complete_upload_data(void)
         //printf("%d\n",distance);
     }
     //UltraDataIO_Output();
-    //StopTimer();
+    //stop_timer();
 }
 
 #define ULTRASONIC_MEASURE_TIME                 13/SYSTICK_PERIOD //unit: ms

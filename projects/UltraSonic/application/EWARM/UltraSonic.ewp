@@ -17,15 +17,15 @@
         <debug>1</debug>
         <option>
           <name>ExePath</name>
-          <state>$PROJ_DIR$\..\..\..\..\build\PowerBoard_V2\Output</state>
+          <state>$PROJ_DIR$\..\..\..\..\build\ultrasonic\output</state>
         </option>
         <option>
           <name>ObjPath</name>
-          <state>$PROJ_DIR$\..\..\..\..\build\PowerBoard_V2\application\obj_RVMDK</state>
+          <state>$PROJ_DIR$\..\..\..\..\build\\ultrasonic\application\obj_RVMDK</state>
         </option>
         <option>
           <name>ListPath</name>
-          <state>$PROJ_DIR$\..\..\..\..\build\PowerBoard_V2\application\list_RVMDK</state>
+          <state>$PROJ_DIR$\..\..\..\..\build\\ultrasonic\application\list_RVMDK</state>
         </option>
         <option>
           <name>Variant</name>
@@ -679,7 +679,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>PowerBoard_Application.out</state>
+          <state>Ultrasonic.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -2533,7 +2533,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>PowerBoard_Application.bin</state>
+          <state>Ultrasonic.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -2588,7 +2588,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>PowerBoard_Application.out</state>
+          <state>Ultrasonic.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -3500,7 +3500,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>PowerBoard_Application.bin</state>
+          <state>Ultrasonic.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -3555,7 +3555,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>PowerBoard_Application.out</state>
+          <state>Ultrasonic.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -3868,7 +3868,7 @@
         <name>$PROJ_DIR$\..\..\..\..\application\platform\UltraSonic.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\UltraSonic.h</name>
+        <name>$PROJ_DIR$\..\..\..\..\application\platform\ultrasonic.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\upgrade_flash.c</name>
@@ -3885,6 +3885,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\Getline.c</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\menu.c</name>
@@ -3894,9 +3897,15 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\Update_for_OTA.c</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\ymodem.c</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
     </file>
   </group>
   <group>

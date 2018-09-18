@@ -35,13 +35,13 @@
 #include "platform_config.h"
 #include "CheckSumUtils.h"
 
-typedef int Log_Status;					
-#define Log_NotExist		        (1)
-#define Log_NeedUpdate			    (2)
-#define Log_UpdateTagNotExist		(3)
+typedef int Log_Status;
+#define Log_NotExist                (1)
+#define Log_NeedUpdate              (2)
+#define Log_UpdateTagNotExist       (3)
 #define Log_contentTypeNotExist     (4)
 #define Log_dataLengthOverFlow      (5)
-#define Log_StartAddressERROR		(6)
+#define Log_StartAddressERROR       (6)
 #define Log_UnkonwnERROR            (7)
 #define Log_CRCERROR                (8)
 

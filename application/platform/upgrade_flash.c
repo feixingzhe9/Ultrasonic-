@@ -26,7 +26,7 @@ save_flash_data_t        flashTable;
 
 OSStatus MICOUpdateConfiguration(boot_table_t *bootTable);
 
-OSStatus upgradePrepareFlash( uint8_t *md5, uint32_t Size )
+OSStatus prepare_upgrade_flash( uint8_t *md5, uint32_t Size )
 {
     OSStatus err = kNoErr;
     mico_logic_partition_t *para_partition_info, *ota_partition_info;
@@ -85,7 +85,7 @@ exit:
     return err;
 }
 
-OSStatus upgradeCheckFlash( void )
+OSStatus check_upgrade_finish( void )
 {
     OSStatus err = kNoErr;
     MD5_HASH md5_ret;

@@ -25,12 +25,13 @@ void emergency_stop_test(void);
 #endif
 
 #ifdef OPEN_WATCH_DOG
-static void MX_IWDG_Init(uint32_t period);
+static void init_iwdg(uint32_t period);
+static void start_iwdg(void);
 #endif
 
 void feed_dog(void);
 
-IWDG_HandleTypeDef hiwdg;
+IWDG_HandleTypeDef iwdg_handle;
 
 int main( void )
 {
@@ -43,15 +44,15 @@ int main( void )
     board_gpios_init();
 
     can_long_buf_init();
-    MicoCanInitialize( MICO_CAN1 );
+    init_can( MICO_CAN1 );
 
     delay_ms(10);
     ultrasonic_init();
     delay_ms(10);
 
 #ifdef OPEN_WATCH_DOG
-    MX_IWDG_Init(550);
-    HAL_IWDG_Start(&hiwdg);
+    init_iwdg(550);
+    start_iwdg();
 #endif
 
     for(;;)
@@ -93,12 +94,10 @@ void ultrasonic_start_tick(void)
     }
 }
 
-
 #define TEST_PERID      500/SYSTICK_PERIOD
 uint32_t sys_led_start_time = 0;
 void sys_indicator(void)
 {
-
     static uint32_t cnt = 0;
 
     platform_pin_config_t pin_config;
@@ -108,7 +107,6 @@ void sys_indicator(void)
 
     //  Initialise system led
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_SYS_LED, &pin_config );
-
 
     if(os_get_time() - sys_led_start_time >= TEST_PERID)
     {
@@ -154,18 +152,22 @@ void emergency_stop_test(void)
 
 #ifdef OPEN_WATCH_DOG
 /* IWDG init function */
-static void MX_IWDG_Init(uint32_t period)
+static void init_iwdg(uint32_t period)
 {
 
-    hiwdg.Instance = IWDG;
-    hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
-    hiwdg.Init.Reload = period;
-    if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+    iwdg_handle.Instance = IWDG;
+    iwdg_handle.Init.Prescaler = IWDG_PRESCALER_32;
+    iwdg_handle.Init.Reload = period;
+    if (HAL_IWDG_Init(&iwdg_handle) != HAL_OK)
     {
         //_Error_Handler(__FILE__, __LINE__);
         printf("error");
     }
+}
 
+static void start_iwdg(void)
+{
+    HAL_IWDG_Start(&iwdg_handle);
 }
 #endif
 
@@ -175,7 +177,7 @@ void feed_dog(void)
     static uint32_t feed_dog_start_time = 0;
     if(os_get_time() - feed_dog_start_time > FEED_DOG_PERIOD)
     {
-        HAL_IWDG_Refresh(&hiwdg);
+        HAL_IWDG_Refresh(&iwdg_handle);
         feed_dog_start_time = os_get_time();
     }
 }

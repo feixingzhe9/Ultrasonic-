@@ -10,9 +10,8 @@
 
 #define CAN_USED    CAN1
 
-
 #define HW_VERSION                      "12"
-#define SW_VERSION                      "NoahUS_HC_SR_04_V005"
+#define SW_VERSION                      "NoahUS_HC_SR_04_V006"
 #define PROTOCOL_VERSION                "20170505R0101"
 
 #define DESTID          0x02
@@ -22,7 +21,6 @@
 #define ULTRASONIC_SRC_ID_BASE          0x60
 
 #define CAN_CMD_READ_VERSION            0x01
-
 
 #define SOURCE_ID_PREPARE_UPDATE        0x10
 #define SOURCE_ID_TRANSMIT_UPDATE       0x11
@@ -45,21 +43,6 @@
 #define CAN_SOURCE_ID_SET_GROUP             0x83
 
 #define CAN_SOURCE_ID_CAN_TEST              0x03
-
-
-typedef union
-{
-    struct{
-        uint32_t start_address; // the address of the bin saved on flash.
-        uint32_t length; // file real length
-        uint8_t version[8];
-        uint8_t type; // B:bootloader, P:boot_table, A:application,
-        uint8_t upgrade_type; //u:upgrade,
-        uint8_t reserved[6];
-    }boot_table_t;
-    char data[24];
-}BOOTLOADER_UNION;
-
 
 typedef struct
 {
@@ -112,28 +95,11 @@ typedef void (*FreeBufFn)(uint8_t);
 typedef struct
 {
     can_rcv_buf_t can_rcv_buf[CAN_LONG_BUF_NUM];
-    GetOneFreeBufFn GetOneFreeBuf;
-    GetTheBufByIdFn GetTheBufById;
-    FreeBufFn FreeBuf;
+    GetOneFreeBufFn get_one_free_buf;
+    GetTheBufByIdFn get_the_buf_by_id;
+    FreeBufFn free_buf;
 }can_long_buf_t;
 
-
-#if 0
-extern uint8_t CanUpdataBuff[64];
-extern uint8_t CanRxdataBuff[64];
-#endif
-
-void RxMsgHandle(uint32_t ID,uint8_t* pdata);
-
-void CM_CAN_Init(void);
-void RxMsgHandle(uint32_t ID,uint8_t* pdata);
-
-void CAN_SetMsg(void);
-
-void CM_CanSetMsg(uint32_t id,uint8_t ide,uint8_t rtr,uint8_t dlc,uint8_t* pdata);
-void CM_CAN_Tx( mico_can_t can_type, can_id_union id, uint8_t* pdata, uint16_t len );
-
-void UploadAdcData(void);
 
 void can_protocol_period( void );
 extern void tx_can_data(mico_can_t can_type, uint32_t canx_id,uint8_t* pdata,uint16_t len);

@@ -17,9 +17,9 @@
 #include "platform.h"
 #include "platform_peripheral.h"
 
-OSStatus MicoCanInitialize( mico_can_t can );
+OSStatus init_can( mico_can_t can );
 
-OSStatus MicoCanMessageSend( mico_can_t can, const CanTxMsgTypeDef *msg);
+OSStatus tx_can_pkg( mico_can_t can, const CanTxMsgTypeDef *msg);
 
 OSStatus MicoCanMessageRead( mico_can_t can, const void *msg );
 
