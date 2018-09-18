@@ -102,7 +102,7 @@ uint8_t GetCanSrcId(void)
 #define TRANSING       0x02
 #define END            0x03
 
-void CanTX(mico_can_t can_type, uint32_t canx_id,uint8_t* pdata,uint16_t len)
+void tx_can_data(mico_can_t can_type, uint32_t canx_id,uint8_t* pdata,uint16_t len)
 {
     //return ;
     uint16_t t_len;
@@ -253,14 +253,14 @@ uint16_t CmdProcessing(can_id_union *id, const uint8_t *data_in, const uint16_t 
 #if 0
                     {
                         uint16_t tmp;
-                        tmp =  UltraSonicGetMeasureData();
+                        tmp =  get_us_measure_data();
                         memcpy(&data_out[0], (uint8_t *)&tmp,sizeof(tmp));
                         return  sizeof(tmp);
                     }
 #else
                     if(ultra_sonic_data->start_flag == 0)
                     {
-                        //UltraSonicStart();
+                        //ultrasonic_start();
                     }
 
                     return 0;
@@ -349,7 +349,7 @@ static uint8_t GetTheBufById(uint32_t id)
     return CAN_BUF_NO_THIS_ID;
 }
 
-void CanLongBufInit(void)
+void can_long_buf_init(void)
 {
     can_long_frame_buf->GetOneFreeBuf = GetOneFreeBuf;
     can_long_frame_buf->GetTheBufById = GetTheBufById;
@@ -360,7 +360,7 @@ void CanLongBufInit(void)
     FifoInit(can_fifo, can_pkg, CAN_FIFO_SIZE);
 }
 
-void CanAckBack(uint32_t canx_id, const uint8_t * const pdata, uint16_t len)
+void can_ack_back(uint32_t canx_id, const uint8_t * const pdata, uint16_t len)
 {
     uint16_t t_len;
     CanTxMsgTypeDef tx_message;
@@ -408,7 +408,7 @@ static OSStatus UpgradePrepareProcess(can_id_union id, uint8_t *md5, uint8_t *fi
     if( firmware_size > ota_partition_info->partition_length )
     {
         ack = 0x01;
-        CanAckBack(id.canx_id, &ack, 1);
+        can_ack_back(id.canx_id, &ack, 1);
         CanProtocolLog( "not enough storage" );
         goto exit;
     }
@@ -416,13 +416,13 @@ static OSStatus UpgradePrepareProcess(can_id_union id, uint8_t *md5, uint8_t *fi
     if( !upgradePrepareFlash( md5, firmware_size ) )
     {
         ack = 0x00;
-        CanAckBack(id.canx_id, &ack, 1);
+        can_ack_back(id.canx_id, &ack, 1);
         CanProtocolLog( "mcu prepare ok" );
     }
     else
     {
         ack = 0x02;
-        CanAckBack(id.canx_id, &ack, 1);
+        can_ack_back(id.canx_id, &ack, 1);
         CanProtocolLog( "mcu retry later" );
     }
 
@@ -448,7 +448,7 @@ static OSStatus UpgradeFirmwareRecevingProcess( can_id_union *id,  uint8_t *rx_d
 #endif
         {
             ack = 0x00;
-            CanAckBack(id->canx_id, rx_data, 2);
+            can_ack_back(id->canx_id, rx_data, 2);
         }
     }
     else
@@ -462,13 +462,13 @@ static OSStatus UpgradeFirmwareRecevingProcess( can_id_union *id,  uint8_t *rx_d
 #endif
             {
                 ack = 0x00;
-                CanAckBack(id->canx_id, rx_data, 2);
+                can_ack_back(id->canx_id, rx_data, 2);
             }
         }
         else
         {
             ack = 0x01;
-            CanAckBack(id->canx_id, &ack, 1);
+            can_ack_back(id->canx_id, &ack, 1);
             CanProtocolLog( "mcu write data failed" );
             //index = rx_data[0] & 0x3f;
             //group = rx_data[1];
@@ -490,14 +490,14 @@ static OSStatus upgradeFinishCheckProcess( can_id_union *id )
     if( !upgradeCheckFlash() )
     {
         ack = 0x00;
-        CanAckBack(id->canx_id, &ack, 1);
+        can_ack_back(id->canx_id, &ack, 1);
         CanProtocolLog("MD5 success,sent right ack");
         platform_mcu_reset();
     }
     else
     {
         ack = 0x01;
-        CanAckBack(id->canx_id, &ack, 1);
+        can_ack_back(id->canx_id, &ack, 1);
         CanProtocolLog("MD5 err,sent err ack");
     }
 
@@ -519,6 +519,7 @@ void can_protocol_period( void )
         can_comm_start_time = os_get_time();
         //ENABLE_INTERRUPTS();
     }
+
     while(IsFifoEmpty(can_fifo) == FALSE)
     {
         can_id_union id;
@@ -592,7 +593,7 @@ void can_protocol_period( void )
 
                 if(tx_len > 0)
                 {
-                    CanTX( MICO_CAN1, id.canx_id, can_tx_buf, tx_len );
+                    tx_can_data( MICO_CAN1, id.canx_id, can_tx_buf, tx_len );
                 }
             }
         }
@@ -657,7 +658,7 @@ void can_protocol_period( void )
                     /**********************/
                     //process the data here//
 
-                    CanTX( MICO_CAN1, id.canx_id, can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf, can_long_frame_buf->can_rcv_buf[buf_index].used_len);  // test :send the data back;
+                    tx_can_data( MICO_CAN1, id.canx_id, can_long_frame_buf->can_rcv_buf[buf_index].rcv_buf, can_long_frame_buf->can_rcv_buf[buf_index].used_len);  // test :send the data back;
                     can_long_frame_buf->FreeBuf(buf_index);
                     CanProtocolLog("end\r\n");
                 }

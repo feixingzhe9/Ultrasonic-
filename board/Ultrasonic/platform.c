@@ -398,7 +398,7 @@ bool MicoShouldEnterBootloader(void)
         return false;
 }
 
-#define UltraSonicLog(format, ...)  custom_log("UlSo", format, ##__VA_ARGS__)
+#define ultrasonic_log(format, ...)  custom_log("UlSo", format, ##__VA_ARGS__)
 #include "platform_tim.h"
 #include "UltraSonic.h"
 static void UltraSonicIRQ_CallBack(void* arg )
@@ -407,7 +407,7 @@ static void UltraSonicIRQ_CallBack(void* arg )
 #if 1
     if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
     {
-        ultra_sonic_data->rcv_time = GetTimerCount();
+        ultra_sonic_data->rcv_time = get_timer_count();
         if(ultra_sonic_data->interval_time.cnt < INTERVAL_TIME_MAX)
         {
             if(ultra_sonic_data->rcv_time > ultra_sonic_data->send_time)
@@ -426,7 +426,7 @@ static void UltraSonicIRQ_CallBack(void* arg )
     /*
        if(ultrasonic_frq_calibration->start_flag == 1)
        {
-       ultrasonic_frq_calibration->end_time = GetTimerCount();
+       ultrasonic_frq_calibration->end_time = get_timer_count();
        if(ultrasonic_frq_calibration->end_time > ultrasonic_frq_calibration->start_time)
        {
        ultrasonic_frq_calibration->interval_time = ultrasonic_frq_calibration->end_time - ultrasonic_frq_calibration->start_time;
@@ -441,21 +441,9 @@ static void UltraSonicIRQ_CallBack(void* arg )
 
 }
 
-void UltraDataIO_Input(void)//interrupt mode
-{
-    platform_pin_config_t pin_config;
 
-    DISABLE_INTERRUPTS();
 
-    pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
-    pin_config.gpio_mode =GPIO_MODE_INPUT;
-    pin_config.gpio_pull = GPIO_PULLUP;
-    MicoGpioInitialize( MICO_GPIO_ULTRA_DATA, &pin_config );
-
-    ENABLE_INTERRUPTS();
-}
-
-void UltraDataIO_InputIT(void)//interrupt mode
+void set_us_data_io_input_it(void)//interrupt mode
 {
     platform_pin_config_t pin_config;
 
@@ -471,20 +459,16 @@ void UltraDataIO_InputIT(void)//interrupt mode
     ENABLE_INTERRUPTS();
 }
 
-void UltraTrigOutputHigh(void)
+void set_us_trig_output_high(void)
 {
     MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_TRIG );
 }
 
-void UltraTrigOutputLow(void)
+void set_us_trig_output_low(void)
 {
     MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_TRIG );
 }
 
-void UltraIoOutputHigh(void)
-{
-    MicoGpioOutputHigh( (mico_gpio_t)MICO_GPIO_ULTRA_DATA );
-}
 
 void SysLedTrigger(void)
 {

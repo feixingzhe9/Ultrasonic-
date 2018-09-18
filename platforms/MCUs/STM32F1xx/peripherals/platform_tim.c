@@ -6,7 +6,7 @@
 #include "platform_tim.h"
 
 
-void TimerInit(void)
+void timer_init(void)
 {
     TIM_ClockConfigTypeDef sClockSourceConfig;
     //TIM_MasterConfigTypeDef sMasterConfig;
@@ -29,7 +29,7 @@ void TimerInit(void)
 
 
 
-void StartTimer(void)
+void start_timer(void)
 {
     TIM_HandleTypeDef htimx;
     htimx.Instance = TIM2;
@@ -44,7 +44,7 @@ void StopTimer(void)
     htimx.Instance = TIM2;
     HAL_TIM_Base_Stop(&htimx);
 }
-uint32_t GetTimerCount(void)
+uint32_t get_timer_count(void)
 {
     return TIM2->CNT;
 }

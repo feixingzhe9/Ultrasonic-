@@ -253,7 +253,7 @@ void platform_can_rx_irq( platform_can_driver_t* can_driver )
 }
 
 //CanRxMsgTypeDef RxMessage;
-extern void UltraSonicStart(void);
+extern void ultrasonic_start(void);
 extern platform_can_driver_t  platform_can_drivers[];
 extern uint32_t can_comm_start_time;
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
@@ -277,7 +277,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
                     if((ultra_sonic_data->start_flag == 0) && (ultra_sonic_data->i_am_en == true))
                     {
                         __HAL_CAN_DISABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
-                        UltraSonicStart();
+                        ultrasonic_start();
                     }
                 }
             }

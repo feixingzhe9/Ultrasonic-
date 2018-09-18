@@ -47,8 +47,8 @@ void board_gpios_init( void )
     pin_config.gpio_pull = GPIO_PULLUP;
 
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_ULTRA_DATA, &pin_config );
-    extern void Ultra_IO_InputIT(void);
-    Ultra_IO_InputIT();
+    extern void set_us_io_input_it(void);
+    set_us_io_input_it();
 
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S0, &pin_config );
     MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_KEY_S1, &pin_config );

@@ -8,7 +8,7 @@
 #include "can_protocol.h"
 #include "UltraSonic.h"
 #include "platform_tim.h"
-#define os_PowerBoard_log(format, ...)  custom_log("Ultrasonic", format, ##__VA_ARGS__)
+#define ultrasonic_log(format, ...)  custom_log("Ultrasonic", format, ##__VA_ARGS__)
 #define Application_REVISION "v0.1"
 
 const  char menu[] =
@@ -18,10 +18,10 @@ const  char menu[] =
 
 //#define HOMWEE_TEST
 
-void SysLed(void);
-void UltraSonicStartTick(void);
+void sys_indicator(void);
+void ultrasonic_start_tick(void);
 #ifdef HOMWEE_TEST
-void EmergencyStopTest(void);
+void emergency_stop_test(void);
 #endif
 
 #ifdef OPEN_WATCH_DOG
@@ -38,14 +38,15 @@ int main( void )
     init_architecture();
     init_platform();
 
-    os_PowerBoard_log( "System clock = %d Hz",HAL_RCC_GetHCLKFreq() );
+    ultrasonic_log( "System clock = %d Hz",HAL_RCC_GetHCLKFreq() );
     printf ( menu, MODEL, SW_VERSION, HARDWARE_REVISION );
     board_gpios_init();
-    CanLongBufInit();
+
+    can_long_buf_init();
     MicoCanInitialize( MICO_CAN1 );
 
     delay_ms(10);
-    UltraSonicInit();
+    ultrasonic_init();
     delay_ms(10);
 
 #ifdef OPEN_WATCH_DOG
@@ -56,12 +57,12 @@ int main( void )
     for(;;)
     {
         can_protocol_period();
-        //UltraSonicStartTick();
-        UltraSonicDataTick();
-        SysLed();
+        //ultrasonic_start_tick();
+        ultrasonic_data_tick();
+        sys_indicator();
 
 #ifdef HOMWEE_TEST
-        EmergencyStopTest();
+        emergency_stop_test();
 #endif
 
 #ifdef OPEN_WATCH_DOG
@@ -71,7 +72,7 @@ int main( void )
 }
 
 #define ULTRASONIC_SEND_TIME   100/SYSTICK_PERIOD
-void UltraSonicStartTick(void)
+void ultrasonic_start_tick(void)
 {
     static uint32_t start_time_1 = 0;
     static uint32_t start_time2 = 0;
@@ -79,7 +80,7 @@ void UltraSonicStartTick(void)
 
     if(os_get_time() - start_time_1 >= ULTRASONIC_SEND_TIME)
     {
-        UltraSonicStart();
+        ultrasonic_start();
         start_time_1 = os_get_time();
         start_time2 = os_get_time();
         flag = 1;
@@ -87,7 +88,7 @@ void UltraSonicStartTick(void)
 
     if((os_get_time() - start_time2 >= ULTRASONIC_SEND_TIME/2) && (flag == 1))
     {
-        ShowTestLog();
+        show_test_log();
         flag = 0;
     }
 }
@@ -95,7 +96,7 @@ void UltraSonicStartTick(void)
 
 #define TEST_PERID      500/SYSTICK_PERIOD
 uint32_t sys_led_start_time = 0;
-void SysLed(void)
+void sys_indicator(void)
 {
 
     static uint32_t cnt = 0;
@@ -131,7 +132,7 @@ void SysLed(void)
 #define EMG_TEST_PERIOD     1000/SYSTICK_PERIOD
 static uint32_t emg_test_start_time = 0;
 
-void EmergencyStopTest(void)
+void emergency_stop_test(void)
 {
 
     //platform_pin_config_t pin_config;

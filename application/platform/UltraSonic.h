@@ -41,11 +41,11 @@ typedef struct
     //uint32_t high_end_time;
 }ultra_sonic_read_data_t;
 
-void UltraSonicStart(void);
-extern void UltraSonicInit(void);
-extern void ShowTestLog(void);
-extern void UltraSonicDataTick(void);
-extern uint16_t UltraSonicGetMeasureData(void);
+void ultrasonic_start(void);
+extern void ultrasonic_init(void);
+extern void show_test_log(void);
+extern void ultrasonic_data_tick(void);
+extern uint16_t get_us_measure_data(void);
 extern ultra_sonic_data_t *ultra_sonic_data;
 
 extern ultra_sonic_read_data_t * ultra_sonic_read_data;

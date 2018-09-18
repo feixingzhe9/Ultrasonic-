@@ -467,7 +467,7 @@ MICO_RTOS_DEFINE_ISR( EXTI4_IRQHandler )
 
 
 
-//#define UltraSonicLog(format, ...)  custom_log("PowerBoard", format, ##__VA_ARGS__)
+//#define ultrasonic_log(format, ...)  custom_log("PowerBoard", format, ##__VA_ARGS__)
 //#include "platform_tim.h"
 MICO_RTOS_DEFINE_ISR( EXTI9_5_IRQHandler )
 {

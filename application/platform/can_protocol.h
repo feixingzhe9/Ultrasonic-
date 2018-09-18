@@ -136,7 +136,7 @@ void CM_CAN_Tx( mico_can_t can_type, can_id_union id, uint8_t* pdata, uint16_t l
 void UploadAdcData(void);
 
 void can_protocol_period( void );
-extern void CanTX(mico_can_t can_type, uint32_t canx_id,uint8_t* pdata,uint16_t len);
-void CanLongBufInit(void);
+extern void tx_can_data(mico_can_t can_type, uint32_t canx_id,uint8_t* pdata,uint16_t len);
+void can_long_buf_init(void);
 
 #endif
