@@ -312,15 +312,15 @@ void can_ack_back(uint32_t canx_id, const uint8_t * const pdata, uint16_t len)
     tx_message.RTR   = CAN_RTR_DATA;        //发送的是数据
 
     t_len = len;
-    if( t_len <=7 )
+    if(t_len <=7)
     {
         tx_msg.can_data_t.seg_polo = ONLYONCE;
         tx_msg.can_data_t.seg_num = 0;
-        memcpy( tx_msg.can_data_t.Data, (const void *)pdata, t_len );
-        memcpy( tx_message.Data, tx_msg.can_data, t_len + 1 );
+        memcpy(tx_msg.can_data_t.Data, (const void *)pdata, t_len);
+        memcpy(tx_message.Data, tx_msg.can_data, t_len + 1);
 
         tx_message.DLC = t_len + 1;
-        if( (CAN_USED->TSR & 0x1C000000) )
+        if((CAN_USED->TSR & 0x1C000000))
         {
             tx_can_pkg(MICO_CAN1, &tx_message );//
         }
@@ -335,35 +335,35 @@ static OSStatus prepare_upgrade_process(can_id_union id, uint8_t *md5, uint8_t *
     uint8_t ack;
 
     ota_partition_info = MicoFlashGetInfo( MICO_PARTITION_OTA_TEMP );
-    require_action( ota_partition_info->partition_owner != MICO_FLASH_NONE, exit, err = kUnsupportedErr );
+    require_action(ota_partition_info->partition_owner != MICO_FLASH_NONE, exit, err = kUnsupportedErr);
 
     firmware_size = ReadBig32(firmware_Size);
-    if( firmware_size > ota_partition_info->partition_length )
+    if(firmware_size > ota_partition_info->partition_length)
     {
         ack = 0x01;
         can_ack_back(id.canx_id, &ack, 1);
         can_protocol_log( "not enough storage" );
         goto exit;
     }
-    can_protocol_log( "firmware_size is:%d", firmware_size );
-    if( !prepare_upgrade_flash( md5, firmware_size ) )
+    can_protocol_log("firmware_size is:%d", firmware_size);
+    if(!prepare_upgrade_flash(md5, firmware_size))
     {
         ack = 0x00;
         can_ack_back(id.canx_id, &ack, 1);
-        can_protocol_log( "mcu prepare ok" );
+        can_protocol_log("mcu prepare ok");
     }
     else
     {
         ack = 0x02;
         can_ack_back(id.canx_id, &ack, 1);
-        can_protocol_log( "mcu retry later" );
+        can_protocol_log("mcu retry later");
     }
 
 exit:
     return err;
 }
 
-static OSStatus rcv_upgrade_firmware_proc( can_id_union *id,  uint8_t *rx_data, uint8_t dataLen)
+static OSStatus rcv_upgrade_firmware_proc(can_id_union *id,  uint8_t *rx_data, uint8_t dataLen)
 {
     OSStatus err = kNoErr;
     uint32_t packageDataLength = dataLen;
@@ -386,12 +386,12 @@ static OSStatus rcv_upgrade_firmware_proc( can_id_union *id,  uint8_t *rx_data, 
     }
     else
     {
-        if( !upgradeWriteFlashData( (uint32_t *)(rx_data + 2), packageDataLength - 2 ) )
+        if( !upgradeWriteFlashData((uint32_t *)(rx_data + 2), packageDataLength - 2 ))
         {
 #if COM_ERR_TEST
             uint32_t rand_test;
             rand_test = rand() % COM_ERR_RAND_NUM;
-            if(rand_test != COM_ERR_RAND_NUM>>1)
+            if(rand_test != COM_ERR_RAND_NUM >> 1)
 #endif
             {
                 ack = 0x00;
@@ -415,12 +415,12 @@ exit:
     return err;
 }
 
-static OSStatus check_upgrade_finish_proc( can_id_union *id )
+static OSStatus check_upgrade_finish_proc(can_id_union *id)
 {
     OSStatus err = kNoErr;
     uint8_t ack;
 
-    if( !check_upgrade_finish() )
+    if(!check_upgrade_finish())
     {
         ack = 0x00;
         can_ack_back(id->canx_id, &ack, 1);
@@ -448,7 +448,7 @@ void can_protocol_period( void )
     if(os_get_time() - can_comm_start_time >= CAN_COMM_TIME_OUT)
     {
         HAL_CAN_DeInit(platform_can_drivers[MICO_CAN1].handle);
-        init_can( MICO_CAN1 );
+        init_can(MICO_CAN1);
         can_comm_start_time = os_get_time();
         //ENABLE_INTERRUPTS();
     }
@@ -473,35 +473,35 @@ void can_protocol_period( void )
         rx_data_len = can_pkg_tmp.len;
         //can_comm_start_time = os_get_time();
 
-        if( id.canx_id_t.source_id == 0x10 )//update_prepare
+        if(id.canx_id_t.source_id == 0x10)//update_prepare
         {
             static uint8_t md5[16];
             static uint8_t firmware_size[4];
 
             //memcpy( &rx_buf, RxMessage.Data, RxMessage.DLC );
-            if( rx_buf.can_data_t.seg_polo == BEGIAN )
+            if(rx_buf.can_data_t.seg_polo == BEGIAN)
             {
-                memcpy(&md5[0], rx_buf.can_data_t.Data, 7 );
+                memcpy(&md5[0], rx_buf.can_data_t.Data, 7);
             }
-            if( rx_buf.can_data_t.seg_polo == TRANSING )
+            if( rx_buf.can_data_t.seg_polo == TRANSING)
             {
-                memcpy(&md5[7], rx_buf.can_data_t.Data, 7 );
+                memcpy(&md5[7], rx_buf.can_data_t.Data, 7);
             }
-            if( rx_buf.can_data_t.seg_polo == END )
+            if(rx_buf.can_data_t.seg_polo == END)
             {
-                memcpy(&md5[14], &rx_buf.can_data_t.Data[0], 2 );
-                memcpy(&firmware_size[0], &rx_buf.can_data_t.Data[2], 4 );
+                memcpy(&md5[14], &rx_buf.can_data_t.Data[0], 2);
+                memcpy(&firmware_size[0], &rx_buf.can_data_t.Data[2], 4);
                 prepare_upgrade_process(id, md5, firmware_size);
             }
             //goto exit;
             continue;
         }
-        if( id.canx_id_t.source_id == 0x11 )//update_receicing
+        if(id.canx_id_t.source_id == 0x11)//update_receicing
         {
 #if COM_ERR_TEST
             uint32_t rand_test;
             rand_test = rand() % COM_ERR_RAND_NUM;
-            if(rand_test != COM_ERR_RAND_NUM>>1)
+            if(rand_test != COM_ERR_RAND_NUM >> 1)
 #endif
                 rcv_upgrade_firmware_proc(&id, rx_buf.can_data, rx_data_len);
 
@@ -509,7 +509,7 @@ void can_protocol_period( void )
             continue;
 
         }
-        if( id.canx_id_t.source_id == 0x12 )//update_finish_check
+        if(id.canx_id_t.source_id == 0x12)//update_finish_check
         {
             check_upgrade_finish_proc(&id);
             //goto exit;
@@ -521,12 +521,12 @@ void can_protocol_period( void )
             //if( (id.canx_id_t.source_id < SOURCE_ID_PREPARE_UPDATE) && (id.canx_id_t.source_id > SOURCE_ID_CHECK_TRANSMIT) )
             if(id.canx_id_t.dest_mac_id == ultrasonic_src_id)
             {
-                tx_len = proc_can_cmd(&id, rx_buf.can_data_t.Data, rx_data_len - 1, can_tx_buf );
+                tx_len = proc_can_cmd(&id, rx_buf.can_data_t.Data, rx_data_len - 1, can_tx_buf);
                 //process the data here//
 
                 if(tx_len > 0)
                 {
-                    tx_can_data( MICO_CAN1, id.canx_id, can_tx_buf, tx_len );
+                    tx_can_data(MICO_CAN1, id.canx_id, can_tx_buf, tx_len);
                 }
             }
         }

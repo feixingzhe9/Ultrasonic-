@@ -3859,52 +3859,19 @@
         <name>$PROJ_DIR$\..\..\..\..\application\platform\can_protocol.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\can_protocol.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\fifo.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\UltraSonic.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\ultrasonic.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\..\application\platform\upgrade_flash.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\application\platform\upgrade_flash.h</name>
       </file>
     </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\application\application.c</name>
       <excluded>
         <configuration>RTOS</configuration>
-      </excluded>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\application\Getline.c</name>
-      <excluded>
-        <configuration>Debug</configuration>
-      </excluded>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\application\menu.c</name>
-      <excluded>
-        <configuration>Debug</configuration>
-      </excluded>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\application\Update_for_OTA.c</name>
-      <excluded>
-        <configuration>Debug</configuration>
-      </excluded>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\application\ymodem.c</name>
-      <excluded>
-        <configuration>Debug</configuration>
       </excluded>
     </file>
   </group>

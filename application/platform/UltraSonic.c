@@ -40,9 +40,6 @@ void ultrasonic_start(void)
 {
     measure_cnt++;
 
-    //timer_init();
-    //start_timer();
-
     DISABLE_INTERRUPTS();
     set_us_trig_output_high();
     delay_us(10);
@@ -64,7 +61,6 @@ void ultrasonic_start(void)
 
 #include "can_protocol.h"
 extern uint32_t ultrasonic_src_id;
-//static uint16_t last_distance = NO_OBJ_DETECTED;
 
 void complete_upload_data(void)
 {
@@ -95,8 +91,6 @@ void complete_upload_data(void)
         tx_can_data( MICO_CAN1, id.canx_id, (uint8_t *)&distance, sizeof(distance) );
         //printf("%d\n",distance);
     }
-    //UltraDataIO_Output();
-    //stop_timer();
 }
 
 #define ULTRASONIC_MEASURE_TIME                 13/SYSTICK_PERIOD //unit: ms
@@ -105,47 +99,46 @@ void complete_upload_data(void)
 extern platform_can_driver_t  platform_can_drivers[];
 void ultrasonic_data_tick(void)
 {
-    static uint32_t start_time_1 = 0;
-    //static uint32_t start_time_2 = 0;
-    static uint8_t flag_1 = 0;
-    static uint8_t flag_2 = 0;
+    static uint8_t state = 0;
+    static uint32_t measure_start_time = 0;
 
-    if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
+    switch(state)
     {
-        if(flag_1 == 0)
-        {
-            start_time_1 = os_get_time();
-            flag_1 = 1;
-            flag_2 = 0;
-        }
-        if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_TIME)
-        {
-            if(flag_2 == 0)
+        case 0:
+            if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
+            {
+                state = 1;
+                measure_start_time = os_get_time();
+            }
+            else
+            {
+                break;
+            }
+
+        case 1:
+            if(os_get_time() - measure_start_time >= ULTRASONIC_MEASURE_TIME)
             {
                 complete_upload_data();
-                flag_2 = 1;
+                state = 2;
             }
-        }
+            else
+            {
+                break;
+            }
 
-        if(os_get_time() - start_time_1 >= ULTRASONIC_MEASURE_CRITICAL_TIME)
-        {
-            ultra_sonic_data->start_flag = 0;
-            ultra_sonic_data->end_flag = 1;
-            flag_1 = 0;
-            __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
-        }
+        case 2:
+            if(os_get_time() - measure_start_time >= ULTRASONIC_MEASURE_CRITICAL_TIME)
+            {
+                ultra_sonic_data->start_flag = 0;
+                ultra_sonic_data->end_flag = 1;
+                __HAL_CAN_ENABLE_IT( platform_can_drivers[MICO_CAN1].handle, CAN_IT_FMP0 | CAN_IER_FFIE0 | CAN_IT_FOV0 );
+                state = 0;
+            }
+            break;
+
+        default:
+            break;
     }
-    /*
-       if(ultra_sonic_data->data_ready_flag == DATA_NEW_COMING)
-       {
-       start_time_2 = os_get_time();
-       ultra_sonic_data->data_ready_flag  = DATA_READY;
-       }
-       if(os_get_time() - start_time_2 >= ULTRASONIC_DATA_EXIST_TIME)
-       {
-       ultra_sonic_data->data_ready_flag = DATA_EXPIRED;
-       }
-     */
 }
 
 void show_test_log(void)

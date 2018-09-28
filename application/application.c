@@ -44,7 +44,7 @@ int main( void )
     board_gpios_init();
 
     can_long_buf_init();
-    init_can( MICO_CAN1 );
+    init_can(MICO_CAN1);
 
     delay_ms(10);
     ultrasonic_init();
