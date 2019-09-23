@@ -55,7 +55,7 @@ void ultrasonic_start(void)
     delay_us(400);
     //set_us_io_input_it();
 
-    ultra_sonic_data->send_time = get_timer_count();
+    //ultra_sonic_data->send_time = get_timer_count();
     ENABLE_INTERRUPTS();
 }
 

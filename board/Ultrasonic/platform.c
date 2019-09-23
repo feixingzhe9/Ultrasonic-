@@ -405,23 +405,30 @@ static void UltraSonicIRQ_CallBack(void* arg )
 {
     (void)arg;
 #if 1
-    if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
+    if(MicoGpioInputGet(MICO_GPIO_ULTRA_DATA))
     {
-        ultra_sonic_data->rcv_time = get_timer_count();
-        if(ultra_sonic_data->interval_time.cnt < INTERVAL_TIME_MAX)
+        ultra_sonic_data->send_time = get_timer_count();
+    }
+    else
+    {
+        if((ultra_sonic_data->start_flag == 1) && (ultra_sonic_data->end_flag == 0))
         {
-            if(ultra_sonic_data->rcv_time > ultra_sonic_data->send_time)
+            ultra_sonic_data->rcv_time = get_timer_count();
+            if(ultra_sonic_data->interval_time.cnt < INTERVAL_TIME_MAX)
             {
-                ultra_sonic_data->interval_time.time[ultra_sonic_data->interval_time.cnt] = ultra_sonic_data->rcv_time - ultra_sonic_data->send_time;
+                if(ultra_sonic_data->rcv_time > ultra_sonic_data->send_time)
+                {
+                    ultra_sonic_data->interval_time.time[ultra_sonic_data->interval_time.cnt] = ultra_sonic_data->rcv_time - ultra_sonic_data->send_time;
+                }
+                else if(ultra_sonic_data->rcv_time < ultra_sonic_data->send_time)
+                {
+                    ultra_sonic_data->interval_time.time[ultra_sonic_data->interval_time.cnt] = USER_TIM_MAX_CNT - (ultra_sonic_data->send_time - ultra_sonic_data->rcv_time);
+                }
+                ultra_sonic_data->interval_time.cnt++;
             }
-            else if(ultra_sonic_data->rcv_time < ultra_sonic_data->send_time)
-            {
-                ultra_sonic_data->interval_time.time[ultra_sonic_data->interval_time.cnt] = USER_TIM_MAX_CNT - (ultra_sonic_data->send_time - ultra_sonic_data->rcv_time);
-            }
-            ultra_sonic_data->interval_time.cnt++;
-        }
 
-        ultra_sonic_data->data_ready_flag = DATA_NEW_COMING;
+            ultra_sonic_data->data_ready_flag = DATA_NEW_COMING;
+        }
     }
     /*
        if(ultrasonic_frq_calibration->start_flag == 1)
@@ -450,11 +457,11 @@ void set_us_data_io_input_it(void)//interrupt mode
     DISABLE_INTERRUPTS();
 
     pin_config.gpio_speed = GPIO_SPEED_MEDIUM;
-    pin_config.gpio_mode =GPIO_MODE_IT_FALLING |GPIO_MODE_INPUT;
+    pin_config.gpio_mode = GPIO_MODE_IT_RISING_FALLING | GPIO_MODE_INPUT;
     pin_config.gpio_pull = GPIO_PULLUP;//GPIO_PULLUP;
     //MicoGpioOutputHigh(MICO_GPIO_ULTRA_DATA);
     MicoGpioInitialize( MICO_GPIO_ULTRA_DATA, &pin_config );
-    MicoGpioEnableIRQ( MICO_GPIO_ULTRA_DATA , IRQ_TRIGGER_FALLING_EDGE, UltraSonicIRQ_CallBack, NULL);
+    MicoGpioEnableIRQ( MICO_GPIO_ULTRA_DATA , IRQ_TRIGGER_BOTH_EDGES, UltraSonicIRQ_CallBack, NULL);
 
     ENABLE_INTERRUPTS();
 }
