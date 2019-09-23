@@ -11,7 +11,7 @@
 #define CAN_USED    CAN1
 
 #define HW_VERSION                      "12"
-#define SW_VERSION                      "NoahUS_HC_SR_04_V006"
+#define SW_VERSION                      "US_HC_SR_04_V006"
 #define PROTOCOL_VERSION                "20170505R0101"
 
 #define DESTID          0x02

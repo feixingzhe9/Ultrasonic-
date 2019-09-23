@@ -616,7 +616,7 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>2</state>
+          <state>1</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
@@ -624,7 +624,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>test.bin</state>
+          <state>sonar.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
